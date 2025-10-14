@@ -26,7 +26,7 @@ interface IStrategy {
     function userUnderlying(address user) external returns (uint256);
     function userUnderlyingView(address user) external view returns (uint256);
     function version() external view returns (string memory);
-    function withdraw(address recipient, address token, uint256 amountShares) external;
+    function withdraw(address recipient, address token, uint256 amountShares) external returns (uint256);
 }
 ```
 
@@ -262,7 +262,13 @@ interface IStrategy {
         "internalType": "uint256"
       }
     ],
-    "outputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable"
   },
   {
@@ -2685,7 +2691,7 @@ pub mod IStrategy {
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Function with signature `withdraw(address,address,uint256)` and selector `0xd9caed12`.
     ```solidity
-    function withdraw(address recipient, address token, uint256 amountShares) external;
+    function withdraw(address recipient, address token, uint256 amountShares) external returns (uint256);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
@@ -2697,10 +2703,14 @@ pub mod IStrategy {
         #[allow(missing_docs)]
         pub amountShares: alloy::sol_types::private::primitives::aliases::U256,
     }
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     ///Container type for the return parameters of the [`withdraw(address,address,uint256)`](withdrawCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct withdrawReturn {}
+    pub struct withdrawReturn {
+        #[allow(missing_docs)]
+        pub _0: alloy::sol_types::private::primitives::aliases::U256,
+    }
     #[allow(
         non_camel_case_types,
         non_snake_case,
@@ -2752,9 +2762,9 @@ pub mod IStrategy {
         }
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = ();
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = ();
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -2768,20 +2778,15 @@ pub mod IStrategy {
             #[doc(hidden)]
             impl ::core::convert::From<withdrawReturn> for UnderlyingRustTuple<'_> {
                 fn from(value: withdrawReturn) -> Self {
-                    ()
+                    (value._0,)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
             impl ::core::convert::From<UnderlyingRustTuple<'_>> for withdrawReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {}
+                    Self { _0: tuple.0 }
                 }
-            }
-        }
-        impl withdrawReturn {
-            fn _tokenize(&self) -> <withdrawCall as alloy_sol_types::SolCall>::ReturnToken<'_> {
-                ()
             }
         }
         #[automatically_derived]
@@ -2792,8 +2797,8 @@ pub mod IStrategy {
                 alloy::sol_types::sol_data::Uint<256>,
             );
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = withdrawReturn;
-            type ReturnTuple<'a> = ();
+            type Return = alloy::sol_types::private::primitives::aliases::U256;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "withdraw(address,address,uint256)";
             const SELECTOR: [u8; 4] = [217u8, 202u8, 237u8, 18u8];
@@ -2819,19 +2824,30 @@ pub mod IStrategy {
             }
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                withdrawReturn::_tokenize(ret)
+                (
+                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
+                        ret,
+                    ),
+                )
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
-                    .map(Into::into)
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: withdrawReturn = r.into();
+                        r._0
+                    },
+                )
             }
             #[inline]
             fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
                 <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
                     data,
                 )
-                .map(Into::into)
+                .map(|r| {
+                    let r: withdrawReturn = r.into();
+                    r._0
+                })
             }
         }
     };

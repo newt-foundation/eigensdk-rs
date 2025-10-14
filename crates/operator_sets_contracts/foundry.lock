@@ -1,0 +1,14 @@
+{
+  "../m2_contracts/lib/eigenlayer-middleware": {
+    "rev": "fe5834371caed60c1d26ab62b5519b0cbdcb42fa"
+  },
+  "../m2_contracts/lib/forge-std": {
+    "rev": "b93cf4bc34ff214c099dc970b153f85ade8c9f66"
+  },
+  "lib/eigenlayer-middleware": {
+    "rev": "fd26169c7f988a53ad9ca1e745f40754afed4ed4"
+  },
+  "lib/forge-std": {
+    "rev": "bf909b22fa55e244796dfa920c9639fdffa1c545"
+  }
+}

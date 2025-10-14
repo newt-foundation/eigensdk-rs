@@ -5,6 +5,7 @@ members = [
     "crates/chainio/clients/elcontracts/",
     "crates/chainio/clients/eth/",
     "crates/chainio/clients/fireblocks/",
+    "crates/chainio/clients/multichain/",
     "crates/crypto/bls/",
     "crates/crypto/bn254/",
     "crates/eigen-cli/",
@@ -13,6 +14,7 @@ members = [
     "crates/metrics/collectors/rpc_calls/",
     "crates/services/avsregistry/",
     "crates/services/bls_aggregation/",
+    "crates/services/multichain/",
     "crates/services/operatorsinfo/",
     "crates/signer/",
     "crates/types/",
@@ -64,13 +66,16 @@ eigen-client-elcontracts = { version = "2.0.0", path = "crates/chainio/clients/e
 eigen-client-avsregistry = { version = "2.0.0", path = "crates/chainio/clients/avsregistry" }
 eigen-client-eth = { version = "2.0.0", path = "crates/chainio/clients/eth" }
 eigen-client-fireblocks = { version = "2.0.0", path = "crates/chainio/clients/fireblocks" }
+eigen-client-multichain = { version = "2.0.0", path = "crates/chainio/clients/multichain" }
 eigen-crypto-bls = { version = "2.0.0", path = "crates/crypto/bls/" }
 eigen-crypto-bn254 = { version = "2.0.0", path = "crates/crypto/bn254/" }
+eigen-crypto-ecdsa = { version = "2.0.0", path = "crates/crypto/ecdsa/" }
 eigen-metrics = { version = "2.0.0", path = "crates/metrics/" }
 eigen-metrics-collectors-economic = { version = "2.0.0", path = "crates/metrics/collectors/economic" }
 eigen-metrics-collectors-rpc-calls = { version = "2.0.0", path = "crates/metrics/collectors/rpc_calls" }
 eigen-services-avsregistry = { version = "2.0.0", path = "crates/services/avsregistry" }
 eigen-services-blsaggregation = { version = "2.0.0", path = "crates/services/bls_aggregation" }
+eigen-services-multichain = { version = "2.0.0", path = "crates/services/multichain" }
 eigen-services-operatorsinfo = { version = "2.0.0", path = "crates/services/operatorsinfo" }
 eigen-signer = { version = "2.0.0", path = "crates/signer/" }
 eigen-types = { version = "2.0.0", path = "crates/types/" }

@@ -1,0 +1,28 @@
+[package]
+name = "eigen-client-multichain"
+description = "Eigen Layer Multichain Client"
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license-file.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+alloy.workspace = true
+async-trait.workspace = true
+eigen-types.workspace = true
+eigen-crypto-bls.workspace = true
+eigen-crypto-bn254.workspace = true
+eigen-crypto-ecdsa.workspace = true
+eigen-common.workspace = true
+eigen-utils.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[lints]
+workspace = true

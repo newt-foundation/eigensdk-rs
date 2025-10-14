@@ -968,7 +968,9 @@ pub mod BeaconChainProofs {
 library IEigenPodTypes {
     type VALIDATOR_STATUS is uint8;
     struct Checkpoint { bytes32 beaconBlockRoot; uint24 proofsRemaining; uint64 podBalanceGwei; int64 balanceDeltasGwei; uint64 prevBeaconBalanceGwei; }
+    struct ConsolidationRequest { bytes srcPubkey; bytes targetPubkey; }
     struct ValidatorInfo { uint64 validatorIndex; uint64 restakedBalanceGwei; uint64 lastCheckpointedAt; VALIDATOR_STATUS status; }
+    struct WithdrawalRequest { bytes pubkey; uint64 amountGwei; }
 }
 ```*/
 #[allow(
@@ -1392,6 +1394,200 @@ pub mod IEigenPodTypes {
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**```solidity
+    struct ConsolidationRequest { bytes srcPubkey; bytes targetPubkey; }
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct ConsolidationRequest {
+        #[allow(missing_docs)]
+        pub srcPubkey: alloy::sol_types::private::Bytes,
+        #[allow(missing_docs)]
+        pub targetPubkey: alloy::sol_types::private::Bytes,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = (
+            alloy::sol_types::sol_data::Bytes,
+            alloy::sol_types::sol_data::Bytes,
+        );
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = (
+            alloy::sol_types::private::Bytes,
+            alloy::sol_types::private::Bytes,
+        );
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<ConsolidationRequest> for UnderlyingRustTuple<'_> {
+            fn from(value: ConsolidationRequest) -> Self {
+                (value.srcPubkey, value.targetPubkey)
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for ConsolidationRequest {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self {
+                    srcPubkey: tuple.0,
+                    targetPubkey: tuple.1,
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolValue for ConsolidationRequest {
+            type SolType = Self;
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::private::SolTypeValue<Self> for ConsolidationRequest {
+            #[inline]
+            fn stv_to_tokens(&self) -> <Self as alloy_sol_types::SolType>::Token<'_> {
+                (
+                    <alloy::sol_types::sol_data::Bytes as alloy_sol_types::SolType>::tokenize(
+                        &self.srcPubkey,
+                    ),
+                    <alloy::sol_types::sol_data::Bytes as alloy_sol_types::SolType>::tokenize(
+                        &self.targetPubkey,
+                    ),
+                )
+            }
+            #[inline]
+            fn stv_abi_encoded_size(&self) -> usize {
+                if let Some(size) = <Self as alloy_sol_types::SolType>::ENCODED_SIZE {
+                    return size;
+                }
+                let tuple =
+                    <UnderlyingRustTuple<'_> as ::core::convert::From<Self>>::from(self.clone());
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::abi_encoded_size(&tuple)
+            }
+            #[inline]
+            fn stv_eip712_data_word(&self) -> alloy_sol_types::Word {
+                <Self as alloy_sol_types::SolStruct>::eip712_hash_struct(self)
+            }
+            #[inline]
+            fn stv_abi_encode_packed_to(&self, out: &mut alloy_sol_types::private::Vec<u8>) {
+                let tuple =
+                    <UnderlyingRustTuple<'_> as ::core::convert::From<Self>>::from(self.clone());
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::abi_encode_packed_to(
+                    &tuple, out,
+                )
+            }
+            #[inline]
+            fn stv_abi_packed_encoded_size(&self) -> usize {
+                if let Some(size) = <Self as alloy_sol_types::SolType>::PACKED_ENCODED_SIZE {
+                    return size;
+                }
+                let tuple =
+                    <UnderlyingRustTuple<'_> as ::core::convert::From<Self>>::from(self.clone());
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::abi_packed_encoded_size(
+                    &tuple,
+                )
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolType for ConsolidationRequest {
+            type RustType = Self;
+            type Token<'a> = <UnderlyingSolTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SOL_NAME: &'static str = <Self as alloy_sol_types::SolStruct>::NAME;
+            const ENCODED_SIZE: Option<usize> =
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::ENCODED_SIZE;
+            const PACKED_ENCODED_SIZE: Option<usize> =
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::PACKED_ENCODED_SIZE;
+            #[inline]
+            fn valid_token(token: &Self::Token<'_>) -> bool {
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::valid_token(token)
+            }
+            #[inline]
+            fn detokenize(token: Self::Token<'_>) -> Self::RustType {
+                let tuple = <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::detokenize(token);
+                <Self as ::core::convert::From<UnderlyingRustTuple<'_>>>::from(tuple)
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolStruct for ConsolidationRequest {
+            const NAME: &'static str = "ConsolidationRequest";
+            #[inline]
+            fn eip712_root_type() -> alloy_sol_types::private::Cow<'static, str> {
+                alloy_sol_types::private::Cow::Borrowed(
+                    "ConsolidationRequest(bytes srcPubkey,bytes targetPubkey)",
+                )
+            }
+            #[inline]
+            fn eip712_components(
+            ) -> alloy_sol_types::private::Vec<alloy_sol_types::private::Cow<'static, str>>
+            {
+                alloy_sol_types::private::Vec::new()
+            }
+            #[inline]
+            fn eip712_encode_type() -> alloy_sol_types::private::Cow<'static, str> {
+                <Self as alloy_sol_types::SolStruct>::eip712_root_type()
+            }
+            #[inline]
+            fn eip712_encode_data(&self) -> alloy_sol_types::private::Vec<u8> {
+                [
+                    <alloy::sol_types::sol_data::Bytes as alloy_sol_types::SolType>::eip712_data_word(
+                            &self.srcPubkey,
+                        )
+                        .0,
+                    <alloy::sol_types::sol_data::Bytes as alloy_sol_types::SolType>::eip712_data_word(
+                            &self.targetPubkey,
+                        )
+                        .0,
+                ]
+                    .concat()
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::EventTopic for ConsolidationRequest {
+            #[inline]
+            fn topic_preimage_length(rust: &Self::RustType) -> usize {
+                0usize
+                    + <alloy::sol_types::sol_data::Bytes as alloy_sol_types::EventTopic>::topic_preimage_length(
+                        &rust.srcPubkey,
+                    )
+                    + <alloy::sol_types::sol_data::Bytes as alloy_sol_types::EventTopic>::topic_preimage_length(
+                        &rust.targetPubkey,
+                    )
+            }
+            #[inline]
+            fn encode_topic_preimage(
+                rust: &Self::RustType,
+                out: &mut alloy_sol_types::private::Vec<u8>,
+            ) {
+                out.reserve(<Self as alloy_sol_types::EventTopic>::topic_preimage_length(rust));
+                <alloy::sol_types::sol_data::Bytes as alloy_sol_types::EventTopic>::encode_topic_preimage(
+                    &rust.srcPubkey,
+                    out,
+                );
+                <alloy::sol_types::sol_data::Bytes as alloy_sol_types::EventTopic>::encode_topic_preimage(
+                    &rust.targetPubkey,
+                    out,
+                );
+            }
+            #[inline]
+            fn encode_topic(rust: &Self::RustType) -> alloy_sol_types::abi::token::WordToken {
+                let mut out = alloy_sol_types::private::Vec::new();
+                <Self as alloy_sol_types::EventTopic>::encode_topic_preimage(rust, &mut out);
+                alloy_sol_types::abi::token::WordToken(alloy_sol_types::private::keccak256(out))
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**```solidity
     struct ValidatorInfo { uint64 validatorIndex; uint64 restakedBalanceGwei; uint64 lastCheckpointedAt; VALIDATOR_STATUS status; }
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
@@ -1643,6 +1839,201 @@ pub mod IEigenPodTypes {
             }
         }
     };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**```solidity
+    struct WithdrawalRequest { bytes pubkey; uint64 amountGwei; }
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct WithdrawalRequest {
+        #[allow(missing_docs)]
+        pub pubkey: alloy::sol_types::private::Bytes,
+        #[allow(missing_docs)]
+        pub amountGwei: u64,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = (
+            alloy::sol_types::sol_data::Bytes,
+            alloy::sol_types::sol_data::Uint<64>,
+        );
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = (alloy::sol_types::private::Bytes, u64);
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<WithdrawalRequest> for UnderlyingRustTuple<'_> {
+            fn from(value: WithdrawalRequest) -> Self {
+                (value.pubkey, value.amountGwei)
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for WithdrawalRequest {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self {
+                    pubkey: tuple.0,
+                    amountGwei: tuple.1,
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolValue for WithdrawalRequest {
+            type SolType = Self;
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::private::SolTypeValue<Self> for WithdrawalRequest {
+            #[inline]
+            fn stv_to_tokens(&self) -> <Self as alloy_sol_types::SolType>::Token<'_> {
+                (
+                    <alloy::sol_types::sol_data::Bytes as alloy_sol_types::SolType>::tokenize(
+                        &self.pubkey,
+                    ),
+                    <alloy::sol_types::sol_data::Uint<64> as alloy_sol_types::SolType>::tokenize(
+                        &self.amountGwei,
+                    ),
+                )
+            }
+            #[inline]
+            fn stv_abi_encoded_size(&self) -> usize {
+                if let Some(size) = <Self as alloy_sol_types::SolType>::ENCODED_SIZE {
+                    return size;
+                }
+                let tuple =
+                    <UnderlyingRustTuple<'_> as ::core::convert::From<Self>>::from(self.clone());
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::abi_encoded_size(&tuple)
+            }
+            #[inline]
+            fn stv_eip712_data_word(&self) -> alloy_sol_types::Word {
+                <Self as alloy_sol_types::SolStruct>::eip712_hash_struct(self)
+            }
+            #[inline]
+            fn stv_abi_encode_packed_to(&self, out: &mut alloy_sol_types::private::Vec<u8>) {
+                let tuple =
+                    <UnderlyingRustTuple<'_> as ::core::convert::From<Self>>::from(self.clone());
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::abi_encode_packed_to(
+                    &tuple, out,
+                )
+            }
+            #[inline]
+            fn stv_abi_packed_encoded_size(&self) -> usize {
+                if let Some(size) = <Self as alloy_sol_types::SolType>::PACKED_ENCODED_SIZE {
+                    return size;
+                }
+                let tuple =
+                    <UnderlyingRustTuple<'_> as ::core::convert::From<Self>>::from(self.clone());
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::abi_packed_encoded_size(
+                    &tuple,
+                )
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolType for WithdrawalRequest {
+            type RustType = Self;
+            type Token<'a> = <UnderlyingSolTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SOL_NAME: &'static str = <Self as alloy_sol_types::SolStruct>::NAME;
+            const ENCODED_SIZE: Option<usize> =
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::ENCODED_SIZE;
+            const PACKED_ENCODED_SIZE: Option<usize> =
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::PACKED_ENCODED_SIZE;
+            #[inline]
+            fn valid_token(token: &Self::Token<'_>) -> bool {
+                <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::valid_token(token)
+            }
+            #[inline]
+            fn detokenize(token: Self::Token<'_>) -> Self::RustType {
+                let tuple = <UnderlyingSolTuple<'_> as alloy_sol_types::SolType>::detokenize(token);
+                <Self as ::core::convert::From<UnderlyingRustTuple<'_>>>::from(tuple)
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolStruct for WithdrawalRequest {
+            const NAME: &'static str = "WithdrawalRequest";
+            #[inline]
+            fn eip712_root_type() -> alloy_sol_types::private::Cow<'static, str> {
+                alloy_sol_types::private::Cow::Borrowed(
+                    "WithdrawalRequest(bytes pubkey,uint64 amountGwei)",
+                )
+            }
+            #[inline]
+            fn eip712_components(
+            ) -> alloy_sol_types::private::Vec<alloy_sol_types::private::Cow<'static, str>>
+            {
+                alloy_sol_types::private::Vec::new()
+            }
+            #[inline]
+            fn eip712_encode_type() -> alloy_sol_types::private::Cow<'static, str> {
+                <Self as alloy_sol_types::SolStruct>::eip712_root_type()
+            }
+            #[inline]
+            fn eip712_encode_data(&self) -> alloy_sol_types::private::Vec<u8> {
+                [
+                    <alloy::sol_types::sol_data::Bytes as alloy_sol_types::SolType>::eip712_data_word(
+                            &self.pubkey,
+                        )
+                        .0,
+                    <alloy::sol_types::sol_data::Uint<
+                        64,
+                    > as alloy_sol_types::SolType>::eip712_data_word(&self.amountGwei)
+                        .0,
+                ]
+                    .concat()
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::EventTopic for WithdrawalRequest {
+            #[inline]
+            fn topic_preimage_length(rust: &Self::RustType) -> usize {
+                0usize
+                    + <alloy::sol_types::sol_data::Bytes as alloy_sol_types::EventTopic>::topic_preimage_length(
+                        &rust.pubkey,
+                    )
+                    + <alloy::sol_types::sol_data::Uint<
+                        64,
+                    > as alloy_sol_types::EventTopic>::topic_preimage_length(
+                        &rust.amountGwei,
+                    )
+            }
+            #[inline]
+            fn encode_topic_preimage(
+                rust: &Self::RustType,
+                out: &mut alloy_sol_types::private::Vec<u8>,
+            ) {
+                out.reserve(<Self as alloy_sol_types::EventTopic>::topic_preimage_length(rust));
+                <alloy::sol_types::sol_data::Bytes as alloy_sol_types::EventTopic>::encode_topic_preimage(
+                    &rust.pubkey,
+                    out,
+                );
+                <alloy::sol_types::sol_data::Uint<
+                    64,
+                > as alloy_sol_types::EventTopic>::encode_topic_preimage(
+                    &rust.amountGwei,
+                    out,
+                );
+            }
+            #[inline]
+            fn encode_topic(rust: &Self::RustType) -> alloy_sol_types::abi::token::WordToken {
+                let mut out = alloy_sol_types::private::Vec::new();
+                <Self as alloy_sol_types::EventTopic>::encode_topic_preimage(rust, &mut out);
+                alloy_sol_types::abi::token::WordToken(alloy_sol_types::private::keccak256(out))
+            }
+        }
+    };
     use alloy::contract as alloy_contract;
     /**Creates a new wrapper around an on-chain [`IEigenPodTypes`](self) contract instance.
 
@@ -1796,11 +2187,19 @@ library IEigenPodTypes {
         int64 balanceDeltasGwei;
         uint64 prevBeaconBalanceGwei;
     }
+    struct ConsolidationRequest {
+        bytes srcPubkey;
+        bytes targetPubkey;
+    }
     struct ValidatorInfo {
         uint64 validatorIndex;
         uint64 restakedBalanceGwei;
         uint64 lastCheckpointedAt;
         VALIDATOR_STATUS status;
+    }
+    struct WithdrawalRequest {
+        bytes pubkey;
+        uint64 amountGwei;
     }
 }
 
@@ -1810,8 +2209,11 @@ interface IEigenPod {
     error CheckpointAlreadyActive();
     error CredentialsAlreadyVerified();
     error CurrentlyPaused();
+    error FeeQueryFailed();
+    error ForkTimestampZero();
     error InputAddressZero();
     error InputArrayLengthMismatch();
+    error InsufficientFunds();
     error InsufficientWithdrawableBalance();
     error InvalidEIP4788Response();
     error InvalidPubKeyLength();
@@ -1821,6 +2223,8 @@ interface IEigenPod {
     error OnlyEigenPodManager();
     error OnlyEigenPodOwner();
     error OnlyEigenPodOwnerOrProofSubmitter();
+    error PredeployFailed();
+    error RefundFailed();
     error TimestampOutOfRange();
     error ValidatorInactiveOnBeaconChain();
     error ValidatorIsExitingBeaconChain();
@@ -1830,26 +2234,34 @@ interface IEigenPod {
 
     event CheckpointCreated(uint64 indexed checkpointTimestamp, bytes32 indexed beaconBlockRoot, uint256 validatorCount);
     event CheckpointFinalized(uint64 indexed checkpointTimestamp, int256 totalShareDeltaWei);
-    event EigenPodStaked(bytes pubkey);
+    event ConsolidationRequested(bytes32 indexed sourcePubkeyHash, bytes32 indexed targetPubkeyHash);
+    event EigenPodStaked(bytes32 pubkeyHash);
+    event ExitRequested(bytes32 indexed validatorPubkeyHash);
     event NonBeaconChainETHReceived(uint256 amountReceived);
     event ProofSubmitterUpdated(address prevProofSubmitter, address newProofSubmitter);
     event RestakedBeaconChainETHWithdrawn(address indexed recipient, uint256 amount);
-    event ValidatorBalanceUpdated(uint40 validatorIndex, uint64 balanceTimestamp, uint64 newValidatorBalanceGwei);
-    event ValidatorCheckpointed(uint64 indexed checkpointTimestamp, uint40 indexed validatorIndex);
-    event ValidatorRestaked(uint40 validatorIndex);
-    event ValidatorWithdrawn(uint64 indexed checkpointTimestamp, uint40 indexed validatorIndex);
+    event SwitchToCompoundingRequested(bytes32 indexed validatorPubkeyHash);
+    event ValidatorBalanceUpdated(bytes32 pubkeyHash, uint64 balanceTimestamp, uint64 newValidatorBalanceGwei);
+    event ValidatorCheckpointed(uint64 indexed checkpointTimestamp, bytes32 indexed pubkeyHash);
+    event ValidatorRestaked(bytes32 pubkeyHash);
+    event ValidatorWithdrawn(uint64 indexed checkpointTimestamp, bytes32 indexed pubkeyHash);
+    event WithdrawalRequested(bytes32 indexed validatorPubkeyHash, uint64 withdrawalAmountGwei);
 
     function activeValidatorCount() external view returns (uint256);
     function checkpointBalanceExitedGwei(uint64) external view returns (uint64);
     function currentCheckpoint() external view returns (IEigenPodTypes.Checkpoint memory);
     function currentCheckpointTimestamp() external view returns (uint64);
     function eigenPodManager() external view returns (address);
+    function getConsolidationRequestFee() external view returns (uint256);
     function getParentBlockRoot(uint64 timestamp) external view returns (bytes32);
+    function getWithdrawalRequestFee() external view returns (uint256);
     function initialize(address owner) external;
     function lastCheckpointTimestamp() external view returns (uint64);
     function podOwner() external view returns (address);
     function proofSubmitter() external view returns (address);
     function recoverTokens(address[] memory tokenList, uint256[] memory amountsToWithdraw, address recipient) external;
+    function requestConsolidation(IEigenPodTypes.ConsolidationRequest[] memory requests) external payable;
+    function requestWithdrawal(IEigenPodTypes.WithdrawalRequest[] memory requests) external payable;
     function setProofSubmitter(address newProofSubmitter) external;
     function stake(bytes memory pubkey, bytes memory signature, bytes32 depositDataRoot) external payable;
     function startCheckpoint(bool revertIfNoBalance) external;
@@ -1969,6 +2381,19 @@ interface IEigenPod {
   },
   {
     "type": "function",
+    "name": "getConsolidationRequestFee",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getParentBlockRoot",
     "inputs": [
       {
@@ -1982,6 +2407,19 @@ interface IEigenPod {
         "name": "",
         "type": "bytes32",
         "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getWithdrawalRequestFee",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -2060,6 +2498,56 @@ interface IEigenPod {
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "requestConsolidation",
+    "inputs": [
+      {
+        "name": "requests",
+        "type": "tuple[]",
+        "internalType": "struct IEigenPodTypes.ConsolidationRequest[]",
+        "components": [
+          {
+            "name": "srcPubkey",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "targetPubkey",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "requestWithdrawal",
+    "inputs": [
+      {
+        "name": "requests",
+        "type": "tuple[]",
+        "internalType": "struct IEigenPodTypes.WithdrawalRequest[]",
+        "components": [
+          {
+            "name": "pubkey",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "amountGwei",
+            "type": "uint64",
+            "internalType": "uint64"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
   },
   {
     "type": "function",
@@ -2459,13 +2947,45 @@ interface IEigenPod {
   },
   {
     "type": "event",
+    "name": "ConsolidationRequested",
+    "inputs": [
+      {
+        "name": "sourcePubkeyHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "targetPubkeyHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "EigenPodStaked",
     "inputs": [
       {
-        "name": "pubkey",
-        "type": "bytes",
+        "name": "pubkeyHash",
+        "type": "bytes32",
         "indexed": false,
-        "internalType": "bytes"
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ExitRequested",
+    "inputs": [
+      {
+        "name": "validatorPubkeyHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
       }
     ],
     "anonymous": false
@@ -2523,13 +3043,26 @@ interface IEigenPod {
   },
   {
     "type": "event",
+    "name": "SwitchToCompoundingRequested",
+    "inputs": [
+      {
+        "name": "validatorPubkeyHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "ValidatorBalanceUpdated",
     "inputs": [
       {
-        "name": "validatorIndex",
-        "type": "uint40",
+        "name": "pubkeyHash",
+        "type": "bytes32",
         "indexed": false,
-        "internalType": "uint40"
+        "internalType": "bytes32"
       },
       {
         "name": "balanceTimestamp",
@@ -2557,10 +3090,10 @@ interface IEigenPod {
         "internalType": "uint64"
       },
       {
-        "name": "validatorIndex",
-        "type": "uint40",
+        "name": "pubkeyHash",
+        "type": "bytes32",
         "indexed": true,
-        "internalType": "uint40"
+        "internalType": "bytes32"
       }
     ],
     "anonymous": false
@@ -2570,10 +3103,10 @@ interface IEigenPod {
     "name": "ValidatorRestaked",
     "inputs": [
       {
-        "name": "validatorIndex",
-        "type": "uint40",
+        "name": "pubkeyHash",
+        "type": "bytes32",
         "indexed": false,
-        "internalType": "uint40"
+        "internalType": "bytes32"
       }
     ],
     "anonymous": false
@@ -2589,10 +3122,29 @@ interface IEigenPod {
         "internalType": "uint64"
       },
       {
-        "name": "validatorIndex",
-        "type": "uint40",
+        "name": "pubkeyHash",
+        "type": "bytes32",
         "indexed": true,
-        "internalType": "uint40"
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "WithdrawalRequested",
+    "inputs": [
+      {
+        "name": "validatorPubkeyHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "withdrawalAmountGwei",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
       }
     ],
     "anonymous": false
@@ -2624,12 +3176,27 @@ interface IEigenPod {
   },
   {
     "type": "error",
+    "name": "FeeQueryFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ForkTimestampZero",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InputAddressZero",
     "inputs": []
   },
   {
     "type": "error",
     "name": "InputArrayLengthMismatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InsufficientFunds",
     "inputs": []
   },
   {
@@ -2675,6 +3242,16 @@ interface IEigenPod {
   {
     "type": "error",
     "name": "OnlyEigenPodOwnerOrProofSubmitter",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PredeployFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RefundFailed",
     "inputs": []
   },
   {
@@ -3080,6 +3657,142 @@ pub mod IEigenPod {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `FeeQueryFailed()` and selector `0xc90158af`.
+    ```solidity
+    error FeeQueryFailed();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct FeeQueryFailed;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<FeeQueryFailed> for UnderlyingRustTuple<'_> {
+            fn from(value: FeeQueryFailed) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for FeeQueryFailed {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for FeeQueryFailed {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "FeeQueryFailed()";
+            const SELECTOR: [u8; 4] = [201u8, 1u8, 88u8, 175u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `ForkTimestampZero()` and selector `0x41a02cc9`.
+    ```solidity
+    error ForkTimestampZero();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct ForkTimestampZero;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<ForkTimestampZero> for UnderlyingRustTuple<'_> {
+            fn from(value: ForkTimestampZero) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for ForkTimestampZero {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for ForkTimestampZero {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "ForkTimestampZero()";
+            const SELECTOR: [u8; 4] = [65u8, 160u8, 44u8, 201u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Custom error with signature `InputAddressZero()` and selector `0x73632176`.
     ```solidity
     error InputAddressZero();
@@ -3196,6 +3909,74 @@ pub mod IEigenPod {
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "InputArrayLengthMismatch()";
             const SELECTOR: [u8; 4] = [67u8, 113u8, 74u8, 253u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `InsufficientFunds()` and selector `0x356680b7`.
+    ```solidity
+    error InsufficientFunds();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct InsufficientFunds;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<InsufficientFunds> for UnderlyingRustTuple<'_> {
+            fn from(value: InsufficientFunds) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for InsufficientFunds {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for InsufficientFunds {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "InsufficientFunds()";
+            const SELECTOR: [u8; 4] = [53u8, 102u8, 128u8, 183u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -3808,6 +4589,142 @@ pub mod IEigenPod {
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "OnlyEigenPodOwnerOrProofSubmitter()";
             const SELECTOR: [u8; 4] = [66u8, 122u8, 119u8, 121u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `PredeployFailed()` and selector `0xfc52d483`.
+    ```solidity
+    error PredeployFailed();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct PredeployFailed;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<PredeployFailed> for UnderlyingRustTuple<'_> {
+            fn from(value: PredeployFailed) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for PredeployFailed {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for PredeployFailed {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "PredeployFailed()";
+            const SELECTOR: [u8; 4] = [252u8, 82u8, 212u8, 131u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `RefundFailed()` and selector `0xf0c49d44`.
+    ```solidity
+    error RefundFailed();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct RefundFailed;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<RefundFailed> for UnderlyingRustTuple<'_> {
+            fn from(value: RefundFailed) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for RefundFailed {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for RefundFailed {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "RefundFailed()";
+            const SELECTOR: [u8; 4] = [240u8, 196u8, 157u8, 68u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -4474,9 +5391,123 @@ pub mod IEigenPod {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `EigenPodStaked(bytes)` and selector `0x606865b7934a25d4aed43f6cdb426403353fa4b3009c4d228407474581b01e23`.
+    /**Event with signature `ConsolidationRequested(bytes32,bytes32)` and selector `0x42f9c9db2ca443e9ec62f4588bd0c9b241065c02c2a8001ac164ae1282dc7b94`.
     ```solidity
-    event EigenPodStaked(bytes pubkey);
+    event ConsolidationRequested(bytes32 indexed sourcePubkeyHash, bytes32 indexed targetPubkeyHash);
+    ```*/
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    #[derive(Clone)]
+    pub struct ConsolidationRequested {
+        #[allow(missing_docs)]
+        pub sourcePubkeyHash: alloy::sol_types::private::FixedBytes<32>,
+        #[allow(missing_docs)]
+        pub targetPubkeyHash: alloy::sol_types::private::FixedBytes<32>,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[automatically_derived]
+        impl alloy_sol_types::SolEvent for ConsolidationRequested {
+            type DataTuple<'a> = ();
+            type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type TopicList = (
+                alloy_sol_types::sol_data::FixedBytes<32>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
+            );
+            const SIGNATURE: &'static str = "ConsolidationRequested(bytes32,bytes32)";
+            const SIGNATURE_HASH: alloy_sol_types::private::B256 =
+                alloy_sol_types::private::B256::new([
+                    66u8, 249u8, 201u8, 219u8, 44u8, 164u8, 67u8, 233u8, 236u8, 98u8, 244u8, 88u8,
+                    139u8, 208u8, 201u8, 178u8, 65u8, 6u8, 92u8, 2u8, 194u8, 168u8, 0u8, 26u8,
+                    193u8, 100u8, 174u8, 18u8, 130u8, 220u8, 123u8, 148u8,
+                ]);
+            const ANONYMOUS: bool = false;
+            #[allow(unused_variables)]
+            #[inline]
+            fn new(
+                topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
+                data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                Self {
+                    sourcePubkeyHash: topics.1,
+                    targetPubkeyHash: topics.2,
+                }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
+            }
+            #[inline]
+            fn tokenize_body(&self) -> Self::DataToken<'_> {
+                ()
+            }
+            #[inline]
+            fn topics(&self) -> <Self::TopicList as alloy_sol_types::SolType>::RustType {
+                (
+                    Self::SIGNATURE_HASH.into(),
+                    self.sourcePubkeyHash.clone(),
+                    self.targetPubkeyHash.clone(),
+                )
+            }
+            #[inline]
+            fn encode_topics_raw(
+                &self,
+                out: &mut [alloy_sol_types::abi::token::WordToken],
+            ) -> alloy_sol_types::Result<()> {
+                if out.len() < <Self::TopicList as alloy_sol_types::TopicList>::COUNT {
+                    return Err(alloy_sol_types::Error::Overrun);
+                }
+                out[0usize] = alloy_sol_types::abi::token::WordToken(Self::SIGNATURE_HASH);
+                out[1usize] = <alloy::sol_types::sol_data::FixedBytes<
+                    32,
+                > as alloy_sol_types::EventTopic>::encode_topic(&self.sourcePubkeyHash);
+                out[2usize] = <alloy::sol_types::sol_data::FixedBytes<
+                    32,
+                > as alloy_sol_types::EventTopic>::encode_topic(&self.targetPubkeyHash);
+                Ok(())
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::private::IntoLogData for ConsolidationRequested {
+            fn to_log_data(&self) -> alloy_sol_types::private::LogData {
+                From::from(self)
+            }
+            fn into_log_data(self) -> alloy_sol_types::private::LogData {
+                From::from(&self)
+            }
+        }
+        #[automatically_derived]
+        impl From<&ConsolidationRequested> for alloy_sol_types::private::LogData {
+            #[inline]
+            fn from(this: &ConsolidationRequested) -> alloy_sol_types::private::LogData {
+                alloy_sol_types::SolEvent::encode_log_data(this)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Event with signature `EigenPodStaked(bytes32)` and selector `0xa01003766d3cd97cf2ade5429690bf5d206be7fb01ef9d3a0089ecf67bc11219`.
+    ```solidity
+    event EigenPodStaked(bytes32 pubkeyHash);
     ```*/
     #[allow(
         non_camel_case_types,
@@ -4487,7 +5518,7 @@ pub mod IEigenPod {
     #[derive(Clone)]
     pub struct EigenPodStaked {
         #[allow(missing_docs)]
-        pub pubkey: alloy::sol_types::private::Bytes,
+        pub pubkeyHash: alloy::sol_types::private::FixedBytes<32>,
     }
     #[allow(
         non_camel_case_types,
@@ -4499,15 +5530,15 @@ pub mod IEigenPod {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
         impl alloy_sol_types::SolEvent for EigenPodStaked {
-            type DataTuple<'a> = (alloy::sol_types::sol_data::Bytes,);
+            type DataTuple<'a> = (alloy::sol_types::sol_data::FixedBytes<32>,);
             type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             type TopicList = (alloy_sol_types::sol_data::FixedBytes<32>,);
-            const SIGNATURE: &'static str = "EigenPodStaked(bytes)";
+            const SIGNATURE: &'static str = "EigenPodStaked(bytes32)";
             const SIGNATURE_HASH: alloy_sol_types::private::B256 =
                 alloy_sol_types::private::B256::new([
-                    96u8, 104u8, 101u8, 183u8, 147u8, 74u8, 37u8, 212u8, 174u8, 212u8, 63u8, 108u8,
-                    219u8, 66u8, 100u8, 3u8, 53u8, 63u8, 164u8, 179u8, 0u8, 156u8, 77u8, 34u8,
-                    132u8, 7u8, 71u8, 69u8, 129u8, 176u8, 30u8, 35u8,
+                    160u8, 16u8, 3u8, 118u8, 109u8, 60u8, 217u8, 124u8, 242u8, 173u8, 229u8, 66u8,
+                    150u8, 144u8, 191u8, 93u8, 32u8, 107u8, 231u8, 251u8, 1u8, 239u8, 157u8, 58u8,
+                    0u8, 137u8, 236u8, 246u8, 123u8, 193u8, 18u8, 25u8,
                 ]);
             const ANONYMOUS: bool = false;
             #[allow(unused_variables)]
@@ -4516,7 +5547,7 @@ pub mod IEigenPod {
                 topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
                 data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
             ) -> Self {
-                Self { pubkey: data.0 }
+                Self { pubkeyHash: data.0 }
             }
             #[inline]
             fn check_signature(
@@ -4534,9 +5565,9 @@ pub mod IEigenPod {
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
                 (
-                    <alloy::sol_types::sol_data::Bytes as alloy_sol_types::SolType>::tokenize(
-                        &self.pubkey,
-                    ),
+                    <alloy::sol_types::sol_data::FixedBytes<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(&self.pubkeyHash),
                 )
             }
             #[inline]
@@ -4568,6 +5599,114 @@ pub mod IEigenPod {
         impl From<&EigenPodStaked> for alloy_sol_types::private::LogData {
             #[inline]
             fn from(this: &EigenPodStaked) -> alloy_sol_types::private::LogData {
+                alloy_sol_types::SolEvent::encode_log_data(this)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Event with signature `ExitRequested(bytes32)` and selector `0x60d8ca014d4765a2b8b389e25714cb1cef83b574222911a01d90c1bd69d2d320`.
+    ```solidity
+    event ExitRequested(bytes32 indexed validatorPubkeyHash);
+    ```*/
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    #[derive(Clone)]
+    pub struct ExitRequested {
+        #[allow(missing_docs)]
+        pub validatorPubkeyHash: alloy::sol_types::private::FixedBytes<32>,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[automatically_derived]
+        impl alloy_sol_types::SolEvent for ExitRequested {
+            type DataTuple<'a> = ();
+            type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type TopicList = (
+                alloy_sol_types::sol_data::FixedBytes<32>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
+            );
+            const SIGNATURE: &'static str = "ExitRequested(bytes32)";
+            const SIGNATURE_HASH: alloy_sol_types::private::B256 =
+                alloy_sol_types::private::B256::new([
+                    96u8, 216u8, 202u8, 1u8, 77u8, 71u8, 101u8, 162u8, 184u8, 179u8, 137u8, 226u8,
+                    87u8, 20u8, 203u8, 28u8, 239u8, 131u8, 181u8, 116u8, 34u8, 41u8, 17u8, 160u8,
+                    29u8, 144u8, 193u8, 189u8, 105u8, 210u8, 211u8, 32u8,
+                ]);
+            const ANONYMOUS: bool = false;
+            #[allow(unused_variables)]
+            #[inline]
+            fn new(
+                topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
+                data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                Self {
+                    validatorPubkeyHash: topics.1,
+                }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
+            }
+            #[inline]
+            fn tokenize_body(&self) -> Self::DataToken<'_> {
+                ()
+            }
+            #[inline]
+            fn topics(&self) -> <Self::TopicList as alloy_sol_types::SolType>::RustType {
+                (
+                    Self::SIGNATURE_HASH.into(),
+                    self.validatorPubkeyHash.clone(),
+                )
+            }
+            #[inline]
+            fn encode_topics_raw(
+                &self,
+                out: &mut [alloy_sol_types::abi::token::WordToken],
+            ) -> alloy_sol_types::Result<()> {
+                if out.len() < <Self::TopicList as alloy_sol_types::TopicList>::COUNT {
+                    return Err(alloy_sol_types::Error::Overrun);
+                }
+                out[0usize] = alloy_sol_types::abi::token::WordToken(Self::SIGNATURE_HASH);
+                out[1usize] = <alloy::sol_types::sol_data::FixedBytes<
+                    32,
+                > as alloy_sol_types::EventTopic>::encode_topic(
+                    &self.validatorPubkeyHash,
+                );
+                Ok(())
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::private::IntoLogData for ExitRequested {
+            fn to_log_data(&self) -> alloy_sol_types::private::LogData {
+                From::from(self)
+            }
+            fn into_log_data(self) -> alloy_sol_types::private::LogData {
+                From::from(&self)
+            }
+        }
+        #[automatically_derived]
+        impl From<&ExitRequested> for alloy_sol_types::private::LogData {
+            #[inline]
+            fn from(this: &ExitRequested) -> alloy_sol_types::private::LogData {
                 alloy_sol_types::SolEvent::encode_log_data(this)
             }
         }
@@ -4894,9 +6033,117 @@ pub mod IEigenPod {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `ValidatorBalanceUpdated(uint40,uint64,uint64)` and selector `0x0e5fac175b83177cc047381e030d8fb3b42b37bd1c025e22c280facad62c32df`.
+    /**Event with signature `SwitchToCompoundingRequested(bytes32)` and selector `0xc97b965b92ae7fd20095fe8eb7b99f81f95f8c4adffb22a19116d8eb2846b016`.
     ```solidity
-    event ValidatorBalanceUpdated(uint40 validatorIndex, uint64 balanceTimestamp, uint64 newValidatorBalanceGwei);
+    event SwitchToCompoundingRequested(bytes32 indexed validatorPubkeyHash);
+    ```*/
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    #[derive(Clone)]
+    pub struct SwitchToCompoundingRequested {
+        #[allow(missing_docs)]
+        pub validatorPubkeyHash: alloy::sol_types::private::FixedBytes<32>,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[automatically_derived]
+        impl alloy_sol_types::SolEvent for SwitchToCompoundingRequested {
+            type DataTuple<'a> = ();
+            type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type TopicList = (
+                alloy_sol_types::sol_data::FixedBytes<32>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
+            );
+            const SIGNATURE: &'static str = "SwitchToCompoundingRequested(bytes32)";
+            const SIGNATURE_HASH: alloy_sol_types::private::B256 =
+                alloy_sol_types::private::B256::new([
+                    201u8, 123u8, 150u8, 91u8, 146u8, 174u8, 127u8, 210u8, 0u8, 149u8, 254u8,
+                    142u8, 183u8, 185u8, 159u8, 129u8, 249u8, 95u8, 140u8, 74u8, 223u8, 251u8,
+                    34u8, 161u8, 145u8, 22u8, 216u8, 235u8, 40u8, 70u8, 176u8, 22u8,
+                ]);
+            const ANONYMOUS: bool = false;
+            #[allow(unused_variables)]
+            #[inline]
+            fn new(
+                topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
+                data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                Self {
+                    validatorPubkeyHash: topics.1,
+                }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
+            }
+            #[inline]
+            fn tokenize_body(&self) -> Self::DataToken<'_> {
+                ()
+            }
+            #[inline]
+            fn topics(&self) -> <Self::TopicList as alloy_sol_types::SolType>::RustType {
+                (
+                    Self::SIGNATURE_HASH.into(),
+                    self.validatorPubkeyHash.clone(),
+                )
+            }
+            #[inline]
+            fn encode_topics_raw(
+                &self,
+                out: &mut [alloy_sol_types::abi::token::WordToken],
+            ) -> alloy_sol_types::Result<()> {
+                if out.len() < <Self::TopicList as alloy_sol_types::TopicList>::COUNT {
+                    return Err(alloy_sol_types::Error::Overrun);
+                }
+                out[0usize] = alloy_sol_types::abi::token::WordToken(Self::SIGNATURE_HASH);
+                out[1usize] = <alloy::sol_types::sol_data::FixedBytes<
+                    32,
+                > as alloy_sol_types::EventTopic>::encode_topic(
+                    &self.validatorPubkeyHash,
+                );
+                Ok(())
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::private::IntoLogData for SwitchToCompoundingRequested {
+            fn to_log_data(&self) -> alloy_sol_types::private::LogData {
+                From::from(self)
+            }
+            fn into_log_data(self) -> alloy_sol_types::private::LogData {
+                From::from(&self)
+            }
+        }
+        #[automatically_derived]
+        impl From<&SwitchToCompoundingRequested> for alloy_sol_types::private::LogData {
+            #[inline]
+            fn from(this: &SwitchToCompoundingRequested) -> alloy_sol_types::private::LogData {
+                alloy_sol_types::SolEvent::encode_log_data(this)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Event with signature `ValidatorBalanceUpdated(bytes32,uint64,uint64)` and selector `0xcdae700d7241bc027168c53cf6f889763b0a2c88a65d77fc13a8a9fef0d8605f`.
+    ```solidity
+    event ValidatorBalanceUpdated(bytes32 pubkeyHash, uint64 balanceTimestamp, uint64 newValidatorBalanceGwei);
     ```*/
     #[allow(
         non_camel_case_types,
@@ -4907,7 +6154,7 @@ pub mod IEigenPod {
     #[derive(Clone)]
     pub struct ValidatorBalanceUpdated {
         #[allow(missing_docs)]
-        pub validatorIndex: alloy::sol_types::private::primitives::aliases::U40,
+        pub pubkeyHash: alloy::sol_types::private::FixedBytes<32>,
         #[allow(missing_docs)]
         pub balanceTimestamp: u64,
         #[allow(missing_docs)]
@@ -4924,18 +6171,18 @@ pub mod IEigenPod {
         #[automatically_derived]
         impl alloy_sol_types::SolEvent for ValidatorBalanceUpdated {
             type DataTuple<'a> = (
-                alloy::sol_types::sol_data::Uint<40>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
                 alloy::sol_types::sol_data::Uint<64>,
                 alloy::sol_types::sol_data::Uint<64>,
             );
             type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             type TopicList = (alloy_sol_types::sol_data::FixedBytes<32>,);
-            const SIGNATURE: &'static str = "ValidatorBalanceUpdated(uint40,uint64,uint64)";
+            const SIGNATURE: &'static str = "ValidatorBalanceUpdated(bytes32,uint64,uint64)";
             const SIGNATURE_HASH: alloy_sol_types::private::B256 =
                 alloy_sol_types::private::B256::new([
-                    14u8, 95u8, 172u8, 23u8, 91u8, 131u8, 23u8, 124u8, 192u8, 71u8, 56u8, 30u8,
-                    3u8, 13u8, 143u8, 179u8, 180u8, 43u8, 55u8, 189u8, 28u8, 2u8, 94u8, 34u8,
-                    194u8, 128u8, 250u8, 202u8, 214u8, 44u8, 50u8, 223u8,
+                    205u8, 174u8, 112u8, 13u8, 114u8, 65u8, 188u8, 2u8, 113u8, 104u8, 197u8, 60u8,
+                    246u8, 248u8, 137u8, 118u8, 59u8, 10u8, 44u8, 136u8, 166u8, 93u8, 119u8, 252u8,
+                    19u8, 168u8, 169u8, 254u8, 240u8, 216u8, 96u8, 95u8,
                 ]);
             const ANONYMOUS: bool = false;
             #[allow(unused_variables)]
@@ -4945,7 +6192,7 @@ pub mod IEigenPod {
                 data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
             ) -> Self {
                 Self {
-                    validatorIndex: data.0,
+                    pubkeyHash: data.0,
                     balanceTimestamp: data.1,
                     newValidatorBalanceGwei: data.2,
                 }
@@ -4966,13 +6213,15 @@ pub mod IEigenPod {
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
                 (
-                    <alloy::sol_types::sol_data::Uint<40> as alloy_sol_types::SolType>::tokenize(
-                        &self.validatorIndex,
-                    ),
-                    <alloy::sol_types::sol_data::Uint<64> as alloy_sol_types::SolType>::tokenize(
-                        &self.balanceTimestamp,
-                    ),
-                    <alloy::sol_types::sol_data::Uint<64> as alloy_sol_types::SolType>::tokenize(
+                    <alloy::sol_types::sol_data::FixedBytes<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(&self.pubkeyHash),
+                    <alloy::sol_types::sol_data::Uint<
+                        64,
+                    > as alloy_sol_types::SolType>::tokenize(&self.balanceTimestamp),
+                    <alloy::sol_types::sol_data::Uint<
+                        64,
+                    > as alloy_sol_types::SolType>::tokenize(
                         &self.newValidatorBalanceGwei,
                     ),
                 )
@@ -5011,9 +6260,9 @@ pub mod IEigenPod {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `ValidatorCheckpointed(uint64,uint40)` and selector `0xa91c59033c3423e18b54d0acecebb4972f9ea95aedf5f4cae3b677b02eaf3a3f`.
+    /**Event with signature `ValidatorCheckpointed(uint64,bytes32)` and selector `0xe4866335761a51dcaff766448ab0af6064291ee5dc94e68492bb9cd757c1e350`.
     ```solidity
-    event ValidatorCheckpointed(uint64 indexed checkpointTimestamp, uint40 indexed validatorIndex);
+    event ValidatorCheckpointed(uint64 indexed checkpointTimestamp, bytes32 indexed pubkeyHash);
     ```*/
     #[allow(
         non_camel_case_types,
@@ -5026,7 +6275,7 @@ pub mod IEigenPod {
         #[allow(missing_docs)]
         pub checkpointTimestamp: u64,
         #[allow(missing_docs)]
-        pub validatorIndex: alloy::sol_types::private::primitives::aliases::U40,
+        pub pubkeyHash: alloy::sol_types::private::FixedBytes<32>,
     }
     #[allow(
         non_camel_case_types,
@@ -5043,14 +6292,14 @@ pub mod IEigenPod {
             type TopicList = (
                 alloy_sol_types::sol_data::FixedBytes<32>,
                 alloy::sol_types::sol_data::Uint<64>,
-                alloy::sol_types::sol_data::Uint<40>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
             );
-            const SIGNATURE: &'static str = "ValidatorCheckpointed(uint64,uint40)";
+            const SIGNATURE: &'static str = "ValidatorCheckpointed(uint64,bytes32)";
             const SIGNATURE_HASH: alloy_sol_types::private::B256 =
                 alloy_sol_types::private::B256::new([
-                    169u8, 28u8, 89u8, 3u8, 60u8, 52u8, 35u8, 225u8, 139u8, 84u8, 208u8, 172u8,
-                    236u8, 235u8, 180u8, 151u8, 47u8, 158u8, 169u8, 90u8, 237u8, 245u8, 244u8,
-                    202u8, 227u8, 182u8, 119u8, 176u8, 46u8, 175u8, 58u8, 63u8,
+                    228u8, 134u8, 99u8, 53u8, 118u8, 26u8, 81u8, 220u8, 175u8, 247u8, 102u8, 68u8,
+                    138u8, 176u8, 175u8, 96u8, 100u8, 41u8, 30u8, 229u8, 220u8, 148u8, 230u8,
+                    132u8, 146u8, 187u8, 156u8, 215u8, 87u8, 193u8, 227u8, 80u8,
                 ]);
             const ANONYMOUS: bool = false;
             #[allow(unused_variables)]
@@ -5061,7 +6310,7 @@ pub mod IEigenPod {
             ) -> Self {
                 Self {
                     checkpointTimestamp: topics.1,
-                    validatorIndex: topics.2,
+                    pubkeyHash: topics.2,
                 }
             }
             #[inline]
@@ -5086,7 +6335,7 @@ pub mod IEigenPod {
                 (
                     Self::SIGNATURE_HASH.into(),
                     self.checkpointTimestamp.clone(),
-                    self.validatorIndex.clone(),
+                    self.pubkeyHash.clone(),
                 )
             }
             #[inline]
@@ -5103,9 +6352,9 @@ pub mod IEigenPod {
                 > as alloy_sol_types::EventTopic>::encode_topic(
                     &self.checkpointTimestamp,
                 );
-                out[2usize] = <alloy::sol_types::sol_data::Uint<
-                    40,
-                > as alloy_sol_types::EventTopic>::encode_topic(&self.validatorIndex);
+                out[2usize] = <alloy::sol_types::sol_data::FixedBytes<
+                    32,
+                > as alloy_sol_types::EventTopic>::encode_topic(&self.pubkeyHash);
                 Ok(())
             }
         }
@@ -5127,9 +6376,9 @@ pub mod IEigenPod {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `ValidatorRestaked(uint40)` and selector `0x2d0800bbc377ea54a08c5db6a87aafff5e3e9c8fead0eda110e40e0c10441449`.
+    /**Event with signature `ValidatorRestaked(bytes32)` and selector `0x101790c2993f6a4d962bd17c786126823ba1c4cf04ff4cccb2659d50fb20aee8`.
     ```solidity
-    event ValidatorRestaked(uint40 validatorIndex);
+    event ValidatorRestaked(bytes32 pubkeyHash);
     ```*/
     #[allow(
         non_camel_case_types,
@@ -5140,7 +6389,7 @@ pub mod IEigenPod {
     #[derive(Clone)]
     pub struct ValidatorRestaked {
         #[allow(missing_docs)]
-        pub validatorIndex: alloy::sol_types::private::primitives::aliases::U40,
+        pub pubkeyHash: alloy::sol_types::private::FixedBytes<32>,
     }
     #[allow(
         non_camel_case_types,
@@ -5152,15 +6401,15 @@ pub mod IEigenPod {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
         impl alloy_sol_types::SolEvent for ValidatorRestaked {
-            type DataTuple<'a> = (alloy::sol_types::sol_data::Uint<40>,);
+            type DataTuple<'a> = (alloy::sol_types::sol_data::FixedBytes<32>,);
             type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             type TopicList = (alloy_sol_types::sol_data::FixedBytes<32>,);
-            const SIGNATURE: &'static str = "ValidatorRestaked(uint40)";
+            const SIGNATURE: &'static str = "ValidatorRestaked(bytes32)";
             const SIGNATURE_HASH: alloy_sol_types::private::B256 =
                 alloy_sol_types::private::B256::new([
-                    45u8, 8u8, 0u8, 187u8, 195u8, 119u8, 234u8, 84u8, 160u8, 140u8, 93u8, 182u8,
-                    168u8, 122u8, 175u8, 255u8, 94u8, 62u8, 156u8, 143u8, 234u8, 208u8, 237u8,
-                    161u8, 16u8, 228u8, 14u8, 12u8, 16u8, 68u8, 20u8, 73u8,
+                    16u8, 23u8, 144u8, 194u8, 153u8, 63u8, 106u8, 77u8, 150u8, 43u8, 209u8, 124u8,
+                    120u8, 97u8, 38u8, 130u8, 59u8, 161u8, 196u8, 207u8, 4u8, 255u8, 76u8, 204u8,
+                    178u8, 101u8, 157u8, 80u8, 251u8, 32u8, 174u8, 232u8,
                 ]);
             const ANONYMOUS: bool = false;
             #[allow(unused_variables)]
@@ -5169,9 +6418,7 @@ pub mod IEigenPod {
                 topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
                 data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
             ) -> Self {
-                Self {
-                    validatorIndex: data.0,
-                }
+                Self { pubkeyHash: data.0 }
             }
             #[inline]
             fn check_signature(
@@ -5189,9 +6436,9 @@ pub mod IEigenPod {
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
                 (
-                    <alloy::sol_types::sol_data::Uint<40> as alloy_sol_types::SolType>::tokenize(
-                        &self.validatorIndex,
-                    ),
+                    <alloy::sol_types::sol_data::FixedBytes<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(&self.pubkeyHash),
                 )
             }
             #[inline]
@@ -5228,9 +6475,9 @@ pub mod IEigenPod {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `ValidatorWithdrawn(uint64,uint40)` and selector `0x2a02361ffa66cf2c2da4682c2355a6adcaa9f6c227b6e6563e68480f9587626a`.
+    /**Event with signature `ValidatorWithdrawn(uint64,bytes32)` and selector `0x5ce0aa04ae51d52da6e680fbe0336d2e2432f7c3dc2d4f3193204c57b9072107`.
     ```solidity
-    event ValidatorWithdrawn(uint64 indexed checkpointTimestamp, uint40 indexed validatorIndex);
+    event ValidatorWithdrawn(uint64 indexed checkpointTimestamp, bytes32 indexed pubkeyHash);
     ```*/
     #[allow(
         non_camel_case_types,
@@ -5243,7 +6490,7 @@ pub mod IEigenPod {
         #[allow(missing_docs)]
         pub checkpointTimestamp: u64,
         #[allow(missing_docs)]
-        pub validatorIndex: alloy::sol_types::private::primitives::aliases::U40,
+        pub pubkeyHash: alloy::sol_types::private::FixedBytes<32>,
     }
     #[allow(
         non_camel_case_types,
@@ -5260,14 +6507,14 @@ pub mod IEigenPod {
             type TopicList = (
                 alloy_sol_types::sol_data::FixedBytes<32>,
                 alloy::sol_types::sol_data::Uint<64>,
-                alloy::sol_types::sol_data::Uint<40>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
             );
-            const SIGNATURE: &'static str = "ValidatorWithdrawn(uint64,uint40)";
+            const SIGNATURE: &'static str = "ValidatorWithdrawn(uint64,bytes32)";
             const SIGNATURE_HASH: alloy_sol_types::private::B256 =
                 alloy_sol_types::private::B256::new([
-                    42u8, 2u8, 54u8, 31u8, 250u8, 102u8, 207u8, 44u8, 45u8, 164u8, 104u8, 44u8,
-                    35u8, 85u8, 166u8, 173u8, 202u8, 169u8, 246u8, 194u8, 39u8, 182u8, 230u8, 86u8,
-                    62u8, 104u8, 72u8, 15u8, 149u8, 135u8, 98u8, 106u8,
+                    92u8, 224u8, 170u8, 4u8, 174u8, 81u8, 213u8, 45u8, 166u8, 230u8, 128u8, 251u8,
+                    224u8, 51u8, 109u8, 46u8, 36u8, 50u8, 247u8, 195u8, 220u8, 45u8, 79u8, 49u8,
+                    147u8, 32u8, 76u8, 87u8, 185u8, 7u8, 33u8, 7u8,
                 ]);
             const ANONYMOUS: bool = false;
             #[allow(unused_variables)]
@@ -5278,7 +6525,7 @@ pub mod IEigenPod {
             ) -> Self {
                 Self {
                     checkpointTimestamp: topics.1,
-                    validatorIndex: topics.2,
+                    pubkeyHash: topics.2,
                 }
             }
             #[inline]
@@ -5303,7 +6550,7 @@ pub mod IEigenPod {
                 (
                     Self::SIGNATURE_HASH.into(),
                     self.checkpointTimestamp.clone(),
-                    self.validatorIndex.clone(),
+                    self.pubkeyHash.clone(),
                 )
             }
             #[inline]
@@ -5320,9 +6567,9 @@ pub mod IEigenPod {
                 > as alloy_sol_types::EventTopic>::encode_topic(
                     &self.checkpointTimestamp,
                 );
-                out[2usize] = <alloy::sol_types::sol_data::Uint<
-                    40,
-                > as alloy_sol_types::EventTopic>::encode_topic(&self.validatorIndex);
+                out[2usize] = <alloy::sol_types::sol_data::FixedBytes<
+                    32,
+                > as alloy_sol_types::EventTopic>::encode_topic(&self.pubkeyHash);
                 Ok(())
             }
         }
@@ -5339,6 +6586,121 @@ pub mod IEigenPod {
         impl From<&ValidatorWithdrawn> for alloy_sol_types::private::LogData {
             #[inline]
             fn from(this: &ValidatorWithdrawn) -> alloy_sol_types::private::LogData {
+                alloy_sol_types::SolEvent::encode_log_data(this)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Event with signature `WithdrawalRequested(bytes32,uint64)` and selector `0x8b2737bb64ab2f2dc09552dfa1c250399e6a42c7ea9f0e1c658f5d65d708ec05`.
+    ```solidity
+    event WithdrawalRequested(bytes32 indexed validatorPubkeyHash, uint64 withdrawalAmountGwei);
+    ```*/
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    #[derive(Clone)]
+    pub struct WithdrawalRequested {
+        #[allow(missing_docs)]
+        pub validatorPubkeyHash: alloy::sol_types::private::FixedBytes<32>,
+        #[allow(missing_docs)]
+        pub withdrawalAmountGwei: u64,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[automatically_derived]
+        impl alloy_sol_types::SolEvent for WithdrawalRequested {
+            type DataTuple<'a> = (alloy::sol_types::sol_data::Uint<64>,);
+            type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type TopicList = (
+                alloy_sol_types::sol_data::FixedBytes<32>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
+            );
+            const SIGNATURE: &'static str = "WithdrawalRequested(bytes32,uint64)";
+            const SIGNATURE_HASH: alloy_sol_types::private::B256 =
+                alloy_sol_types::private::B256::new([
+                    139u8, 39u8, 55u8, 187u8, 100u8, 171u8, 47u8, 45u8, 192u8, 149u8, 82u8, 223u8,
+                    161u8, 194u8, 80u8, 57u8, 158u8, 106u8, 66u8, 199u8, 234u8, 159u8, 14u8, 28u8,
+                    101u8, 143u8, 93u8, 101u8, 215u8, 8u8, 236u8, 5u8,
+                ]);
+            const ANONYMOUS: bool = false;
+            #[allow(unused_variables)]
+            #[inline]
+            fn new(
+                topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
+                data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                Self {
+                    validatorPubkeyHash: topics.1,
+                    withdrawalAmountGwei: data.0,
+                }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
+            }
+            #[inline]
+            fn tokenize_body(&self) -> Self::DataToken<'_> {
+                (
+                    <alloy::sol_types::sol_data::Uint<64> as alloy_sol_types::SolType>::tokenize(
+                        &self.withdrawalAmountGwei,
+                    ),
+                )
+            }
+            #[inline]
+            fn topics(&self) -> <Self::TopicList as alloy_sol_types::SolType>::RustType {
+                (
+                    Self::SIGNATURE_HASH.into(),
+                    self.validatorPubkeyHash.clone(),
+                )
+            }
+            #[inline]
+            fn encode_topics_raw(
+                &self,
+                out: &mut [alloy_sol_types::abi::token::WordToken],
+            ) -> alloy_sol_types::Result<()> {
+                if out.len() < <Self::TopicList as alloy_sol_types::TopicList>::COUNT {
+                    return Err(alloy_sol_types::Error::Overrun);
+                }
+                out[0usize] = alloy_sol_types::abi::token::WordToken(Self::SIGNATURE_HASH);
+                out[1usize] = <alloy::sol_types::sol_data::FixedBytes<
+                    32,
+                > as alloy_sol_types::EventTopic>::encode_topic(
+                    &self.validatorPubkeyHash,
+                );
+                Ok(())
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::private::IntoLogData for WithdrawalRequested {
+            fn to_log_data(&self) -> alloy_sol_types::private::LogData {
+                From::from(self)
+            }
+            fn into_log_data(self) -> alloy_sol_types::private::LogData {
+                From::from(&self)
+            }
+        }
+        #[automatically_derived]
+        impl From<&WithdrawalRequested> for alloy_sol_types::private::LogData {
+            #[inline]
+            fn from(this: &WithdrawalRequested) -> alloy_sol_types::private::LogData {
                 alloy_sol_types::SolEvent::encode_log_data(this)
             }
         }
@@ -5995,6 +7357,136 @@ pub mod IEigenPod {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `getConsolidationRequestFee()` and selector `0x1e515533`.
+    ```solidity
+    function getConsolidationRequestFee() external view returns (uint256);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getConsolidationRequestFeeCall;
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`getConsolidationRequestFee()`](getConsolidationRequestFeeCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getConsolidationRequestFeeReturn {
+        #[allow(missing_docs)]
+        pub _0: alloy::sol_types::private::primitives::aliases::U256,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getConsolidationRequestFeeCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getConsolidationRequestFeeCall) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getConsolidationRequestFeeCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getConsolidationRequestFeeReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getConsolidationRequestFeeReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getConsolidationRequestFeeReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for getConsolidationRequestFeeCall {
+            type Parameters<'a> = ();
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = alloy::sol_types::private::primitives::aliases::U256;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "getConsolidationRequestFee()";
+            const SELECTOR: [u8; 4] = [30u8, 81u8, 85u8, 51u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (
+                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
+                        ret,
+                    ),
+                )
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getConsolidationRequestFeeReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: getConsolidationRequestFeeReturn = r.into();
+                    r._0
+                })
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Function with signature `getParentBlockRoot(uint64)` and selector `0x6c0d2d5a`.
     ```solidity
     function getParentBlockRoot(uint64 timestamp) external view returns (bytes32);
@@ -6126,6 +7618,136 @@ pub mod IEigenPod {
                 )
                 .map(|r| {
                     let r: getParentBlockRootReturn = r.into();
+                    r._0
+                })
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `getWithdrawalRequestFee()` and selector `0xc44e30dc`.
+    ```solidity
+    function getWithdrawalRequestFee() external view returns (uint256);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getWithdrawalRequestFeeCall;
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`getWithdrawalRequestFee()`](getWithdrawalRequestFeeCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getWithdrawalRequestFeeReturn {
+        #[allow(missing_docs)]
+        pub _0: alloy::sol_types::private::primitives::aliases::U256,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getWithdrawalRequestFeeCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getWithdrawalRequestFeeCall) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getWithdrawalRequestFeeCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getWithdrawalRequestFeeReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getWithdrawalRequestFeeReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getWithdrawalRequestFeeReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for getWithdrawalRequestFeeCall {
+            type Parameters<'a> = ();
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = alloy::sol_types::private::primitives::aliases::U256;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "getWithdrawalRequestFee()";
+            const SELECTOR: [u8; 4] = [196u8, 78u8, 48u8, 220u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (
+                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
+                        ret,
+                    ),
+                )
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getWithdrawalRequestFeeReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: getWithdrawalRequestFeeReturn = r.into();
                     r._0
                 })
             }
@@ -6791,6 +8413,281 @@ pub mod IEigenPod {
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
                 recoverTokensReturn::_tokenize(ret)
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
+                    .map(Into::into)
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Into::into)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `requestConsolidation((bytes,bytes)[])` and selector `0x6691954e`.
+    ```solidity
+    function requestConsolidation(IEigenPodTypes.ConsolidationRequest[] memory requests) external payable;
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct requestConsolidationCall {
+        #[allow(missing_docs)]
+        pub requests: alloy::sol_types::private::Vec<
+            <IEigenPodTypes::ConsolidationRequest as alloy::sol_types::SolType>::RustType,
+        >,
+    }
+    ///Container type for the return parameters of the [`requestConsolidation((bytes,bytes)[])`](requestConsolidationCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct requestConsolidationReturn {}
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> =
+                (alloy::sol_types::sol_data::Array<IEigenPodTypes::ConsolidationRequest>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (
+                alloy::sol_types::private::Vec<
+                    <IEigenPodTypes::ConsolidationRequest as alloy::sol_types::SolType>::RustType,
+                >,
+            );
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<requestConsolidationCall> for UnderlyingRustTuple<'_> {
+                fn from(value: requestConsolidationCall) -> Self {
+                    (value.requests,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for requestConsolidationCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { requests: tuple.0 }
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<requestConsolidationReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: requestConsolidationReturn) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for requestConsolidationReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self {}
+                }
+            }
+        }
+        impl requestConsolidationReturn {
+            fn _tokenize(
+                &self,
+            ) -> <requestConsolidationCall as alloy_sol_types::SolCall>::ReturnToken<'_>
+            {
+                ()
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for requestConsolidationCall {
+            type Parameters<'a> =
+                (alloy::sol_types::sol_data::Array<IEigenPodTypes::ConsolidationRequest>,);
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = requestConsolidationReturn;
+            type ReturnTuple<'a> = ();
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "requestConsolidation((bytes,bytes)[])";
+            const SELECTOR: [u8; 4] = [102u8, 145u8, 149u8, 78u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                (<alloy::sol_types::sol_data::Array<
+                    IEigenPodTypes::ConsolidationRequest,
+                > as alloy_sol_types::SolType>::tokenize(
+                    &self.requests
+                ),)
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                requestConsolidationReturn::_tokenize(ret)
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
+                    .map(Into::into)
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Into::into)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `requestWithdrawal((bytes,uint64)[])` and selector `0x3f5fa57a`.
+    ```solidity
+    function requestWithdrawal(IEigenPodTypes.WithdrawalRequest[] memory requests) external payable;
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct requestWithdrawalCall {
+        #[allow(missing_docs)]
+        pub requests: alloy::sol_types::private::Vec<
+            <IEigenPodTypes::WithdrawalRequest as alloy::sol_types::SolType>::RustType,
+        >,
+    }
+    ///Container type for the return parameters of the [`requestWithdrawal((bytes,uint64)[])`](requestWithdrawalCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct requestWithdrawalReturn {}
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> =
+                (alloy::sol_types::sol_data::Array<IEigenPodTypes::WithdrawalRequest>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (
+                alloy::sol_types::private::Vec<
+                    <IEigenPodTypes::WithdrawalRequest as alloy::sol_types::SolType>::RustType,
+                >,
+            );
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<requestWithdrawalCall> for UnderlyingRustTuple<'_> {
+                fn from(value: requestWithdrawalCall) -> Self {
+                    (value.requests,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for requestWithdrawalCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { requests: tuple.0 }
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<requestWithdrawalReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: requestWithdrawalReturn) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for requestWithdrawalReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self {}
+                }
+            }
+        }
+        impl requestWithdrawalReturn {
+            fn _tokenize(
+                &self,
+            ) -> <requestWithdrawalCall as alloy_sol_types::SolCall>::ReturnToken<'_> {
+                ()
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for requestWithdrawalCall {
+            type Parameters<'a> =
+                (alloy::sol_types::sol_data::Array<IEigenPodTypes::WithdrawalRequest>,);
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = requestWithdrawalReturn;
+            type ReturnTuple<'a> = ();
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "requestWithdrawal((bytes,uint64)[])";
+            const SELECTOR: [u8; 4] = [63u8, 95u8, 165u8, 122u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                (<alloy::sol_types::sol_data::Array<
+                    IEigenPodTypes::WithdrawalRequest,
+                > as alloy_sol_types::SolType>::tokenize(
+                    &self.requests
+                ),)
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                requestWithdrawalReturn::_tokenize(ret)
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
@@ -8691,7 +10588,11 @@ pub mod IEigenPod {
         #[allow(missing_docs)]
         eigenPodManager(eigenPodManagerCall),
         #[allow(missing_docs)]
+        getConsolidationRequestFee(getConsolidationRequestFeeCall),
+        #[allow(missing_docs)]
         getParentBlockRoot(getParentBlockRootCall),
+        #[allow(missing_docs)]
+        getWithdrawalRequestFee(getWithdrawalRequestFeeCall),
         #[allow(missing_docs)]
         initialize(initializeCall),
         #[allow(missing_docs)]
@@ -8702,6 +10603,10 @@ pub mod IEigenPod {
         proofSubmitter(proofSubmitterCall),
         #[allow(missing_docs)]
         recoverTokens(recoverTokensCall),
+        #[allow(missing_docs)]
+        requestConsolidation(requestConsolidationCall),
+        #[allow(missing_docs)]
+        requestWithdrawal(requestWithdrawalCall),
         #[allow(missing_docs)]
         setProofSubmitter(setProofSubmitterCall),
         #[allow(missing_docs)]
@@ -8740,8 +10645,10 @@ pub mod IEigenPod {
         pub const SELECTORS: &'static [[u8; 4usize]] = &[
             [3u8, 145u8, 87u8, 210u8],
             [11u8, 24u8, 255u8, 102u8],
+            [30u8, 81u8, 85u8, 51u8],
             [35u8, 64u8, 232u8, 211u8],
             [52u8, 116u8, 170u8, 22u8],
+            [63u8, 95u8, 165u8, 122u8],
             [63u8, 101u8, 207u8, 25u8],
             [66u8, 236u8, 255u8, 42u8],
             [70u8, 101u8, 188u8, 218u8],
@@ -8750,12 +10657,14 @@ pub mod IEigenPod {
             [84u8, 253u8, 77u8, 80u8],
             [88u8, 117u8, 51u8, 87u8],
             [88u8, 234u8, 238u8, 121u8],
+            [102u8, 145u8, 149u8, 78u8],
             [108u8, 13u8, 45u8, 90u8],
             [111u8, 205u8, 14u8, 83u8],
             [116u8, 57u8, 132u8, 31u8],
             [136u8, 103u8, 108u8, 173u8],
             [155u8, 78u8, 70u8, 52u8],
             [181u8, 34u8, 83u8, 138u8],
+            [196u8, 78u8, 48u8, 220u8],
             [196u8, 144u8, 116u8, 66u8],
             [196u8, 214u8, 109u8, 232u8],
             [208u8, 109u8, 85u8, 135u8],
@@ -8768,7 +10677,7 @@ pub mod IEigenPod {
     impl alloy_sol_types::SolInterface for IEigenPodCalls {
         const NAME: &'static str = "IEigenPodCalls";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 24usize;
+        const COUNT: usize = 28usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
@@ -8787,8 +10696,14 @@ pub mod IEigenPod {
                 Self::eigenPodManager(_) => {
                     <eigenPodManagerCall as alloy_sol_types::SolCall>::SELECTOR
                 }
+                Self::getConsolidationRequestFee(_) => {
+                    <getConsolidationRequestFeeCall as alloy_sol_types::SolCall>::SELECTOR
+                }
                 Self::getParentBlockRoot(_) => {
                     <getParentBlockRootCall as alloy_sol_types::SolCall>::SELECTOR
+                }
+                Self::getWithdrawalRequestFee(_) => {
+                    <getWithdrawalRequestFeeCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::initialize(_) => {
                     <initializeCall as alloy_sol_types::SolCall>::SELECTOR
@@ -8802,6 +10717,12 @@ pub mod IEigenPod {
                 }
                 Self::recoverTokens(_) => {
                     <recoverTokensCall as alloy_sol_types::SolCall>::SELECTOR
+                }
+                Self::requestConsolidation(_) => {
+                    <requestConsolidationCall as alloy_sol_types::SolCall>::SELECTOR
+                }
+                Self::requestWithdrawal(_) => {
+                    <requestWithdrawalCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::setProofSubmitter(_) => {
                     <setProofSubmitterCall as alloy_sol_types::SolCall>::SELECTOR
@@ -8867,6 +10788,17 @@ pub mod IEigenPod {
                     podOwner
                 },
                 {
+                    fn getConsolidationRequestFee(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IEigenPodCalls> {
+                        <getConsolidationRequestFeeCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                                data,
+                            )
+                            .map(IEigenPodCalls::getConsolidationRequestFee)
+                    }
+                    getConsolidationRequestFee
+                },
+                {
                     fn activeValidatorCount(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodCalls> {
@@ -8885,6 +10817,13 @@ pub mod IEigenPod {
                             .map(IEigenPodCalls::withdrawableRestakedExecutionLayerGwei)
                     }
                     withdrawableRestakedExecutionLayerGwei
+                },
+                {
+                    fn requestWithdrawal(data: &[u8]) -> alloy_sol_types::Result<IEigenPodCalls> {
+                        <requestWithdrawalCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
+                            .map(IEigenPodCalls::requestWithdrawal)
+                    }
+                    requestWithdrawal
                 },
                 {
                     fn verifyWithdrawalCredentials(
@@ -8955,6 +10894,15 @@ pub mod IEigenPod {
                     validatorStatus_0
                 },
                 {
+                    fn requestConsolidation(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IEigenPodCalls> {
+                        <requestConsolidationCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
+                            .map(IEigenPodCalls::requestConsolidation)
+                    }
+                    requestConsolidation
+                },
+                {
                     fn getParentBlockRoot(data: &[u8]) -> alloy_sol_types::Result<IEigenPodCalls> {
                         <getParentBlockRootCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
                             .map(IEigenPodCalls::getParentBlockRoot)
@@ -9003,6 +10951,17 @@ pub mod IEigenPod {
                         .map(IEigenPodCalls::validatorPubkeyToInfo)
                     }
                     validatorPubkeyToInfo
+                },
+                {
+                    fn getWithdrawalRequestFee(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IEigenPodCalls> {
+                        <getWithdrawalRequestFeeCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                            data,
+                        )
+                        .map(IEigenPodCalls::getWithdrawalRequestFee)
+                    }
+                    getWithdrawalRequestFee
                 },
                 {
                     fn withdrawRestakedBeaconChainETH(
@@ -9094,6 +11053,17 @@ pub mod IEigenPod {
                     podOwner
                 },
                 {
+                    fn getConsolidationRequestFee(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IEigenPodCalls> {
+                        <getConsolidationRequestFeeCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IEigenPodCalls::getConsolidationRequestFee)
+                    }
+                    getConsolidationRequestFee
+                },
+                {
                     fn activeValidatorCount(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodCalls> {
@@ -9114,6 +11084,15 @@ pub mod IEigenPod {
                             .map(IEigenPodCalls::withdrawableRestakedExecutionLayerGwei)
                     }
                     withdrawableRestakedExecutionLayerGwei
+                },
+                {
+                    fn requestWithdrawal(data: &[u8]) -> alloy_sol_types::Result<IEigenPodCalls> {
+                        <requestWithdrawalCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IEigenPodCalls::requestWithdrawal)
+                    }
+                    requestWithdrawal
                 },
                 {
                     fn verifyWithdrawalCredentials(
@@ -9192,6 +11171,17 @@ pub mod IEigenPod {
                     validatorStatus_0
                 },
                 {
+                    fn requestConsolidation(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IEigenPodCalls> {
+                        <requestConsolidationCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IEigenPodCalls::requestConsolidation)
+                    }
+                    requestConsolidation
+                },
+                {
                     fn getParentBlockRoot(data: &[u8]) -> alloy_sol_types::Result<IEigenPodCalls> {
                         <getParentBlockRootCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
                                 data,
@@ -9246,6 +11236,17 @@ pub mod IEigenPod {
                             .map(IEigenPodCalls::validatorPubkeyToInfo)
                     }
                     validatorPubkeyToInfo
+                },
+                {
+                    fn getWithdrawalRequestFee(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IEigenPodCalls> {
+                        <getWithdrawalRequestFeeCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IEigenPodCalls::getWithdrawalRequestFee)
+                    }
+                    getWithdrawalRequestFee
                 },
                 {
                     fn withdrawRestakedBeaconChainETH(
@@ -9342,8 +11343,18 @@ pub mod IEigenPod {
                         inner,
                     )
                 }
+                Self::getConsolidationRequestFee(inner) => {
+                    <getConsolidationRequestFeeCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
                 Self::getParentBlockRoot(inner) => {
                     <getParentBlockRootCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::getWithdrawalRequestFee(inner) => {
+                    <getWithdrawalRequestFeeCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
@@ -9365,6 +11376,16 @@ pub mod IEigenPod {
                 }
                 Self::recoverTokens(inner) => {
                     <recoverTokensCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::requestConsolidation(inner) => {
+                    <requestConsolidationCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::requestWithdrawal(inner) => {
+                    <requestWithdrawalCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
@@ -9464,8 +11485,20 @@ pub mod IEigenPod {
                         out,
                     )
                 }
+                Self::getConsolidationRequestFee(inner) => {
+                    <getConsolidationRequestFeeCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
                 Self::getParentBlockRoot(inner) => {
                     <getParentBlockRootCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::getWithdrawalRequestFee(inner) => {
+                    <getWithdrawalRequestFeeCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -9496,6 +11529,18 @@ pub mod IEigenPod {
                 }
                 Self::recoverTokens(inner) => {
                     <recoverTokensCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::requestConsolidation(inner) => {
+                    <requestConsolidationCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::requestWithdrawal(inner) => {
+                    <requestWithdrawalCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -9589,9 +11634,15 @@ pub mod IEigenPod {
         #[allow(missing_docs)]
         CurrentlyPaused(CurrentlyPaused),
         #[allow(missing_docs)]
+        FeeQueryFailed(FeeQueryFailed),
+        #[allow(missing_docs)]
+        ForkTimestampZero(ForkTimestampZero),
+        #[allow(missing_docs)]
         InputAddressZero(InputAddressZero),
         #[allow(missing_docs)]
         InputArrayLengthMismatch(InputArrayLengthMismatch),
+        #[allow(missing_docs)]
+        InsufficientFunds(InsufficientFunds),
         #[allow(missing_docs)]
         InsufficientWithdrawableBalance(InsufficientWithdrawableBalance),
         #[allow(missing_docs)]
@@ -9610,6 +11661,10 @@ pub mod IEigenPod {
         OnlyEigenPodOwner(OnlyEigenPodOwner),
         #[allow(missing_docs)]
         OnlyEigenPodOwnerOrProofSubmitter(OnlyEigenPodOwnerOrProofSubmitter),
+        #[allow(missing_docs)]
+        PredeployFailed(PredeployFailed),
+        #[allow(missing_docs)]
+        RefundFailed(RefundFailed),
         #[allow(missing_docs)]
         TimestampOutOfRange(TimestampOutOfRange),
         #[allow(missing_docs)]
@@ -9636,8 +11691,10 @@ pub mod IEigenPod {
             [26u8, 84u8, 79u8, 73u8],
             [36u8, 180u8, 181u8, 152u8],
             [46u8, 173u8, 230u8, 55u8],
+            [53u8, 102u8, 128u8, 183u8],
             [53u8, 224u8, 158u8, 157u8],
             [55u8, 224u8, 127u8, 253u8],
+            [65u8, 160u8, 44u8, 201u8],
             [66u8, 122u8, 119u8, 121u8],
             [67u8, 113u8, 74u8, 253u8],
             [85u8, 138u8, 208u8, 163u8],
@@ -9650,17 +11707,20 @@ pub mod IEigenPod {
             [176u8, 231u8, 47u8, 104u8],
             [190u8, 155u8, 195u8, 0u8],
             [200u8, 78u8, 153u8, 132u8],
+            [201u8, 1u8, 88u8, 175u8],
             [203u8, 122u8, 165u8, 100u8],
             [212u8, 158u8, 25u8, 167u8],
             [227u8, 62u8, 110u8, 6u8],
+            [240u8, 196u8, 157u8, 68u8],
             [242u8, 137u8, 204u8, 218u8],
+            [252u8, 82u8, 212u8, 131u8],
         ];
     }
     #[automatically_derived]
     impl alloy_sol_types::SolInterface for IEigenPodErrors {
         const NAME: &'static str = "IEigenPodErrors";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 22usize;
+        const COUNT: usize = 27usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
@@ -9679,11 +11739,18 @@ pub mod IEigenPod {
                 Self::CurrentlyPaused(_) => {
                     <CurrentlyPaused as alloy_sol_types::SolError>::SELECTOR
                 }
+                Self::FeeQueryFailed(_) => <FeeQueryFailed as alloy_sol_types::SolError>::SELECTOR,
+                Self::ForkTimestampZero(_) => {
+                    <ForkTimestampZero as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::InputAddressZero(_) => {
                     <InputAddressZero as alloy_sol_types::SolError>::SELECTOR
                 }
                 Self::InputArrayLengthMismatch(_) => {
                     <InputArrayLengthMismatch as alloy_sol_types::SolError>::SELECTOR
+                }
+                Self::InsufficientFunds(_) => {
+                    <InsufficientFunds as alloy_sol_types::SolError>::SELECTOR
                 }
                 Self::InsufficientWithdrawableBalance(_) => {
                     <InsufficientWithdrawableBalance as alloy_sol_types::SolError>::SELECTOR
@@ -9712,6 +11779,10 @@ pub mod IEigenPod {
                 Self::OnlyEigenPodOwnerOrProofSubmitter(_) => {
                     <OnlyEigenPodOwnerOrProofSubmitter as alloy_sol_types::SolError>::SELECTOR
                 }
+                Self::PredeployFailed(_) => {
+                    <PredeployFailed as alloy_sol_types::SolError>::SELECTOR
+                }
+                Self::RefundFailed(_) => <RefundFailed as alloy_sol_types::SolError>::SELECTOR,
                 Self::TimestampOutOfRange(_) => {
                     <TimestampOutOfRange as alloy_sol_types::SolError>::SELECTOR
                 }
@@ -9781,6 +11852,13 @@ pub mod IEigenPod {
                     ValidatorIsExitingBeaconChain
                 },
                 {
+                    fn InsufficientFunds(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <InsufficientFunds as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IEigenPodErrors::InsufficientFunds)
+                    }
+                    InsufficientFunds
+                },
+                {
                     fn CredentialsAlreadyVerified(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodErrors> {
@@ -9801,6 +11879,13 @@ pub mod IEigenPod {
                         .map(IEigenPodErrors::BeaconTimestampTooFarInPast)
                     }
                     BeaconTimestampTooFarInPast
+                },
+                {
+                    fn ForkTimestampZero(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <ForkTimestampZero as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IEigenPodErrors::ForkTimestampZero)
+                    }
+                    ForkTimestampZero
                 },
                 {
                     fn OnlyEigenPodOwnerOrProofSubmitter(
@@ -9919,6 +12004,13 @@ pub mod IEigenPod {
                     OnlyEigenPodManager
                 },
                 {
+                    fn FeeQueryFailed(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <FeeQueryFailed as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IEigenPodErrors::FeeQueryFailed)
+                    }
+                    FeeQueryFailed
+                },
+                {
                     fn NoBalanceToCheckpoint(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodErrors> {
@@ -9944,6 +12036,13 @@ pub mod IEigenPod {
                     OnlyEigenPodOwner
                 },
                 {
+                    fn RefundFailed(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <RefundFailed as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IEigenPodErrors::RefundFailed)
+                    }
+                    RefundFailed
+                },
+                {
                     fn TimestampOutOfRange(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodErrors> {
@@ -9951,6 +12050,13 @@ pub mod IEigenPod {
                             .map(IEigenPodErrors::TimestampOutOfRange)
                     }
                     TimestampOutOfRange
+                },
+                {
+                    fn PredeployFailed(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <PredeployFailed as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IEigenPodErrors::PredeployFailed)
+                    }
+                    PredeployFailed
                 },
             ];
             let Ok(idx) = Self::SELECTORS.binary_search(&selector) else {
@@ -10012,6 +12118,15 @@ pub mod IEigenPod {
                     ValidatorIsExitingBeaconChain
                 },
                 {
+                    fn InsufficientFunds(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <InsufficientFunds as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IEigenPodErrors::InsufficientFunds)
+                    }
+                    InsufficientFunds
+                },
+                {
                     fn CredentialsAlreadyVerified(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodErrors> {
@@ -10032,6 +12147,15 @@ pub mod IEigenPod {
                             .map(IEigenPodErrors::BeaconTimestampTooFarInPast)
                     }
                     BeaconTimestampTooFarInPast
+                },
+                {
+                    fn ForkTimestampZero(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <ForkTimestampZero as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IEigenPodErrors::ForkTimestampZero)
+                    }
+                    ForkTimestampZero
                 },
                 {
                     fn OnlyEigenPodOwnerOrProofSubmitter(
@@ -10162,6 +12286,13 @@ pub mod IEigenPod {
                     OnlyEigenPodManager
                 },
                 {
+                    fn FeeQueryFailed(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <FeeQueryFailed as alloy_sol_types::SolError>::abi_decode_raw_validate(data)
+                            .map(IEigenPodErrors::FeeQueryFailed)
+                    }
+                    FeeQueryFailed
+                },
+                {
                     fn NoBalanceToCheckpoint(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodErrors> {
@@ -10193,6 +12324,13 @@ pub mod IEigenPod {
                     OnlyEigenPodOwner
                 },
                 {
+                    fn RefundFailed(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <RefundFailed as alloy_sol_types::SolError>::abi_decode_raw_validate(data)
+                            .map(IEigenPodErrors::RefundFailed)
+                    }
+                    RefundFailed
+                },
+                {
                     fn TimestampOutOfRange(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodErrors> {
@@ -10202,6 +12340,15 @@ pub mod IEigenPod {
                         .map(IEigenPodErrors::TimestampOutOfRange)
                     }
                     TimestampOutOfRange
+                },
+                {
+                    fn PredeployFailed(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <PredeployFailed as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IEigenPodErrors::PredeployFailed)
+                    }
+                    PredeployFailed
                 },
             ];
             let Ok(idx) = Self::SELECTORS.binary_search(&selector) else {
@@ -10240,6 +12387,16 @@ pub mod IEigenPod {
                         inner,
                     )
                 }
+                Self::FeeQueryFailed(inner) => {
+                    <FeeQueryFailed as alloy_sol_types::SolError>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::ForkTimestampZero(inner) => {
+                    <ForkTimestampZero as alloy_sol_types::SolError>::abi_encoded_size(
+                        inner,
+                    )
+                }
                 Self::InputAddressZero(inner) => {
                     <InputAddressZero as alloy_sol_types::SolError>::abi_encoded_size(
                         inner,
@@ -10247,6 +12404,11 @@ pub mod IEigenPod {
                 }
                 Self::InputArrayLengthMismatch(inner) => {
                     <InputArrayLengthMismatch as alloy_sol_types::SolError>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::InsufficientFunds(inner) => {
+                    <InsufficientFunds as alloy_sol_types::SolError>::abi_encoded_size(
                         inner,
                     )
                 }
@@ -10294,6 +12456,14 @@ pub mod IEigenPod {
                     <OnlyEigenPodOwnerOrProofSubmitter as alloy_sol_types::SolError>::abi_encoded_size(
                         inner,
                     )
+                }
+                Self::PredeployFailed(inner) => {
+                    <PredeployFailed as alloy_sol_types::SolError>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::RefundFailed(inner) => {
+                    <RefundFailed as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
                 Self::TimestampOutOfRange(inner) => {
                     <TimestampOutOfRange as alloy_sol_types::SolError>::abi_encoded_size(
@@ -10360,6 +12530,18 @@ pub mod IEigenPod {
                         out,
                     )
                 }
+                Self::FeeQueryFailed(inner) => {
+                    <FeeQueryFailed as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::ForkTimestampZero(inner) => {
+                    <ForkTimestampZero as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
                 Self::InputAddressZero(inner) => {
                     <InputAddressZero as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
@@ -10368,6 +12550,12 @@ pub mod IEigenPod {
                 }
                 Self::InputArrayLengthMismatch(inner) => {
                     <InputArrayLengthMismatch as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::InsufficientFunds(inner) => {
+                    <InsufficientFunds as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -10426,6 +12614,18 @@ pub mod IEigenPod {
                         out,
                     )
                 }
+                Self::PredeployFailed(inner) => {
+                    <PredeployFailed as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::RefundFailed(inner) => {
+                    <RefundFailed as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
                 Self::TimestampOutOfRange(inner) => {
                     <TimestampOutOfRange as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
@@ -10473,13 +12673,19 @@ pub mod IEigenPod {
         #[allow(missing_docs)]
         CheckpointFinalized(CheckpointFinalized),
         #[allow(missing_docs)]
+        ConsolidationRequested(ConsolidationRequested),
+        #[allow(missing_docs)]
         EigenPodStaked(EigenPodStaked),
+        #[allow(missing_docs)]
+        ExitRequested(ExitRequested),
         #[allow(missing_docs)]
         NonBeaconChainETHReceived(NonBeaconChainETHReceived),
         #[allow(missing_docs)]
         ProofSubmitterUpdated(ProofSubmitterUpdated),
         #[allow(missing_docs)]
         RestakedBeaconChainETHWithdrawn(RestakedBeaconChainETHWithdrawn),
+        #[allow(missing_docs)]
+        SwitchToCompoundingRequested(SwitchToCompoundingRequested),
         #[allow(missing_docs)]
         ValidatorBalanceUpdated(ValidatorBalanceUpdated),
         #[allow(missing_docs)]
@@ -10488,6 +12694,8 @@ pub mod IEigenPod {
         ValidatorRestaked(ValidatorRestaked),
         #[allow(missing_docs)]
         ValidatorWithdrawn(ValidatorWithdrawn),
+        #[allow(missing_docs)]
+        WithdrawalRequested(WithdrawalRequested),
     }
     #[automatically_derived]
     impl IEigenPodEvents {
@@ -10499,19 +12707,14 @@ pub mod IEigenPod {
         /// Prefer using `SolInterface` methods instead.
         pub const SELECTORS: &'static [[u8; 32usize]] = &[
             [
-                14u8, 95u8, 172u8, 23u8, 91u8, 131u8, 23u8, 124u8, 192u8, 71u8, 56u8, 30u8, 3u8,
-                13u8, 143u8, 179u8, 180u8, 43u8, 55u8, 189u8, 28u8, 2u8, 94u8, 34u8, 194u8, 128u8,
-                250u8, 202u8, 214u8, 44u8, 50u8, 223u8,
+                16u8, 23u8, 144u8, 194u8, 153u8, 63u8, 106u8, 77u8, 150u8, 43u8, 209u8, 124u8,
+                120u8, 97u8, 38u8, 130u8, 59u8, 161u8, 196u8, 207u8, 4u8, 255u8, 76u8, 204u8,
+                178u8, 101u8, 157u8, 80u8, 251u8, 32u8, 174u8, 232u8,
             ],
             [
-                42u8, 2u8, 54u8, 31u8, 250u8, 102u8, 207u8, 44u8, 45u8, 164u8, 104u8, 44u8, 35u8,
-                85u8, 166u8, 173u8, 202u8, 169u8, 246u8, 194u8, 39u8, 182u8, 230u8, 86u8, 62u8,
-                104u8, 72u8, 15u8, 149u8, 135u8, 98u8, 106u8,
-            ],
-            [
-                45u8, 8u8, 0u8, 187u8, 195u8, 119u8, 234u8, 84u8, 160u8, 140u8, 93u8, 182u8, 168u8,
-                122u8, 175u8, 255u8, 94u8, 62u8, 156u8, 143u8, 234u8, 208u8, 237u8, 161u8, 16u8,
-                228u8, 14u8, 12u8, 16u8, 68u8, 20u8, 73u8,
+                66u8, 249u8, 201u8, 219u8, 44u8, 164u8, 67u8, 233u8, 236u8, 98u8, 244u8, 88u8,
+                139u8, 208u8, 201u8, 178u8, 65u8, 6u8, 92u8, 2u8, 194u8, 168u8, 0u8, 26u8, 193u8,
+                100u8, 174u8, 18u8, 130u8, 220u8, 123u8, 148u8,
             ],
             [
                 82u8, 84u8, 8u8, 194u8, 1u8, 188u8, 21u8, 118u8, 235u8, 68u8, 17u8, 111u8, 100u8,
@@ -10524,9 +12727,14 @@ pub mod IEigenPod {
                 184u8, 134u8, 174u8, 119u8, 235u8, 239u8, 16u8, 118u8,
             ],
             [
-                96u8, 104u8, 101u8, 183u8, 147u8, 74u8, 37u8, 212u8, 174u8, 212u8, 63u8, 108u8,
-                219u8, 66u8, 100u8, 3u8, 53u8, 63u8, 164u8, 179u8, 0u8, 156u8, 77u8, 34u8, 132u8,
-                7u8, 71u8, 69u8, 129u8, 176u8, 30u8, 35u8,
+                92u8, 224u8, 170u8, 4u8, 174u8, 81u8, 213u8, 45u8, 166u8, 230u8, 128u8, 251u8,
+                224u8, 51u8, 109u8, 46u8, 36u8, 50u8, 247u8, 195u8, 220u8, 45u8, 79u8, 49u8, 147u8,
+                32u8, 76u8, 87u8, 185u8, 7u8, 33u8, 7u8,
+            ],
+            [
+                96u8, 216u8, 202u8, 1u8, 77u8, 71u8, 101u8, 162u8, 184u8, 179u8, 137u8, 226u8,
+                87u8, 20u8, 203u8, 28u8, 239u8, 131u8, 181u8, 116u8, 34u8, 41u8, 17u8, 160u8, 29u8,
+                144u8, 193u8, 189u8, 105u8, 210u8, 211u8, 32u8,
             ],
             [
                 111u8, 221u8, 61u8, 189u8, 177u8, 115u8, 41u8, 150u8, 8u8, 192u8, 170u8, 159u8,
@@ -10539,9 +12747,29 @@ pub mod IEigenPod {
                 200u8, 4u8, 194u8, 244u8, 157u8, 142u8,
             ],
             [
-                169u8, 28u8, 89u8, 3u8, 60u8, 52u8, 35u8, 225u8, 139u8, 84u8, 208u8, 172u8, 236u8,
-                235u8, 180u8, 151u8, 47u8, 158u8, 169u8, 90u8, 237u8, 245u8, 244u8, 202u8, 227u8,
-                182u8, 119u8, 176u8, 46u8, 175u8, 58u8, 63u8,
+                139u8, 39u8, 55u8, 187u8, 100u8, 171u8, 47u8, 45u8, 192u8, 149u8, 82u8, 223u8,
+                161u8, 194u8, 80u8, 57u8, 158u8, 106u8, 66u8, 199u8, 234u8, 159u8, 14u8, 28u8,
+                101u8, 143u8, 93u8, 101u8, 215u8, 8u8, 236u8, 5u8,
+            ],
+            [
+                160u8, 16u8, 3u8, 118u8, 109u8, 60u8, 217u8, 124u8, 242u8, 173u8, 229u8, 66u8,
+                150u8, 144u8, 191u8, 93u8, 32u8, 107u8, 231u8, 251u8, 1u8, 239u8, 157u8, 58u8, 0u8,
+                137u8, 236u8, 246u8, 123u8, 193u8, 18u8, 25u8,
+            ],
+            [
+                201u8, 123u8, 150u8, 91u8, 146u8, 174u8, 127u8, 210u8, 0u8, 149u8, 254u8, 142u8,
+                183u8, 185u8, 159u8, 129u8, 249u8, 95u8, 140u8, 74u8, 223u8, 251u8, 34u8, 161u8,
+                145u8, 22u8, 216u8, 235u8, 40u8, 70u8, 176u8, 22u8,
+            ],
+            [
+                205u8, 174u8, 112u8, 13u8, 114u8, 65u8, 188u8, 2u8, 113u8, 104u8, 197u8, 60u8,
+                246u8, 248u8, 137u8, 118u8, 59u8, 10u8, 44u8, 136u8, 166u8, 93u8, 119u8, 252u8,
+                19u8, 168u8, 169u8, 254u8, 240u8, 216u8, 96u8, 95u8,
+            ],
+            [
+                228u8, 134u8, 99u8, 53u8, 118u8, 26u8, 81u8, 220u8, 175u8, 247u8, 102u8, 68u8,
+                138u8, 176u8, 175u8, 96u8, 100u8, 41u8, 30u8, 229u8, 220u8, 148u8, 230u8, 132u8,
+                146u8, 187u8, 156u8, 215u8, 87u8, 193u8, 227u8, 80u8,
             ],
             [
                 251u8, 129u8, 41u8, 8u8, 10u8, 25u8, 211u8, 77u8, 206u8, 172u8, 4u8, 186u8, 37u8,
@@ -10553,7 +12781,7 @@ pub mod IEigenPod {
     #[automatically_derived]
     impl alloy_sol_types::SolEventInterface for IEigenPodEvents {
         const NAME: &'static str = "IEigenPodEvents";
-        const COUNT: usize = 10usize;
+        const COUNT: usize = 14usize;
         fn decode_raw_log(
             topics: &[alloy_sol_types::Word],
             data: &[u8],
@@ -10567,9 +12795,19 @@ pub mod IEigenPod {
                     <CheckpointFinalized as alloy_sol_types::SolEvent>::decode_raw_log(topics, data)
                         .map(Self::CheckpointFinalized)
                 }
+                Some(<ConsolidationRequested as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
+                    <ConsolidationRequested as alloy_sol_types::SolEvent>::decode_raw_log(
+                        topics, data,
+                    )
+                    .map(Self::ConsolidationRequested)
+                }
                 Some(<EigenPodStaked as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
                     <EigenPodStaked as alloy_sol_types::SolEvent>::decode_raw_log(topics, data)
                         .map(Self::EigenPodStaked)
+                }
+                Some(<ExitRequested as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
+                    <ExitRequested as alloy_sol_types::SolEvent>::decode_raw_log(topics, data)
+                        .map(Self::ExitRequested)
                 }
                 Some(<NonBeaconChainETHReceived as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
                     <NonBeaconChainETHReceived as alloy_sol_types::SolEvent>::decode_raw_log(
@@ -10591,6 +12829,12 @@ pub mod IEigenPod {
                     )
                     .map(Self::RestakedBeaconChainETHWithdrawn)
                 }
+                Some(
+                    <SwitchToCompoundingRequested as alloy_sol_types::SolEvent>::SIGNATURE_HASH,
+                ) => <SwitchToCompoundingRequested as alloy_sol_types::SolEvent>::decode_raw_log(
+                    topics, data,
+                )
+                .map(Self::SwitchToCompoundingRequested),
                 Some(<ValidatorBalanceUpdated as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
                     <ValidatorBalanceUpdated as alloy_sol_types::SolEvent>::decode_raw_log(
                         topics, data,
@@ -10610,6 +12854,10 @@ pub mod IEigenPod {
                 Some(<ValidatorWithdrawn as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
                     <ValidatorWithdrawn as alloy_sol_types::SolEvent>::decode_raw_log(topics, data)
                         .map(Self::ValidatorWithdrawn)
+                }
+                Some(<WithdrawalRequested as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
+                    <WithdrawalRequested as alloy_sol_types::SolEvent>::decode_raw_log(topics, data)
+                        .map(Self::WithdrawalRequested)
                 }
                 _ => alloy_sol_types::private::Err(alloy_sol_types::Error::InvalidLog {
                     name: <Self as alloy_sol_types::SolEventInterface>::NAME,
@@ -10633,7 +12881,13 @@ pub mod IEigenPod {
                 Self::CheckpointFinalized(inner) => {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
+                Self::ConsolidationRequested(inner) => {
+                    alloy_sol_types::private::IntoLogData::to_log_data(inner)
+                }
                 Self::EigenPodStaked(inner) => {
+                    alloy_sol_types::private::IntoLogData::to_log_data(inner)
+                }
+                Self::ExitRequested(inner) => {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
                 Self::NonBeaconChainETHReceived(inner) => {
@@ -10643,6 +12897,9 @@ pub mod IEigenPod {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
                 Self::RestakedBeaconChainETHWithdrawn(inner) => {
+                    alloy_sol_types::private::IntoLogData::to_log_data(inner)
+                }
+                Self::SwitchToCompoundingRequested(inner) => {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
                 Self::ValidatorBalanceUpdated(inner) => {
@@ -10655,6 +12912,9 @@ pub mod IEigenPod {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
                 Self::ValidatorWithdrawn(inner) => {
+                    alloy_sol_types::private::IntoLogData::to_log_data(inner)
+                }
+                Self::WithdrawalRequested(inner) => {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
             }
@@ -10667,7 +12927,13 @@ pub mod IEigenPod {
                 Self::CheckpointFinalized(inner) => {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
+                Self::ConsolidationRequested(inner) => {
+                    alloy_sol_types::private::IntoLogData::into_log_data(inner)
+                }
                 Self::EigenPodStaked(inner) => {
+                    alloy_sol_types::private::IntoLogData::into_log_data(inner)
+                }
+                Self::ExitRequested(inner) => {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
                 Self::NonBeaconChainETHReceived(inner) => {
@@ -10677,6 +12943,9 @@ pub mod IEigenPod {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
                 Self::RestakedBeaconChainETHWithdrawn(inner) => {
+                    alloy_sol_types::private::IntoLogData::into_log_data(inner)
+                }
+                Self::SwitchToCompoundingRequested(inner) => {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
                 Self::ValidatorBalanceUpdated(inner) => {
@@ -10689,6 +12958,9 @@ pub mod IEigenPod {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
                 Self::ValidatorWithdrawn(inner) => {
+                    alloy_sol_types::private::IntoLogData::into_log_data(inner)
+                }
+                Self::WithdrawalRequested(inner) => {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
             }
@@ -10876,12 +13148,24 @@ pub mod IEigenPod {
         ) -> alloy_contract::SolCallBuilder<&P, eigenPodManagerCall, N> {
             self.call_builder(&eigenPodManagerCall)
         }
+        ///Creates a new call builder for the [`getConsolidationRequestFee`] function.
+        pub fn getConsolidationRequestFee(
+            &self,
+        ) -> alloy_contract::SolCallBuilder<&P, getConsolidationRequestFeeCall, N> {
+            self.call_builder(&getConsolidationRequestFeeCall)
+        }
         ///Creates a new call builder for the [`getParentBlockRoot`] function.
         pub fn getParentBlockRoot(
             &self,
             timestamp: u64,
         ) -> alloy_contract::SolCallBuilder<&P, getParentBlockRootCall, N> {
             self.call_builder(&getParentBlockRootCall { timestamp })
+        }
+        ///Creates a new call builder for the [`getWithdrawalRequestFee`] function.
+        pub fn getWithdrawalRequestFee(
+            &self,
+        ) -> alloy_contract::SolCallBuilder<&P, getWithdrawalRequestFeeCall, N> {
+            self.call_builder(&getWithdrawalRequestFeeCall)
         }
         ///Creates a new call builder for the [`initialize`] function.
         pub fn initialize(
@@ -10918,6 +13202,24 @@ pub mod IEigenPod {
                 amountsToWithdraw,
                 recipient,
             })
+        }
+        ///Creates a new call builder for the [`requestConsolidation`] function.
+        pub fn requestConsolidation(
+            &self,
+            requests: alloy::sol_types::private::Vec<
+                <IEigenPodTypes::ConsolidationRequest as alloy::sol_types::SolType>::RustType,
+            >,
+        ) -> alloy_contract::SolCallBuilder<&P, requestConsolidationCall, N> {
+            self.call_builder(&requestConsolidationCall { requests })
+        }
+        ///Creates a new call builder for the [`requestWithdrawal`] function.
+        pub fn requestWithdrawal(
+            &self,
+            requests: alloy::sol_types::private::Vec<
+                <IEigenPodTypes::WithdrawalRequest as alloy::sol_types::SolType>::RustType,
+            >,
+        ) -> alloy_contract::SolCallBuilder<&P, requestWithdrawalCall, N> {
+            self.call_builder(&requestWithdrawalCall { requests })
         }
         ///Creates a new call builder for the [`setProofSubmitter`] function.
         pub fn setProofSubmitter(
@@ -11067,9 +13369,19 @@ pub mod IEigenPod {
         ) -> alloy_contract::Event<&P, CheckpointFinalized, N> {
             self.event_filter::<CheckpointFinalized>()
         }
+        ///Creates a new event filter for the [`ConsolidationRequested`] event.
+        pub fn ConsolidationRequested_filter(
+            &self,
+        ) -> alloy_contract::Event<&P, ConsolidationRequested, N> {
+            self.event_filter::<ConsolidationRequested>()
+        }
         ///Creates a new event filter for the [`EigenPodStaked`] event.
         pub fn EigenPodStaked_filter(&self) -> alloy_contract::Event<&P, EigenPodStaked, N> {
             self.event_filter::<EigenPodStaked>()
+        }
+        ///Creates a new event filter for the [`ExitRequested`] event.
+        pub fn ExitRequested_filter(&self) -> alloy_contract::Event<&P, ExitRequested, N> {
+            self.event_filter::<ExitRequested>()
         }
         ///Creates a new event filter for the [`NonBeaconChainETHReceived`] event.
         pub fn NonBeaconChainETHReceived_filter(
@@ -11088,6 +13400,12 @@ pub mod IEigenPod {
             &self,
         ) -> alloy_contract::Event<&P, RestakedBeaconChainETHWithdrawn, N> {
             self.event_filter::<RestakedBeaconChainETHWithdrawn>()
+        }
+        ///Creates a new event filter for the [`SwitchToCompoundingRequested`] event.
+        pub fn SwitchToCompoundingRequested_filter(
+            &self,
+        ) -> alloy_contract::Event<&P, SwitchToCompoundingRequested, N> {
+            self.event_filter::<SwitchToCompoundingRequested>()
         }
         ///Creates a new event filter for the [`ValidatorBalanceUpdated`] event.
         pub fn ValidatorBalanceUpdated_filter(
@@ -11110,6 +13428,12 @@ pub mod IEigenPod {
             &self,
         ) -> alloy_contract::Event<&P, ValidatorWithdrawn, N> {
             self.event_filter::<ValidatorWithdrawn>()
+        }
+        ///Creates a new event filter for the [`WithdrawalRequested`] event.
+        pub fn WithdrawalRequested_filter(
+            &self,
+        ) -> alloy_contract::Event<&P, WithdrawalRequested, N> {
+            self.event_filter::<WithdrawalRequested>()
         }
     }
 }

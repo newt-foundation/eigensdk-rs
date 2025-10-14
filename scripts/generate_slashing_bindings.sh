@@ -37,12 +37,19 @@ MIDDLEWARE_CONTRACTS_ARGS=$(generate_flags $MIDDLEWARE_CONTRACTS)
 
 
 ### Core bindings ###
-CORE_CONTRACTS="DelegationManager IRewardsCoordinator StrategyManager IEigenPod EigenPod IEigenPodManager EigenPodManager IStrategy AVSDirectory AllocationManager PermissionController"
+CORE_CONTRACTS="DelegationManager IRewardsCoordinator StrategyManager IEigenPod EigenPod IEigenPodManager EigenPodManager IStrategy AVSDirectory AllocationManager PermissionController KeyRegistrar IKeyRegistrar"
 CORE_CONTRACTS_LOCATION=$MIDDLEWARE_CONTRACTS_LOCATION/lib/eigenlayer-contracts
 CORE_BINDINGS_PATH=crates/utils/src/slashing/core
 # The echo is to remove quotes, and the patsubst to make the regex match the full text only
 CORE_CONTRACTS_ARGS=$(generate_flags $CORE_CONTRACTS)
 
+
+### Multichain bindings ###
+MULTICHAIN_CONTRACTS="CrossChainRegistry ICrossChainRegistry OperatorTableUpdater IOperatorTableUpdater BN254CertificateVerifier IBN254CertificateVerifier ECDSACertificateVerifier IECDSACertificateVerifier IBaseCertificateVerifier IOperatorTableCalculator IBN254TableCalculator IECDSATableCalculator"
+MULTICHAIN_CONTRACTS_LOCATION=$CORE_CONTRACTS_LOCATION
+MULTICHAIN_BINDINGS_PATH=crates/utils/src/slashing/multichain
+# The echo is to remove quotes, and the patsubst to make the regex match the full text only
+MULTICHAIN_CONTRACTS_ARGS=$(generate_flags $MULTICHAIN_CONTRACTS)
 
 # Fetch submodules
 cd $SDK_CONTRACTS_LOCATION && forge install
@@ -52,11 +59,12 @@ cd $repo_root
 rm $SDK_BINDINGS_PATH/* || true
 rm $MIDDLEWARE_BINDINGS_PATH/* || true
 rm $CORE_BINDINGS_PATH/* || true
+rm $MULTICHAIN_BINDINGS_PATH/* || true
 
 # Compile all contracts
-cd $repo_root/$SDK_CONTRACTS_LOCATION && forge build --force --skip test --skip script
-cd $repo_root/$MIDDLEWARE_CONTRACTS_LOCATION && forge build --force --skip test --skip script
-cd $repo_root/$CORE_CONTRACTS_LOCATION && forge build --force --skip test --skip script
+cd $repo_root/$SDK_CONTRACTS_LOCATION && forge build src/ --force
+cd $repo_root/$MIDDLEWARE_CONTRACTS_LOCATION && forge build src/ --force
+cd $repo_root/$CORE_CONTRACTS_LOCATION && forge build src/contracts/ --force
 
 # Move back to repo root
 cd $repo_root
@@ -76,3 +84,8 @@ forge bind --alloy --skip-build --bindings-path $MIDDLEWARE_BINDINGS_PATH --over
 forge bind --alloy --skip-build --bindings-path $CORE_BINDINGS_PATH --overwrite \
     --root $CORE_CONTRACTS_LOCATION --module \
     $CORE_CONTRACTS_ARGS
+
+# Generate multichain bindings
+forge bind --alloy --skip-build --bindings-path $MULTICHAIN_BINDINGS_PATH --overwrite \
+    --root $MULTICHAIN_CONTRACTS_LOCATION --module \
+    $MULTICHAIN_CONTRACTS_ARGS

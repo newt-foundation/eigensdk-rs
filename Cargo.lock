@@ -2553,6 +2553,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "eigen-client-multichain"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "async-trait",
+ "eigen-common",
+ "eigen-crypto-bls",
+ "eigen-crypto-bn254",
+ "eigen-crypto-ecdsa",
+ "eigen-types",
+ "eigen-utils",
+ "thiserror 1.0.69",
+ "tracing",
+]
+
+[[package]]
 name = "eigen-common"
 version = "2.0.0"
 dependencies = [
@@ -2590,6 +2606,13 @@ dependencies = [
  "rand 0.8.5",
  "rust-bls-bn254",
  "tokio",
+]
+
+[[package]]
+name = "eigen-crypto-ecdsa"
+version = "2.0.0"
+dependencies = [
+ "eth-keystore",
 ]
 
 [[package]]
@@ -2694,6 +2717,27 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "eigen-services-multichain"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-ec 0.5.0",
+ "ark-ff 0.5.0",
+ "async-trait",
+ "eigen-client-multichain",
+ "eigen-common",
+ "eigen-crypto-bls",
+ "eigen-crypto-bn254",
+ "eigen-crypto-ecdsa",
+ "eigen-services-blsaggregation",
+ "eigen-types",
+ "eigen-utils",
+ "thiserror 1.0.69",
+ "tokio",
  "tracing",
 ]
 

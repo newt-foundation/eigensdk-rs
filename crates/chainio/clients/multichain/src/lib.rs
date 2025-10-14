@@ -4,10 +4,8 @@
 )]
 #![cfg_attr(not(test), warn(unused_crate_dependencies))]
 
-pub mod avs;
-pub mod avs_state;
-pub mod multichain;
-pub mod operator;
-pub mod operator_metadata;
-pub mod operator_pubkeys;
-pub mod test;
+pub mod certificate_verifier;
+pub mod cross_chain_registry;
+pub mod error;
+pub mod multichain_operator_registration;
+pub mod operator_table_updater;
