@@ -146,7 +146,7 @@ impl CertificateVerifierReaderTrait for ECDSACertificateVerifierReader {
                 ))
             })?;
 
-        Ok(result)
+        Ok(result._0)
     }
 }
 

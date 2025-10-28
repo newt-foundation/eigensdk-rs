@@ -88,7 +88,7 @@ impl CrossChainRegistryReaderTrait for CrossChainRegistryReader {
         );
 
         key_registrar
-            .checkKey(operator_set, operator)
+            .isRegistered(operator_set, operator)
             .call()
             .await
             .map_err(Into::into)
