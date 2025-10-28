@@ -2204,6 +2204,7 @@ library IEigenPodTypes {
 }
 
 interface IEigenPod {
+    error BeaconTimestampBeforeLatestCheckpoint();
     error BeaconTimestampTooFarInPast();
     error CannotCheckpointTwiceInSingleBlock();
     error CheckpointAlreadyActive();
@@ -2224,7 +2225,6 @@ interface IEigenPod {
     error OnlyEigenPodOwner();
     error OnlyEigenPodOwnerOrProofSubmitter();
     error PredeployFailed();
-    error RefundFailed();
     error TimestampOutOfRange();
     error ValidatorInactiveOnBeaconChain();
     error ValidatorIsExitingBeaconChain();
@@ -3151,6 +3151,11 @@ interface IEigenPod {
   },
   {
     "type": "error",
+    "name": "BeaconTimestampBeforeLatestCheckpoint",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "BeaconTimestampTooFarInPast",
     "inputs": []
   },
@@ -3251,11 +3256,6 @@ interface IEigenPod {
   },
   {
     "type": "error",
-    "name": "RefundFailed",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "TimestampOutOfRange",
     "inputs": []
   },
@@ -3316,6 +3316,74 @@ pub mod IEigenPod {
     pub static DEPLOYED_BYTECODE: alloy_sol_types::private::Bytes = alloy_sol_types::private::Bytes::from_static(
         b"",
     );
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `BeaconTimestampBeforeLatestCheckpoint()` and selector `0x35e7f6b7`.
+    ```solidity
+    error BeaconTimestampBeforeLatestCheckpoint();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct BeaconTimestampBeforeLatestCheckpoint;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<BeaconTimestampBeforeLatestCheckpoint> for UnderlyingRustTuple<'_> {
+            fn from(value: BeaconTimestampBeforeLatestCheckpoint) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for BeaconTimestampBeforeLatestCheckpoint {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for BeaconTimestampBeforeLatestCheckpoint {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "BeaconTimestampBeforeLatestCheckpoint()";
+            const SELECTOR: [u8; 4] = [53u8, 231u8, 246u8, 183u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Custom error with signature `BeaconTimestampTooFarInPast()` and selector `0x37e07ffd`.
     ```solidity
@@ -4657,74 +4725,6 @@ pub mod IEigenPod {
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "PredeployFailed()";
             const SELECTOR: [u8; 4] = [252u8, 82u8, 212u8, 131u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                ()
-            }
-            #[inline]
-            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
-                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
-                    data,
-                )
-                .map(Self::new)
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Custom error with signature `RefundFailed()` and selector `0xf0c49d44`.
-    ```solidity
-    error RefundFailed();
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct RefundFailed;
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        #[doc(hidden)]
-        type UnderlyingSolTuple<'a> = ();
-        #[doc(hidden)]
-        type UnderlyingRustTuple<'a> = ();
-        #[cfg(test)]
-        #[allow(dead_code, unreachable_patterns)]
-        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-            match _t {
-                alloy_sol_types::private::AssertTypeEq::<
-                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                >(_) => {}
-            }
-        }
-        #[automatically_derived]
-        #[doc(hidden)]
-        impl ::core::convert::From<RefundFailed> for UnderlyingRustTuple<'_> {
-            fn from(value: RefundFailed) -> Self {
-                ()
-            }
-        }
-        #[automatically_derived]
-        #[doc(hidden)]
-        impl ::core::convert::From<UnderlyingRustTuple<'_>> for RefundFailed {
-            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                Self
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolError for RefundFailed {
-            type Parameters<'a> = UnderlyingSolTuple<'a>;
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "RefundFailed()";
-            const SELECTOR: [u8; 4] = [240u8, 196u8, 157u8, 68u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -11624,6 +11624,8 @@ pub mod IEigenPod {
     #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Hash)]
     pub enum IEigenPodErrors {
         #[allow(missing_docs)]
+        BeaconTimestampBeforeLatestCheckpoint(BeaconTimestampBeforeLatestCheckpoint),
+        #[allow(missing_docs)]
         BeaconTimestampTooFarInPast(BeaconTimestampTooFarInPast),
         #[allow(missing_docs)]
         CannotCheckpointTwiceInSingleBlock(CannotCheckpointTwiceInSingleBlock),
@@ -11664,8 +11666,6 @@ pub mod IEigenPod {
         #[allow(missing_docs)]
         PredeployFailed(PredeployFailed),
         #[allow(missing_docs)]
-        RefundFailed(RefundFailed),
-        #[allow(missing_docs)]
         TimestampOutOfRange(TimestampOutOfRange),
         #[allow(missing_docs)]
         ValidatorInactiveOnBeaconChain(ValidatorInactiveOnBeaconChain),
@@ -11693,6 +11693,7 @@ pub mod IEigenPod {
             [46u8, 173u8, 230u8, 55u8],
             [53u8, 102u8, 128u8, 183u8],
             [53u8, 224u8, 158u8, 157u8],
+            [53u8, 231u8, 246u8, 183u8],
             [55u8, 224u8, 127u8, 253u8],
             [65u8, 160u8, 44u8, 201u8],
             [66u8, 122u8, 119u8, 121u8],
@@ -11711,7 +11712,6 @@ pub mod IEigenPod {
             [203u8, 122u8, 165u8, 100u8],
             [212u8, 158u8, 25u8, 167u8],
             [227u8, 62u8, 110u8, 6u8],
-            [240u8, 196u8, 157u8, 68u8],
             [242u8, 137u8, 204u8, 218u8],
             [252u8, 82u8, 212u8, 131u8],
         ];
@@ -11724,6 +11724,9 @@ pub mod IEigenPod {
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
+                Self::BeaconTimestampBeforeLatestCheckpoint(_) => {
+                    <BeaconTimestampBeforeLatestCheckpoint as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::BeaconTimestampTooFarInPast(_) => {
                     <BeaconTimestampTooFarInPast as alloy_sol_types::SolError>::SELECTOR
                 }
@@ -11782,7 +11785,6 @@ pub mod IEigenPod {
                 Self::PredeployFailed(_) => {
                     <PredeployFailed as alloy_sol_types::SolError>::SELECTOR
                 }
-                Self::RefundFailed(_) => <RefundFailed as alloy_sol_types::SolError>::SELECTOR,
                 Self::TimestampOutOfRange(_) => {
                     <TimestampOutOfRange as alloy_sol_types::SolError>::SELECTOR
                 }
@@ -11868,6 +11870,17 @@ pub mod IEigenPod {
                         .map(IEigenPodErrors::CredentialsAlreadyVerified)
                     }
                     CredentialsAlreadyVerified
+                },
+                {
+                    fn BeaconTimestampBeforeLatestCheckpoint(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <BeaconTimestampBeforeLatestCheckpoint as alloy_sol_types::SolError>::abi_decode_raw(
+                                data,
+                            )
+                            .map(IEigenPodErrors::BeaconTimestampBeforeLatestCheckpoint)
+                    }
+                    BeaconTimestampBeforeLatestCheckpoint
                 },
                 {
                     fn BeaconTimestampTooFarInPast(
@@ -12036,13 +12049,6 @@ pub mod IEigenPod {
                     OnlyEigenPodOwner
                 },
                 {
-                    fn RefundFailed(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
-                        <RefundFailed as alloy_sol_types::SolError>::abi_decode_raw(data)
-                            .map(IEigenPodErrors::RefundFailed)
-                    }
-                    RefundFailed
-                },
-                {
                     fn TimestampOutOfRange(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodErrors> {
@@ -12136,6 +12142,17 @@ pub mod IEigenPod {
                             .map(IEigenPodErrors::CredentialsAlreadyVerified)
                     }
                     CredentialsAlreadyVerified
+                },
+                {
+                    fn BeaconTimestampBeforeLatestCheckpoint(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IEigenPodErrors> {
+                        <BeaconTimestampBeforeLatestCheckpoint as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IEigenPodErrors::BeaconTimestampBeforeLatestCheckpoint)
+                    }
+                    BeaconTimestampBeforeLatestCheckpoint
                 },
                 {
                     fn BeaconTimestampTooFarInPast(
@@ -12324,13 +12341,6 @@ pub mod IEigenPod {
                     OnlyEigenPodOwner
                 },
                 {
-                    fn RefundFailed(data: &[u8]) -> alloy_sol_types::Result<IEigenPodErrors> {
-                        <RefundFailed as alloy_sol_types::SolError>::abi_decode_raw_validate(data)
-                            .map(IEigenPodErrors::RefundFailed)
-                    }
-                    RefundFailed
-                },
-                {
                     fn TimestampOutOfRange(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IEigenPodErrors> {
@@ -12362,6 +12372,11 @@ pub mod IEigenPod {
         #[inline]
         fn abi_encoded_size(&self) -> usize {
             match self {
+                Self::BeaconTimestampBeforeLatestCheckpoint(inner) => {
+                    <BeaconTimestampBeforeLatestCheckpoint as alloy_sol_types::SolError>::abi_encoded_size(
+                        inner,
+                    )
+                }
                 Self::BeaconTimestampTooFarInPast(inner) => {
                     <BeaconTimestampTooFarInPast as alloy_sol_types::SolError>::abi_encoded_size(
                         inner,
@@ -12462,9 +12477,6 @@ pub mod IEigenPod {
                         inner,
                     )
                 }
-                Self::RefundFailed(inner) => {
-                    <RefundFailed as alloy_sol_types::SolError>::abi_encoded_size(inner)
-                }
                 Self::TimestampOutOfRange(inner) => {
                     <TimestampOutOfRange as alloy_sol_types::SolError>::abi_encoded_size(
                         inner,
@@ -12500,6 +12512,12 @@ pub mod IEigenPod {
         #[inline]
         fn abi_encode_raw(&self, out: &mut alloy_sol_types::private::Vec<u8>) {
             match self {
+                Self::BeaconTimestampBeforeLatestCheckpoint(inner) => {
+                    <BeaconTimestampBeforeLatestCheckpoint as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
                 Self::BeaconTimestampTooFarInPast(inner) => {
                     <BeaconTimestampTooFarInPast as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
@@ -12616,12 +12634,6 @@ pub mod IEigenPod {
                 }
                 Self::PredeployFailed(inner) => {
                     <PredeployFailed as alloy_sol_types::SolError>::abi_encode_raw(
-                        inner,
-                        out,
-                    )
-                }
-                Self::RefundFailed(inner) => {
-                    <RefundFailed as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
                         out,
                     )

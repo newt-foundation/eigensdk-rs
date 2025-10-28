@@ -11,7 +11,5 @@ pub mod r#i_cross_chain_registry;
 pub mod r#i_operator_table_calculator;
 pub mod r#i_operator_table_updater;
 pub mod r#ibn254_certificate_verifier;
-pub mod r#ibn254_table_calculator;
 pub mod r#iecdsa_certificate_verifier;
-pub mod r#iecdsa_table_calculator;
 pub mod r#operator_table_updater;

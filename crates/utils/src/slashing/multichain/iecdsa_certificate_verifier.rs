@@ -1065,10 +1065,13 @@ interface IECDSACertificateVerifier {
 
     error ArrayLengthMismatch();
     error CertificateStale();
+    error IndexOutOfBounds();
     error InvalidSignatureLength();
     error OnlyTableUpdater();
+    error OperatorCountZero();
     error ReferenceTimestampDoesNotExist();
     error RootDisabled();
+    error SignersNotOrdered();
     error TableUpdateStale();
     error VerificationFailed();
 
@@ -1077,18 +1080,20 @@ interface IECDSACertificateVerifier {
     event TableUpdated(OperatorSet operatorSet, uint32 referenceTimestamp, IOperatorTableCalculatorTypes.ECDSAOperatorInfo[] operatorInfos);
 
     function calculateCertificateDigest(uint32 referenceTimestamp, bytes32 messageHash) external view returns (bytes32);
+    function calculateCertificateDigestBytes(uint32 referenceTimestamp, bytes32 messageHash) external view returns (bytes memory);
     function domainSeparator() external view returns (bytes32);
-    function getOperatorCount(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (uint32);
-    function getOperatorInfo(OperatorSet memory operatorSet, uint32 referenceTimestamp, uint32 operatorIndex) external view returns (IOperatorTableCalculatorTypes.ECDSAOperatorInfo memory);
+    function getOperatorCount(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (uint256);
+    function getOperatorInfo(OperatorSet memory operatorSet, uint32 referenceTimestamp, uint256 operatorIndex) external view returns (IOperatorTableCalculatorTypes.ECDSAOperatorInfo memory);
     function getOperatorInfos(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (IOperatorTableCalculatorTypes.ECDSAOperatorInfo[] memory);
     function getOperatorSetOwner(OperatorSet memory operatorSet) external view returns (address);
-    function getTotalStakes(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (uint256[] memory);
+    function getTotalStakeWeights(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (uint256[] memory);
+    function isReferenceTimestampSet(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (bool);
     function latestReferenceTimestamp(OperatorSet memory operatorSet) external view returns (uint32);
     function maxOperatorTableStaleness(OperatorSet memory operatorSet) external view returns (uint32);
     function updateOperatorTable(OperatorSet memory operatorSet, uint32 referenceTimestamp, IOperatorTableCalculatorTypes.ECDSAOperatorInfo[] memory operatorInfos, ICrossChainRegistryTypes.OperatorSetConfig memory operatorSetConfig) external;
-    function verifyCertificate(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert) external returns (uint256[] memory signedStakes);
-    function verifyCertificateNominal(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert, uint256[] memory totalStakeNominalThresholds) external returns (bool);
-    function verifyCertificateProportion(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert, uint16[] memory totalStakeProportionThresholds) external returns (bool);
+    function verifyCertificate(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert) external view returns (uint256[] memory totalSignedStakeWeights, address[] memory signers);
+    function verifyCertificateNominal(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert, uint256[] memory totalStakeNominalThresholds) external view returns (bool, address[] memory signers);
+    function verifyCertificateProportion(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert, uint16[] memory totalStakeProportionThresholds) external view returns (bool, address[] memory signers);
 }
 ```
 
@@ -1115,6 +1120,30 @@ interface IECDSACertificateVerifier {
         "name": "",
         "type": "bytes32",
         "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "calculateCertificateDigestBytes",
+    "inputs": [
+      {
+        "name": "referenceTimestamp",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "messageHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
     "stateMutability": "view"
@@ -1162,8 +1191,8 @@ interface IECDSACertificateVerifier {
     "outputs": [
       {
         "name": "",
-        "type": "uint32",
-        "internalType": "uint32"
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -1196,8 +1225,8 @@ interface IECDSACertificateVerifier {
       },
       {
         "name": "operatorIndex",
-        "type": "uint32",
-        "internalType": "uint32"
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "outputs": [
@@ -1302,7 +1331,7 @@ interface IECDSACertificateVerifier {
   },
   {
     "type": "function",
-    "name": "getTotalStakes",
+    "name": "getTotalStakeWeights",
     "inputs": [
       {
         "name": "operatorSet",
@@ -1332,6 +1361,42 @@ interface IECDSACertificateVerifier {
         "name": "",
         "type": "uint256[]",
         "internalType": "uint256[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isReferenceTimestampSet",
+    "inputs": [
+      {
+        "name": "operatorSet",
+        "type": "tuple",
+        "internalType": "struct OperatorSet",
+        "components": [
+          {
+            "name": "avs",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "id",
+            "type": "uint32",
+            "internalType": "uint32"
+          }
+        ]
+      },
+      {
+        "name": "referenceTimestamp",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
     "stateMutability": "view"
@@ -1508,12 +1573,17 @@ interface IECDSACertificateVerifier {
     ],
     "outputs": [
       {
-        "name": "signedStakes",
+        "name": "totalSignedStakeWeights",
         "type": "uint256[]",
         "internalType": "uint256[]"
+      },
+      {
+        "name": "signers",
+        "type": "address[]",
+        "internalType": "address[]"
       }
     ],
-    "stateMutability": "nonpayable"
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -1569,9 +1639,14 @@ interface IECDSACertificateVerifier {
         "name": "",
         "type": "bool",
         "internalType": "bool"
+      },
+      {
+        "name": "signers",
+        "type": "address[]",
+        "internalType": "address[]"
       }
     ],
-    "stateMutability": "nonpayable"
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -1627,9 +1702,14 @@ interface IECDSACertificateVerifier {
         "name": "",
         "type": "bool",
         "internalType": "bool"
+      },
+      {
+        "name": "signers",
+        "type": "address[]",
+        "internalType": "address[]"
       }
     ],
-    "stateMutability": "nonpayable"
+    "stateMutability": "view"
   },
   {
     "type": "event",
@@ -1754,6 +1834,11 @@ interface IECDSACertificateVerifier {
   },
   {
     "type": "error",
+    "name": "IndexOutOfBounds",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InvalidSignatureLength",
     "inputs": []
   },
@@ -1764,12 +1849,22 @@ interface IECDSACertificateVerifier {
   },
   {
     "type": "error",
+    "name": "OperatorCountZero",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "ReferenceTimestampDoesNotExist",
     "inputs": []
   },
   {
     "type": "error",
     "name": "RootDisabled",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "SignersNotOrdered",
     "inputs": []
   },
   {
@@ -2139,6 +2234,74 @@ pub mod IECDSACertificateVerifier {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `IndexOutOfBounds()` and selector `0x4e23d035`.
+    ```solidity
+    error IndexOutOfBounds();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct IndexOutOfBounds;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<IndexOutOfBounds> for UnderlyingRustTuple<'_> {
+            fn from(value: IndexOutOfBounds) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for IndexOutOfBounds {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for IndexOutOfBounds {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "IndexOutOfBounds()";
+            const SELECTOR: [u8; 4] = [78u8, 35u8, 208u8, 53u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Custom error with signature `InvalidSignatureLength()` and selector `0x4be6321b`.
     ```solidity
     error InvalidSignatureLength();
@@ -2275,6 +2438,74 @@ pub mod IECDSACertificateVerifier {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `OperatorCountZero()` and selector `0x40a42054`.
+    ```solidity
+    error OperatorCountZero();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct OperatorCountZero;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<OperatorCountZero> for UnderlyingRustTuple<'_> {
+            fn from(value: OperatorCountZero) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for OperatorCountZero {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for OperatorCountZero {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "OperatorCountZero()";
+            const SELECTOR: [u8; 4] = [64u8, 164u8, 32u8, 84u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Custom error with signature `ReferenceTimestampDoesNotExist()` and selector `0x6568bdb8`.
     ```solidity
     error ReferenceTimestampDoesNotExist();
@@ -2391,6 +2622,74 @@ pub mod IECDSACertificateVerifier {
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "RootDisabled()";
             const SELECTOR: [u8; 4] = [27u8, 20u8, 23u8, 75u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `SignersNotOrdered()` and selector `0xb550c570`.
+    ```solidity
+    error SignersNotOrdered();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct SignersNotOrdered;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<SignersNotOrdered> for UnderlyingRustTuple<'_> {
+            fn from(value: SignersNotOrdered) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for SignersNotOrdered {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for SignersNotOrdered {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "SignersNotOrdered()";
+            const SELECTOR: [u8; 4] = [181u8, 80u8, 197u8, 112u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -3028,6 +3327,153 @@ pub mod IECDSACertificateVerifier {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `calculateCertificateDigestBytes(uint32,bytes32)` and selector `0x702ca531`.
+    ```solidity
+    function calculateCertificateDigestBytes(uint32 referenceTimestamp, bytes32 messageHash) external view returns (bytes memory);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct calculateCertificateDigestBytesCall {
+        #[allow(missing_docs)]
+        pub referenceTimestamp: u32,
+        #[allow(missing_docs)]
+        pub messageHash: alloy::sol_types::private::FixedBytes<32>,
+    }
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`calculateCertificateDigestBytes(uint32,bytes32)`](calculateCertificateDigestBytesCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct calculateCertificateDigestBytesReturn {
+        #[allow(missing_docs)]
+        pub _0: alloy::sol_types::private::Bytes,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (
+                alloy::sol_types::sol_data::Uint<32>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
+            );
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (u32, alloy::sol_types::private::FixedBytes<32>);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<calculateCertificateDigestBytesCall> for UnderlyingRustTuple<'_> {
+                fn from(value: calculateCertificateDigestBytesCall) -> Self {
+                    (value.referenceTimestamp, value.messageHash)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for calculateCertificateDigestBytesCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self {
+                        referenceTimestamp: tuple.0,
+                        messageHash: tuple.1,
+                    }
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Bytes,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::Bytes,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<calculateCertificateDigestBytesReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: calculateCertificateDigestBytesReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for calculateCertificateDigestBytesReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for calculateCertificateDigestBytesCall {
+            type Parameters<'a> = (
+                alloy::sol_types::sol_data::Uint<32>,
+                alloy::sol_types::sol_data::FixedBytes<32>,
+            );
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = alloy::sol_types::private::Bytes;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Bytes,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "calculateCertificateDigestBytes(uint32,bytes32)";
+            const SELECTOR: [u8; 4] = [112u8, 44u8, 165u8, 49u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                (
+                    <alloy::sol_types::sol_data::Uint<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(&self.referenceTimestamp),
+                    <alloy::sol_types::sol_data::FixedBytes<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(&self.messageHash),
+                )
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (<alloy::sol_types::sol_data::Bytes as alloy_sol_types::SolType>::tokenize(ret),)
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: calculateCertificateDigestBytesReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: calculateCertificateDigestBytesReturn = r.into();
+                    r._0
+                })
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Function with signature `domainSeparator()` and selector `0xf698da25`.
     ```solidity
     function domainSeparator() external view returns (bytes32);
@@ -3160,7 +3606,7 @@ pub mod IECDSACertificateVerifier {
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Function with signature `getOperatorCount((address,uint32),uint32)` and selector `0x23c2a3cb`.
     ```solidity
-    function getOperatorCount(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (uint32);
+    function getOperatorCount(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (uint256);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
@@ -3176,7 +3622,7 @@ pub mod IECDSACertificateVerifier {
     #[derive(Clone)]
     pub struct getOperatorCountReturn {
         #[allow(missing_docs)]
-        pub _0: u32,
+        pub _0: alloy::sol_types::private::primitives::aliases::U256,
     }
     #[allow(
         non_camel_case_types,
@@ -3221,9 +3667,9 @@ pub mod IECDSACertificateVerifier {
         }
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (u32,);
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -3252,8 +3698,8 @@ pub mod IECDSACertificateVerifier {
         impl alloy_sol_types::SolCall for getOperatorCountCall {
             type Parameters<'a> = (OperatorSet, alloy::sol_types::sol_data::Uint<32>);
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = u32;
-            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
+            type Return = alloy::sol_types::private::primitives::aliases::U256;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "getOperatorCount((address,uint32),uint32)";
             const SELECTOR: [u8; 4] = [35u8, 194u8, 163u8, 203u8];
@@ -3275,7 +3721,7 @@ pub mod IECDSACertificateVerifier {
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
                 (
-                    <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
+                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
                         ret,
                     ),
                 )
@@ -3302,9 +3748,9 @@ pub mod IECDSACertificateVerifier {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `getOperatorInfo((address,uint32),uint32,uint32)` and selector `0x082ef73d`.
+    /**Function with signature `getOperatorInfo((address,uint32),uint32,uint256)` and selector `0xe49613fc`.
     ```solidity
-    function getOperatorInfo(OperatorSet memory operatorSet, uint32 referenceTimestamp, uint32 operatorIndex) external view returns (IOperatorTableCalculatorTypes.ECDSAOperatorInfo memory);
+    function getOperatorInfo(OperatorSet memory operatorSet, uint32 referenceTimestamp, uint256 operatorIndex) external view returns (IOperatorTableCalculatorTypes.ECDSAOperatorInfo memory);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
@@ -3314,10 +3760,10 @@ pub mod IECDSACertificateVerifier {
         #[allow(missing_docs)]
         pub referenceTimestamp: u32,
         #[allow(missing_docs)]
-        pub operatorIndex: u32,
+        pub operatorIndex: alloy::sol_types::private::primitives::aliases::U256,
     }
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    ///Container type for the return parameters of the [`getOperatorInfo((address,uint32),uint32,uint32)`](getOperatorInfoCall) function.
+    ///Container type for the return parameters of the [`getOperatorInfo((address,uint32),uint32,uint256)`](getOperatorInfoCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct getOperatorInfoReturn {
@@ -3337,13 +3783,13 @@ pub mod IECDSACertificateVerifier {
             type UnderlyingSolTuple<'a> = (
                 OperatorSet,
                 alloy::sol_types::sol_data::Uint<32>,
-                alloy::sol_types::sol_data::Uint<32>,
+                alloy::sol_types::sol_data::Uint<256>,
             );
             #[doc(hidden)]
             type UnderlyingRustTuple<'a> = (
                 <OperatorSet as alloy::sol_types::SolType>::RustType,
                 u32,
-                u32,
+                alloy::sol_types::private::primitives::aliases::U256,
             );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
@@ -3413,14 +3859,14 @@ pub mod IECDSACertificateVerifier {
             type Parameters<'a> = (
                 OperatorSet,
                 alloy::sol_types::sol_data::Uint<32>,
-                alloy::sol_types::sol_data::Uint<32>,
+                alloy::sol_types::sol_data::Uint<256>,
             );
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             type Return = <IOperatorTableCalculatorTypes::ECDSAOperatorInfo as alloy::sol_types::SolType>::RustType;
             type ReturnTuple<'a> = (IOperatorTableCalculatorTypes::ECDSAOperatorInfo,);
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "getOperatorInfo((address,uint32),uint32,uint32)";
-            const SELECTOR: [u8; 4] = [8u8, 46u8, 247u8, 61u8];
+            const SIGNATURE: &'static str = "getOperatorInfo((address,uint32),uint32,uint256)";
+            const SELECTOR: [u8; 4] = [228u8, 150u8, 19u8, 252u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -3434,7 +3880,7 @@ pub mod IECDSACertificateVerifier {
                     <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
                         &self.referenceTimestamp,
                     ),
-                    <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
+                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
                         &self.operatorIndex,
                     ),
                 )
@@ -3760,23 +4206,23 @@ pub mod IECDSACertificateVerifier {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `getTotalStakes((address,uint32),uint32)` and selector `0x04cdbae4`.
+    /**Function with signature `getTotalStakeWeights((address,uint32),uint32)` and selector `0x7d1d1f5b`.
     ```solidity
-    function getTotalStakes(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (uint256[] memory);
+    function getTotalStakeWeights(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (uint256[] memory);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getTotalStakesCall {
+    pub struct getTotalStakeWeightsCall {
         #[allow(missing_docs)]
         pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
         #[allow(missing_docs)]
         pub referenceTimestamp: u32,
     }
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    ///Container type for the return parameters of the [`getTotalStakes((address,uint32),uint32)`](getTotalStakesCall) function.
+    ///Container type for the return parameters of the [`getTotalStakeWeights((address,uint32),uint32)`](getTotalStakeWeightsCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getTotalStakesReturn {
+    pub struct getTotalStakeWeightsReturn {
         #[allow(missing_docs)]
         pub _0:
             alloy::sol_types::private::Vec<alloy::sol_types::private::primitives::aliases::U256>,
@@ -3806,14 +4252,14 @@ pub mod IECDSACertificateVerifier {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getTotalStakesCall> for UnderlyingRustTuple<'_> {
-                fn from(value: getTotalStakesCall) -> Self {
+            impl ::core::convert::From<getTotalStakeWeightsCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getTotalStakeWeightsCall) -> Self {
                     (value.operatorSet, value.referenceTimestamp)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getTotalStakesCall {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getTotalStakeWeightsCall {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self {
                         operatorSet: tuple.0,
@@ -3843,21 +4289,21 @@ pub mod IECDSACertificateVerifier {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getTotalStakesReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: getTotalStakesReturn) -> Self {
+            impl ::core::convert::From<getTotalStakeWeightsReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getTotalStakeWeightsReturn) -> Self {
                     (value._0,)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getTotalStakesReturn {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getTotalStakeWeightsReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self { _0: tuple.0 }
                 }
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::SolCall for getTotalStakesCall {
+        impl alloy_sol_types::SolCall for getTotalStakeWeightsCall {
             type Parameters<'a> = (OperatorSet, alloy::sol_types::sol_data::Uint<32>);
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             type Return = alloy::sol_types::private::Vec<
@@ -3866,8 +4312,8 @@ pub mod IECDSACertificateVerifier {
             type ReturnTuple<'a> =
                 (alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,);
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "getTotalStakes((address,uint32),uint32)";
-            const SELECTOR: [u8; 4] = [4u8, 205u8, 186u8, 228u8];
+            const SIGNATURE: &'static str = "getTotalStakeWeights((address,uint32),uint32)";
+            const SELECTOR: [u8; 4] = [125u8, 29u8, 31u8, 91u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -3893,7 +4339,7 @@ pub mod IECDSACertificateVerifier {
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
                 <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
                     |r| {
-                        let r: getTotalStakesReturn = r.into();
+                        let r: getTotalStakeWeightsReturn = r.into();
                         r._0
                     },
                 )
@@ -3904,7 +4350,147 @@ pub mod IECDSACertificateVerifier {
                     data,
                 )
                 .map(|r| {
-                    let r: getTotalStakesReturn = r.into();
+                    let r: getTotalStakeWeightsReturn = r.into();
+                    r._0
+                })
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `isReferenceTimestampSet((address,uint32),uint32)` and selector `0xcd83a72b`.
+    ```solidity
+    function isReferenceTimestampSet(OperatorSet memory operatorSet, uint32 referenceTimestamp) external view returns (bool);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct isReferenceTimestampSetCall {
+        #[allow(missing_docs)]
+        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
+        #[allow(missing_docs)]
+        pub referenceTimestamp: u32,
+    }
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`isReferenceTimestampSet((address,uint32),uint32)`](isReferenceTimestampSetCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct isReferenceTimestampSetReturn {
+        #[allow(missing_docs)]
+        pub _0: bool,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (OperatorSet, alloy::sol_types::sol_data::Uint<32>);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> =
+                (<OperatorSet as alloy::sol_types::SolType>::RustType, u32);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<isReferenceTimestampSetCall> for UnderlyingRustTuple<'_> {
+                fn from(value: isReferenceTimestampSetCall) -> Self {
+                    (value.operatorSet, value.referenceTimestamp)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for isReferenceTimestampSetCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self {
+                        operatorSet: tuple.0,
+                        referenceTimestamp: tuple.1,
+                    }
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Bool,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (bool,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<isReferenceTimestampSetReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: isReferenceTimestampSetReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for isReferenceTimestampSetReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for isReferenceTimestampSetCall {
+            type Parameters<'a> = (OperatorSet, alloy::sol_types::sol_data::Uint<32>);
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = bool;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Bool,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "isReferenceTimestampSet((address,uint32),uint32)";
+            const SELECTOR: [u8; 4] = [205u8, 131u8, 167u8, 43u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                (
+                    <OperatorSet as alloy_sol_types::SolType>::tokenize(&self.operatorSet),
+                    <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
+                        &self.referenceTimestamp,
+                    ),
+                )
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (<alloy::sol_types::sol_data::Bool as alloy_sol_types::SolType>::tokenize(ret),)
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: isReferenceTimestampSetReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: isReferenceTimestampSetReturn = r.into();
                     r._0
                 })
             }
@@ -4361,7 +4947,7 @@ pub mod IECDSACertificateVerifier {
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Function with signature `verifyCertificate((address,uint32),(uint32,bytes32,bytes))` and selector `0x80c7d3f3`.
     ```solidity
-    function verifyCertificate(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert) external returns (uint256[] memory signedStakes);
+    function verifyCertificate(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert) external view returns (uint256[] memory totalSignedStakeWeights, address[] memory signers);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
@@ -4377,8 +4963,10 @@ pub mod IECDSACertificateVerifier {
     #[derive(Clone)]
     pub struct verifyCertificateReturn {
         #[allow(missing_docs)]
-        pub signedStakes:
+        pub totalSignedStakeWeights:
             alloy::sol_types::private::Vec<alloy::sol_types::private::primitives::aliases::U256>,
+        #[allow(missing_docs)]
+        pub signers: alloy::sol_types::private::Vec<alloy::sol_types::private::Address>,
     }
     #[allow(
         non_camel_case_types,
@@ -4428,13 +5016,16 @@ pub mod IECDSACertificateVerifier {
         }
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> =
-                (alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,);
+            type UnderlyingSolTuple<'a> = (
+                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
+                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Address>,
+            );
             #[doc(hidden)]
             type UnderlyingRustTuple<'a> = (
                 alloy::sol_types::private::Vec<
                     alloy::sol_types::private::primitives::aliases::U256,
                 >,
+                alloy::sol_types::private::Vec<alloy::sol_types::private::Address>,
             );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
@@ -4449,7 +5040,7 @@ pub mod IECDSACertificateVerifier {
             #[doc(hidden)]
             impl ::core::convert::From<verifyCertificateReturn> for UnderlyingRustTuple<'_> {
                 fn from(value: verifyCertificateReturn) -> Self {
-                    (value.signedStakes,)
+                    (value.totalSignedStakeWeights, value.signers)
                 }
             }
             #[automatically_derived]
@@ -4457,9 +5048,26 @@ pub mod IECDSACertificateVerifier {
             impl ::core::convert::From<UnderlyingRustTuple<'_>> for verifyCertificateReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self {
-                        signedStakes: tuple.0,
+                        totalSignedStakeWeights: tuple.0,
+                        signers: tuple.1,
                     }
                 }
+            }
+        }
+        impl verifyCertificateReturn {
+            fn _tokenize(
+                &self,
+            ) -> <verifyCertificateCall as alloy_sol_types::SolCall>::ReturnToken<'_> {
+                (
+                    <alloy::sol_types::sol_data::Array<
+                        alloy::sol_types::sol_data::Uint<256>,
+                    > as alloy_sol_types::SolType>::tokenize(
+                        &self.totalSignedStakeWeights,
+                    ),
+                    <alloy::sol_types::sol_data::Array<
+                        alloy::sol_types::sol_data::Address,
+                    > as alloy_sol_types::SolType>::tokenize(&self.signers),
+                )
             }
         }
         #[automatically_derived]
@@ -4469,11 +5077,11 @@ pub mod IECDSACertificateVerifier {
                 IECDSACertificateVerifierTypes::ECDSACertificate,
             );
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = alloy::sol_types::private::Vec<
-                alloy::sol_types::private::primitives::aliases::U256,
-            >;
-            type ReturnTuple<'a> =
-                (alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,);
+            type Return = verifyCertificateReturn;
+            type ReturnTuple<'a> = (
+                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
+                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Address>,
+            );
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str =
                 "verifyCertificate((address,uint32),(uint32,bytes32,bytes))";
@@ -4497,35 +5105,26 @@ pub mod IECDSACertificateVerifier {
             }
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                (<alloy::sol_types::sol_data::Array<
-                    alloy::sol_types::sol_data::Uint<256>,
-                > as alloy_sol_types::SolType>::tokenize(ret),)
+                verifyCertificateReturn::_tokenize(ret)
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
-                    |r| {
-                        let r: verifyCertificateReturn = r.into();
-                        r.signedStakes
-                    },
-                )
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
+                    .map(Into::into)
             }
             #[inline]
             fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
                 <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
                     data,
                 )
-                .map(|r| {
-                    let r: verifyCertificateReturn = r.into();
-                    r.signedStakes
-                })
+                .map(Into::into)
             }
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Function with signature `verifyCertificateNominal((address,uint32),(uint32,bytes32,bytes),uint256[])` and selector `0xbe86e0b2`.
     ```solidity
-    function verifyCertificateNominal(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert, uint256[] memory totalStakeNominalThresholds) external returns (bool);
+    function verifyCertificateNominal(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert, uint256[] memory totalStakeNominalThresholds) external view returns (bool, address[] memory signers);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
@@ -4546,6 +5145,8 @@ pub mod IECDSACertificateVerifier {
     pub struct verifyCertificateNominalReturn {
         #[allow(missing_docs)]
         pub _0: bool,
+        #[allow(missing_docs)]
+        pub signers: alloy::sol_types::private::Vec<alloy::sol_types::private::Address>,
     }
     #[allow(
         non_camel_case_types,
@@ -4604,9 +5205,15 @@ pub mod IECDSACertificateVerifier {
         }
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Bool,);
+            type UnderlyingSolTuple<'a> = (
+                alloy::sol_types::sol_data::Bool,
+                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Address>,
+            );
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (bool,);
+            type UnderlyingRustTuple<'a> = (
+                bool,
+                alloy::sol_types::private::Vec<alloy::sol_types::private::Address>,
+            );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -4620,15 +5227,33 @@ pub mod IECDSACertificateVerifier {
             #[doc(hidden)]
             impl ::core::convert::From<verifyCertificateNominalReturn> for UnderlyingRustTuple<'_> {
                 fn from(value: verifyCertificateNominalReturn) -> Self {
-                    (value._0,)
+                    (value._0, value.signers)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
             impl ::core::convert::From<UnderlyingRustTuple<'_>> for verifyCertificateNominalReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self { _0: tuple.0 }
+                    Self {
+                        _0: tuple.0,
+                        signers: tuple.1,
+                    }
                 }
+            }
+        }
+        impl verifyCertificateNominalReturn {
+            fn _tokenize(
+                &self,
+            ) -> <verifyCertificateNominalCall as alloy_sol_types::SolCall>::ReturnToken<'_>
+            {
+                (
+                    <alloy::sol_types::sol_data::Bool as alloy_sol_types::SolType>::tokenize(
+                        &self._0,
+                    ),
+                    <alloy::sol_types::sol_data::Array<
+                        alloy::sol_types::sol_data::Address,
+                    > as alloy_sol_types::SolType>::tokenize(&self.signers),
+                )
             }
         }
         #[automatically_derived]
@@ -4639,8 +5264,11 @@ pub mod IECDSACertificateVerifier {
                 alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
             );
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = bool;
-            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Bool,);
+            type Return = verifyCertificateNominalReturn;
+            type ReturnTuple<'a> = (
+                alloy::sol_types::sol_data::Bool,
+                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Address>,
+            );
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str =
                 "verifyCertificateNominal((address,uint32),(uint32,bytes32,bytes),uint256[])";
@@ -4669,33 +5297,26 @@ pub mod IECDSACertificateVerifier {
             }
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                (<alloy::sol_types::sol_data::Bool as alloy_sol_types::SolType>::tokenize(ret),)
+                verifyCertificateNominalReturn::_tokenize(ret)
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
-                    |r| {
-                        let r: verifyCertificateNominalReturn = r.into();
-                        r._0
-                    },
-                )
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
+                    .map(Into::into)
             }
             #[inline]
             fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
                 <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
                     data,
                 )
-                .map(|r| {
-                    let r: verifyCertificateNominalReturn = r.into();
-                    r._0
-                })
+                .map(Into::into)
             }
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Function with signature `verifyCertificateProportion((address,uint32),(uint32,bytes32,bytes),uint16[])` and selector `0xc0da2420`.
     ```solidity
-    function verifyCertificateProportion(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert, uint16[] memory totalStakeProportionThresholds) external returns (bool);
+    function verifyCertificateProportion(OperatorSet memory operatorSet, IECDSACertificateVerifierTypes.ECDSACertificate memory cert, uint16[] memory totalStakeProportionThresholds) external view returns (bool, address[] memory signers);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
@@ -4714,6 +5335,8 @@ pub mod IECDSACertificateVerifier {
     pub struct verifyCertificateProportionReturn {
         #[allow(missing_docs)]
         pub _0: bool,
+        #[allow(missing_docs)]
+        pub signers: alloy::sol_types::private::Vec<alloy::sol_types::private::Address>,
     }
     #[allow(
         non_camel_case_types,
@@ -4770,9 +5393,15 @@ pub mod IECDSACertificateVerifier {
         }
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Bool,);
+            type UnderlyingSolTuple<'a> = (
+                alloy::sol_types::sol_data::Bool,
+                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Address>,
+            );
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (bool,);
+            type UnderlyingRustTuple<'a> = (
+                bool,
+                alloy::sol_types::private::Vec<alloy::sol_types::private::Address>,
+            );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -4786,15 +5415,33 @@ pub mod IECDSACertificateVerifier {
             #[doc(hidden)]
             impl ::core::convert::From<verifyCertificateProportionReturn> for UnderlyingRustTuple<'_> {
                 fn from(value: verifyCertificateProportionReturn) -> Self {
-                    (value._0,)
+                    (value._0, value.signers)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
             impl ::core::convert::From<UnderlyingRustTuple<'_>> for verifyCertificateProportionReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self { _0: tuple.0 }
+                    Self {
+                        _0: tuple.0,
+                        signers: tuple.1,
+                    }
                 }
+            }
+        }
+        impl verifyCertificateProportionReturn {
+            fn _tokenize(
+                &self,
+            ) -> <verifyCertificateProportionCall as alloy_sol_types::SolCall>::ReturnToken<'_>
+            {
+                (
+                    <alloy::sol_types::sol_data::Bool as alloy_sol_types::SolType>::tokenize(
+                        &self._0,
+                    ),
+                    <alloy::sol_types::sol_data::Array<
+                        alloy::sol_types::sol_data::Address,
+                    > as alloy_sol_types::SolType>::tokenize(&self.signers),
+                )
             }
         }
         #[automatically_derived]
@@ -4805,8 +5452,11 @@ pub mod IECDSACertificateVerifier {
                 alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<16>>,
             );
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = bool;
-            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Bool,);
+            type Return = verifyCertificateProportionReturn;
+            type ReturnTuple<'a> = (
+                alloy::sol_types::sol_data::Bool,
+                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Address>,
+            );
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str =
                 "verifyCertificateProportion((address,uint32),(uint32,bytes32,bytes),uint16[])";
@@ -4835,26 +5485,19 @@ pub mod IECDSACertificateVerifier {
             }
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                (<alloy::sol_types::sol_data::Bool as alloy_sol_types::SolType>::tokenize(ret),)
+                verifyCertificateProportionReturn::_tokenize(ret)
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
-                    |r| {
-                        let r: verifyCertificateProportionReturn = r.into();
-                        r._0
-                    },
-                )
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
+                    .map(Into::into)
             }
             #[inline]
             fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
                 <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
                     data,
                 )
-                .map(|r| {
-                    let r: verifyCertificateProportionReturn = r.into();
-                    r._0
-                })
+                .map(Into::into)
             }
         }
     };
@@ -4863,6 +5506,8 @@ pub mod IECDSACertificateVerifier {
     pub enum IECDSACertificateVerifierCalls {
         #[allow(missing_docs)]
         calculateCertificateDigest(calculateCertificateDigestCall),
+        #[allow(missing_docs)]
+        calculateCertificateDigestBytes(calculateCertificateDigestBytesCall),
         #[allow(missing_docs)]
         domainSeparator(domainSeparatorCall),
         #[allow(missing_docs)]
@@ -4874,7 +5519,9 @@ pub mod IECDSACertificateVerifier {
         #[allow(missing_docs)]
         getOperatorSetOwner(getOperatorSetOwnerCall),
         #[allow(missing_docs)]
-        getTotalStakes(getTotalStakesCall),
+        getTotalStakeWeights(getTotalStakeWeightsCall),
+        #[allow(missing_docs)]
+        isReferenceTimestampSet(isReferenceTimestampSetCall),
         #[allow(missing_docs)]
         latestReferenceTimestamp(latestReferenceTimestampCall),
         #[allow(missing_docs)]
@@ -4897,18 +5544,20 @@ pub mod IECDSACertificateVerifier {
         ///
         /// Prefer using `SolInterface` methods instead.
         pub const SELECTORS: &'static [[u8; 4usize]] = &[
-            [4u8, 205u8, 186u8, 228u8],
-            [8u8, 46u8, 247u8, 61u8],
             [24u8, 70u8, 116u8, 52u8],
             [35u8, 194u8, 163u8, 203u8],
             [86u8, 212u8, 130u8, 245u8],
             [93u8, 219u8, 155u8, 91u8],
             [97u8, 65u8, 135u8, 158u8],
+            [112u8, 44u8, 165u8, 49u8],
             [124u8, 133u8, 172u8, 76u8],
+            [125u8, 29u8, 31u8, 91u8],
             [128u8, 199u8, 211u8, 243u8],
             [132u8, 129u8, 137u8, 32u8],
             [190u8, 134u8, 224u8, 178u8],
             [192u8, 218u8, 36u8, 32u8],
+            [205u8, 131u8, 167u8, 43u8],
+            [228u8, 150u8, 19u8, 252u8],
             [246u8, 152u8, 218u8, 37u8],
         ];
     }
@@ -4916,12 +5565,15 @@ pub mod IECDSACertificateVerifier {
     impl alloy_sol_types::SolInterface for IECDSACertificateVerifierCalls {
         const NAME: &'static str = "IECDSACertificateVerifierCalls";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 13usize;
+        const COUNT: usize = 15usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
                 Self::calculateCertificateDigest(_) => {
                     <calculateCertificateDigestCall as alloy_sol_types::SolCall>::SELECTOR
+                }
+                Self::calculateCertificateDigestBytes(_) => {
+                    <calculateCertificateDigestBytesCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::domainSeparator(_) => {
                     <domainSeparatorCall as alloy_sol_types::SolCall>::SELECTOR
@@ -4938,8 +5590,11 @@ pub mod IECDSACertificateVerifier {
                 Self::getOperatorSetOwner(_) => {
                     <getOperatorSetOwnerCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::getTotalStakes(_) => {
-                    <getTotalStakesCall as alloy_sol_types::SolCall>::SELECTOR
+                Self::getTotalStakeWeights(_) => {
+                    <getTotalStakeWeightsCall as alloy_sol_types::SolCall>::SELECTOR
+                }
+                Self::isReferenceTimestampSet(_) => {
+                    <isReferenceTimestampSetCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::latestReferenceTimestamp(_) => {
                     <latestReferenceTimestampCall as alloy_sol_types::SolCall>::SELECTOR
@@ -4977,26 +5632,6 @@ pub mod IECDSACertificateVerifier {
             ) -> alloy_sol_types::Result<
                 IECDSACertificateVerifierCalls,
             >] = &[
-                {
-                    fn getTotalStakes(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
-                    {
-                        <getTotalStakesCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
-                            .map(IECDSACertificateVerifierCalls::getTotalStakes)
-                    }
-                    getTotalStakes
-                },
-                {
-                    fn getOperatorInfo(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
-                    {
-                        <getOperatorInfoCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
-                            .map(IECDSACertificateVerifierCalls::getOperatorInfo)
-                    }
-                    getOperatorInfo
-                },
                 {
                     fn calculateCertificateDigest(
                         data: &[u8],
@@ -5056,6 +5691,20 @@ pub mod IECDSACertificateVerifier {
                     maxOperatorTableStaleness
                 },
                 {
+                    fn calculateCertificateDigestBytes(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
+                    {
+                        <calculateCertificateDigestBytesCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                                data,
+                            )
+                            .map(
+                                IECDSACertificateVerifierCalls::calculateCertificateDigestBytes,
+                            )
+                    }
+                    calculateCertificateDigestBytes
+                },
+                {
                     fn getOperatorInfos(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
@@ -5064,6 +5713,16 @@ pub mod IECDSACertificateVerifier {
                             .map(IECDSACertificateVerifierCalls::getOperatorInfos)
                     }
                     getOperatorInfos
+                },
+                {
+                    fn getTotalStakeWeights(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
+                    {
+                        <getTotalStakeWeightsCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
+                            .map(IECDSACertificateVerifierCalls::getTotalStakeWeights)
+                    }
+                    getTotalStakeWeights
                 },
                 {
                     fn verifyCertificate(
@@ -5112,6 +5771,28 @@ pub mod IECDSACertificateVerifier {
                     verifyCertificateProportion
                 },
                 {
+                    fn isReferenceTimestampSet(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
+                    {
+                        <isReferenceTimestampSetCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                            data,
+                        )
+                        .map(IECDSACertificateVerifierCalls::isReferenceTimestampSet)
+                    }
+                    isReferenceTimestampSet
+                },
+                {
+                    fn getOperatorInfo(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
+                    {
+                        <getOperatorInfoCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
+                            .map(IECDSACertificateVerifierCalls::getOperatorInfo)
+                    }
+                    getOperatorInfo
+                },
+                {
                     fn domainSeparator(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
@@ -5141,30 +5822,6 @@ pub mod IECDSACertificateVerifier {
             ) -> alloy_sol_types::Result<
                 IECDSACertificateVerifierCalls,
             >] = &[
-                {
-                    fn getTotalStakes(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
-                    {
-                        <getTotalStakesCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                            data,
-                        )
-                        .map(IECDSACertificateVerifierCalls::getTotalStakes)
-                    }
-                    getTotalStakes
-                },
-                {
-                    fn getOperatorInfo(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
-                    {
-                        <getOperatorInfoCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                            data,
-                        )
-                        .map(IECDSACertificateVerifierCalls::getOperatorInfo)
-                    }
-                    getOperatorInfo
-                },
                 {
                     fn calculateCertificateDigest(
                         data: &[u8],
@@ -5232,6 +5889,20 @@ pub mod IECDSACertificateVerifier {
                     maxOperatorTableStaleness
                 },
                 {
+                    fn calculateCertificateDigestBytes(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
+                    {
+                        <calculateCertificateDigestBytesCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(
+                                IECDSACertificateVerifierCalls::calculateCertificateDigestBytes,
+                            )
+                    }
+                    calculateCertificateDigestBytes
+                },
+                {
                     fn getOperatorInfos(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
@@ -5242,6 +5913,18 @@ pub mod IECDSACertificateVerifier {
                         .map(IECDSACertificateVerifierCalls::getOperatorInfos)
                     }
                     getOperatorInfos
+                },
+                {
+                    fn getTotalStakeWeights(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
+                    {
+                        <getTotalStakeWeightsCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IECDSACertificateVerifierCalls::getTotalStakeWeights)
+                    }
+                    getTotalStakeWeights
                 },
                 {
                     fn verifyCertificate(
@@ -5296,6 +5979,30 @@ pub mod IECDSACertificateVerifier {
                     verifyCertificateProportion
                 },
                 {
+                    fn isReferenceTimestampSet(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
+                    {
+                        <isReferenceTimestampSetCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IECDSACertificateVerifierCalls::isReferenceTimestampSet)
+                    }
+                    isReferenceTimestampSet
+                },
+                {
+                    fn getOperatorInfo(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
+                    {
+                        <getOperatorInfoCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IECDSACertificateVerifierCalls::getOperatorInfo)
+                    }
+                    getOperatorInfo
+                },
+                {
                     fn domainSeparator(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IECDSACertificateVerifierCalls>
@@ -5324,23 +6031,45 @@ pub mod IECDSACertificateVerifier {
                         inner,
                     )
                 }
+                Self::calculateCertificateDigestBytes(inner) => {
+                    <calculateCertificateDigestBytesCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
                 Self::domainSeparator(inner) => {
-                    <domainSeparatorCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                    <domainSeparatorCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
                 }
                 Self::getOperatorCount(inner) => {
-                    <getOperatorCountCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                    <getOperatorCountCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
                 }
                 Self::getOperatorInfo(inner) => {
-                    <getOperatorInfoCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                    <getOperatorInfoCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
                 }
                 Self::getOperatorInfos(inner) => {
-                    <getOperatorInfosCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                    <getOperatorInfosCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
                 }
                 Self::getOperatorSetOwner(inner) => {
-                    <getOperatorSetOwnerCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                    <getOperatorSetOwnerCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
                 }
-                Self::getTotalStakes(inner) => {
-                    <getTotalStakesCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                Self::getTotalStakeWeights(inner) => {
+                    <getTotalStakeWeightsCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::isReferenceTimestampSet(inner) => {
+                    <isReferenceTimestampSetCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
                 }
                 Self::latestReferenceTimestamp(inner) => {
                     <latestReferenceTimestampCall as alloy_sol_types::SolCall>::abi_encoded_size(
@@ -5353,10 +6082,14 @@ pub mod IECDSACertificateVerifier {
                     )
                 }
                 Self::updateOperatorTable(inner) => {
-                    <updateOperatorTableCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                    <updateOperatorTableCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
                 }
                 Self::verifyCertificate(inner) => {
-                    <verifyCertificateCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                    <verifyCertificateCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
                 }
                 Self::verifyCertificateNominal(inner) => {
                     <verifyCertificateNominalCall as alloy_sol_types::SolCall>::abi_encoded_size(
@@ -5375,55 +6108,92 @@ pub mod IECDSACertificateVerifier {
             match self {
                 Self::calculateCertificateDigest(inner) => {
                     <calculateCertificateDigestCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner, out,
+                        inner,
+                        out,
+                    )
+                }
+                Self::calculateCertificateDigestBytes(inner) => {
+                    <calculateCertificateDigestBytesCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
                     )
                 }
                 Self::domainSeparator(inner) => {
-                    <domainSeparatorCall as alloy_sol_types::SolCall>::abi_encode_raw(inner, out)
+                    <domainSeparatorCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
                 }
                 Self::getOperatorCount(inner) => {
-                    <getOperatorCountCall as alloy_sol_types::SolCall>::abi_encode_raw(inner, out)
+                    <getOperatorCountCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
                 }
                 Self::getOperatorInfo(inner) => {
-                    <getOperatorInfoCall as alloy_sol_types::SolCall>::abi_encode_raw(inner, out)
+                    <getOperatorInfoCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
                 }
                 Self::getOperatorInfos(inner) => {
-                    <getOperatorInfosCall as alloy_sol_types::SolCall>::abi_encode_raw(inner, out)
+                    <getOperatorInfosCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
                 }
                 Self::getOperatorSetOwner(inner) => {
                     <getOperatorSetOwnerCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner, out,
+                        inner,
+                        out,
                     )
                 }
-                Self::getTotalStakes(inner) => {
-                    <getTotalStakesCall as alloy_sol_types::SolCall>::abi_encode_raw(inner, out)
+                Self::getTotalStakeWeights(inner) => {
+                    <getTotalStakeWeightsCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::isReferenceTimestampSet(inner) => {
+                    <isReferenceTimestampSetCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
                 }
                 Self::latestReferenceTimestamp(inner) => {
                     <latestReferenceTimestampCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner, out,
+                        inner,
+                        out,
                     )
                 }
                 Self::maxOperatorTableStaleness(inner) => {
                     <maxOperatorTableStalenessCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner, out,
+                        inner,
+                        out,
                     )
                 }
                 Self::updateOperatorTable(inner) => {
                     <updateOperatorTableCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner, out,
+                        inner,
+                        out,
                     )
                 }
                 Self::verifyCertificate(inner) => {
-                    <verifyCertificateCall as alloy_sol_types::SolCall>::abi_encode_raw(inner, out)
+                    <verifyCertificateCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
                 }
                 Self::verifyCertificateNominal(inner) => {
                     <verifyCertificateNominalCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner, out,
+                        inner,
+                        out,
                     )
                 }
                 Self::verifyCertificateProportion(inner) => {
                     <verifyCertificateProportionCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner, out,
+                        inner,
+                        out,
                     )
                 }
             }
@@ -5437,13 +6207,19 @@ pub mod IECDSACertificateVerifier {
         #[allow(missing_docs)]
         CertificateStale(CertificateStale),
         #[allow(missing_docs)]
+        IndexOutOfBounds(IndexOutOfBounds),
+        #[allow(missing_docs)]
         InvalidSignatureLength(InvalidSignatureLength),
         #[allow(missing_docs)]
         OnlyTableUpdater(OnlyTableUpdater),
         #[allow(missing_docs)]
+        OperatorCountZero(OperatorCountZero),
+        #[allow(missing_docs)]
         ReferenceTimestampDoesNotExist(ReferenceTimestampDoesNotExist),
         #[allow(missing_docs)]
         RootDisabled(RootDisabled),
+        #[allow(missing_docs)]
+        SignersNotOrdered(SignersNotOrdered),
         #[allow(missing_docs)]
         TableUpdateStale(TableUpdateStale),
         #[allow(missing_docs)]
@@ -5461,10 +6237,13 @@ pub mod IECDSACertificateVerifier {
             [6u8, 24u8, 54u8, 214u8],
             [27u8, 20u8, 23u8, 75u8],
             [47u8, 32u8, 136u8, 159u8],
+            [64u8, 164u8, 32u8, 84u8],
             [67u8, 156u8, 192u8, 205u8],
             [75u8, 230u8, 50u8, 27u8],
+            [78u8, 35u8, 208u8, 53u8],
             [101u8, 104u8, 189u8, 184u8],
             [162u8, 74u8, 19u8, 166u8],
+            [181u8, 80u8, 197u8, 112u8],
             [200u8, 31u8, 154u8, 214u8],
         ];
     }
@@ -5472,7 +6251,7 @@ pub mod IECDSACertificateVerifier {
     impl alloy_sol_types::SolInterface for IECDSACertificateVerifierErrors {
         const NAME: &'static str = "IECDSACertificateVerifierErrors";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 8usize;
+        const COUNT: usize = 11usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
@@ -5482,16 +6261,25 @@ pub mod IECDSACertificateVerifier {
                 Self::CertificateStale(_) => {
                     <CertificateStale as alloy_sol_types::SolError>::SELECTOR
                 }
+                Self::IndexOutOfBounds(_) => {
+                    <IndexOutOfBounds as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::InvalidSignatureLength(_) => {
                     <InvalidSignatureLength as alloy_sol_types::SolError>::SELECTOR
                 }
                 Self::OnlyTableUpdater(_) => {
                     <OnlyTableUpdater as alloy_sol_types::SolError>::SELECTOR
                 }
+                Self::OperatorCountZero(_) => {
+                    <OperatorCountZero as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::ReferenceTimestampDoesNotExist(_) => {
                     <ReferenceTimestampDoesNotExist as alloy_sol_types::SolError>::SELECTOR
                 }
                 Self::RootDisabled(_) => <RootDisabled as alloy_sol_types::SolError>::SELECTOR,
+                Self::SignersNotOrdered(_) => {
+                    <SignersNotOrdered as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::TableUpdateStale(_) => {
                     <TableUpdateStale as alloy_sol_types::SolError>::SELECTOR
                 }
@@ -5547,6 +6335,16 @@ pub mod IECDSACertificateVerifier {
                     TableUpdateStale
                 },
                 {
+                    fn OperatorCountZero(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierErrors>
+                    {
+                        <OperatorCountZero as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IECDSACertificateVerifierErrors::OperatorCountZero)
+                    }
+                    OperatorCountZero
+                },
+                {
                     fn VerificationFailed(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IECDSACertificateVerifierErrors>
@@ -5565,6 +6363,16 @@ pub mod IECDSACertificateVerifier {
                             .map(IECDSACertificateVerifierErrors::InvalidSignatureLength)
                     }
                     InvalidSignatureLength
+                },
+                {
+                    fn IndexOutOfBounds(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierErrors>
+                    {
+                        <IndexOutOfBounds as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IECDSACertificateVerifierErrors::IndexOutOfBounds)
+                    }
+                    IndexOutOfBounds
                 },
                 {
                     fn ReferenceTimestampDoesNotExist(
@@ -5589,6 +6397,16 @@ pub mod IECDSACertificateVerifier {
                             .map(IECDSACertificateVerifierErrors::ArrayLengthMismatch)
                     }
                     ArrayLengthMismatch
+                },
+                {
+                    fn SignersNotOrdered(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierErrors>
+                    {
+                        <SignersNotOrdered as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IECDSACertificateVerifierErrors::SignersNotOrdered)
+                    }
+                    SignersNotOrdered
                 },
                 {
                     fn CertificateStale(
@@ -5655,6 +6473,18 @@ pub mod IECDSACertificateVerifier {
                     TableUpdateStale
                 },
                 {
+                    fn OperatorCountZero(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierErrors>
+                    {
+                        <OperatorCountZero as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IECDSACertificateVerifierErrors::OperatorCountZero)
+                    }
+                    OperatorCountZero
+                },
+                {
                     fn VerificationFailed(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IECDSACertificateVerifierErrors>
@@ -5677,6 +6507,18 @@ pub mod IECDSACertificateVerifier {
                             .map(IECDSACertificateVerifierErrors::InvalidSignatureLength)
                     }
                     InvalidSignatureLength
+                },
+                {
+                    fn IndexOutOfBounds(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierErrors>
+                    {
+                        <IndexOutOfBounds as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IECDSACertificateVerifierErrors::IndexOutOfBounds)
+                    }
+                    IndexOutOfBounds
                 },
                 {
                     fn ReferenceTimestampDoesNotExist(
@@ -5703,6 +6545,18 @@ pub mod IECDSACertificateVerifier {
                         .map(IECDSACertificateVerifierErrors::ArrayLengthMismatch)
                     }
                     ArrayLengthMismatch
+                },
+                {
+                    fn SignersNotOrdered(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IECDSACertificateVerifierErrors>
+                    {
+                        <SignersNotOrdered as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IECDSACertificateVerifierErrors::SignersNotOrdered)
+                    }
+                    SignersNotOrdered
                 },
                 {
                     fn CertificateStale(
@@ -5734,11 +6588,17 @@ pub mod IECDSACertificateVerifier {
                 Self::CertificateStale(inner) => {
                     <CertificateStale as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
+                Self::IndexOutOfBounds(inner) => {
+                    <IndexOutOfBounds as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
                 Self::InvalidSignatureLength(inner) => {
                     <InvalidSignatureLength as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
                 Self::OnlyTableUpdater(inner) => {
                     <OnlyTableUpdater as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
+                Self::OperatorCountZero(inner) => {
+                    <OperatorCountZero as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
                 Self::ReferenceTimestampDoesNotExist(inner) => {
                     <ReferenceTimestampDoesNotExist as alloy_sol_types::SolError>::abi_encoded_size(
@@ -5747,6 +6607,9 @@ pub mod IECDSACertificateVerifier {
                 }
                 Self::RootDisabled(inner) => {
                     <RootDisabled as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
+                Self::SignersNotOrdered(inner) => {
+                    <SignersNotOrdered as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
                 Self::TableUpdateStale(inner) => {
                     <TableUpdateStale as alloy_sol_types::SolError>::abi_encoded_size(inner)
@@ -5765,6 +6628,9 @@ pub mod IECDSACertificateVerifier {
                 Self::CertificateStale(inner) => {
                     <CertificateStale as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
+                Self::IndexOutOfBounds(inner) => {
+                    <IndexOutOfBounds as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
+                }
                 Self::InvalidSignatureLength(inner) => {
                     <InvalidSignatureLength as alloy_sol_types::SolError>::abi_encode_raw(
                         inner, out,
@@ -5773,6 +6639,9 @@ pub mod IECDSACertificateVerifier {
                 Self::OnlyTableUpdater(inner) => {
                     <OnlyTableUpdater as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
+                Self::OperatorCountZero(inner) => {
+                    <OperatorCountZero as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
+                }
                 Self::ReferenceTimestampDoesNotExist(inner) => {
                     <ReferenceTimestampDoesNotExist as alloy_sol_types::SolError>::abi_encode_raw(
                         inner, out,
@@ -5780,6 +6649,9 @@ pub mod IECDSACertificateVerifier {
                 }
                 Self::RootDisabled(inner) => {
                     <RootDisabled as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
+                }
+                Self::SignersNotOrdered(inner) => {
+                    <SignersNotOrdered as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
                 Self::TableUpdateStale(inner) => {
                     <TableUpdateStale as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
@@ -6058,6 +6930,17 @@ pub mod IECDSACertificateVerifier {
                 messageHash,
             })
         }
+        ///Creates a new call builder for the [`calculateCertificateDigestBytes`] function.
+        pub fn calculateCertificateDigestBytes(
+            &self,
+            referenceTimestamp: u32,
+            messageHash: alloy::sol_types::private::FixedBytes<32>,
+        ) -> alloy_contract::SolCallBuilder<&P, calculateCertificateDigestBytesCall, N> {
+            self.call_builder(&calculateCertificateDigestBytesCall {
+                referenceTimestamp,
+                messageHash,
+            })
+        }
         ///Creates a new call builder for the [`domainSeparator`] function.
         pub fn domainSeparator(
             &self,
@@ -6080,7 +6963,7 @@ pub mod IECDSACertificateVerifier {
             &self,
             operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
             referenceTimestamp: u32,
-            operatorIndex: u32,
+            operatorIndex: alloy::sol_types::private::primitives::aliases::U256,
         ) -> alloy_contract::SolCallBuilder<&P, getOperatorInfoCall, N> {
             self.call_builder(&getOperatorInfoCall {
                 operatorSet,
@@ -6106,13 +6989,24 @@ pub mod IECDSACertificateVerifier {
         ) -> alloy_contract::SolCallBuilder<&P, getOperatorSetOwnerCall, N> {
             self.call_builder(&getOperatorSetOwnerCall { operatorSet })
         }
-        ///Creates a new call builder for the [`getTotalStakes`] function.
-        pub fn getTotalStakes(
+        ///Creates a new call builder for the [`getTotalStakeWeights`] function.
+        pub fn getTotalStakeWeights(
             &self,
             operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
             referenceTimestamp: u32,
-        ) -> alloy_contract::SolCallBuilder<&P, getTotalStakesCall, N> {
-            self.call_builder(&getTotalStakesCall {
+        ) -> alloy_contract::SolCallBuilder<&P, getTotalStakeWeightsCall, N> {
+            self.call_builder(&getTotalStakeWeightsCall {
+                operatorSet,
+                referenceTimestamp,
+            })
+        }
+        ///Creates a new call builder for the [`isReferenceTimestampSet`] function.
+        pub fn isReferenceTimestampSet(
+            &self,
+            operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
+            referenceTimestamp: u32,
+        ) -> alloy_contract::SolCallBuilder<&P, isReferenceTimestampSetCall, N> {
+            self.call_builder(&isReferenceTimestampSetCall {
                 operatorSet,
                 referenceTimestamp,
             })

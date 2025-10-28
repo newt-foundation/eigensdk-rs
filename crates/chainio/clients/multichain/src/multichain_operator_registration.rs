@@ -63,11 +63,7 @@ impl MultichainOperatorRegistrar {
         let provider = get_provider(&self.provider);
         let registry = CrossChainRegistry::new(self.cross_chain_registry_addr, &provider);
 
-        registry
-            .keyRegistrar()
-            .call()
-            .await
-            .map_err(Into::into)
+        registry.keyRegistrar().call().await.map_err(Into::into)
     }
 }
 
@@ -95,12 +91,13 @@ impl MultichainOperatorRegistration for MultichainOperatorRegistrar {
         let provider = get_signer(&self.signer, &self.provider);
         let key_registrar = KeyRegistrar::new(key_registrar_addr, provider);
 
-        let contract_operator_set = convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
-            ContractOperatorSet {
-                avs: operator_set.avs,
-                id: operator_set.id,
-            },
-        );
+        let contract_operator_set =
+            convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
+                ContractOperatorSet {
+                    avs: operator_set.avs,
+                    id: operator_set.id,
+                },
+            );
 
         let encoded_signature = signature.to_vec().into();
 
@@ -110,10 +107,9 @@ impl MultichainOperatorRegistration for MultichainOperatorRegistrar {
             .await
             .map_err(|e| MultichainError::KeyRegistrationFailed(format!("send failed: {}", e)))?;
 
-        let receipt = tx
-            .get_receipt()
-            .await
-            .map_err(|e| MultichainError::KeyRegistrationFailed(format!("receipt failed: {}", e)))?;
+        let receipt = tx.get_receipt().await.map_err(|e| {
+            MultichainError::KeyRegistrationFailed(format!("receipt failed: {}", e))
+        })?;
 
         Ok(receipt.transaction_hash)
     }
@@ -135,23 +131,25 @@ impl MultichainOperatorRegistration for MultichainOperatorRegistrar {
         let provider = get_signer(&self.signer, &self.provider);
         let key_registrar = KeyRegistrar::new(key_registrar_addr, provider);
 
-        let contract_operator_set = convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
-            ContractOperatorSet {
-                avs: operator_set.avs,
-                id: operator_set.id,
-            },
-        );
+        let contract_operator_set =
+            convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
+                ContractOperatorSet {
+                    avs: operator_set.avs,
+                    id: operator_set.id,
+                },
+            );
 
         let tx = key_registrar
             .deregisterKey(operator, contract_operator_set)
             .send()
             .await
-            .map_err(|e| MultichainError::KeyRegistrationFailed(format!("deregister send failed: {}", e)))?;
+            .map_err(|e| {
+                MultichainError::KeyRegistrationFailed(format!("deregister send failed: {}", e))
+            })?;
 
-        let receipt = tx
-            .get_receipt()
-            .await
-            .map_err(|e| MultichainError::KeyRegistrationFailed(format!("deregister receipt failed: {}", e)))?;
+        let receipt = tx.get_receipt().await.map_err(|e| {
+            MultichainError::KeyRegistrationFailed(format!("deregister receipt failed: {}", e))
+        })?;
 
         Ok(receipt.transaction_hash)
     }

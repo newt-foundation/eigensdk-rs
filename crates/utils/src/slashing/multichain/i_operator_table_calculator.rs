@@ -9,8 +9,8 @@ interface IOperatorTableCalculator {
     }
 
     function calculateOperatorTableBytes(OperatorSet memory operatorSet) external view returns (bytes memory operatorTableBytes);
-    function getOperatorWeight(OperatorSet memory operatorSet, address operator) external view returns (uint256 weight);
-    function getOperatorWeights(OperatorSet memory operatorSet) external view returns (address[] memory operators, uint256[][] memory weights);
+    function getOperatorSetWeights(OperatorSet memory operatorSet) external view returns (address[] memory operators, uint256[][] memory weights);
+    function getOperatorWeights(OperatorSet memory operatorSet, address operator) external view returns (uint256[] memory weights);
 }
 ```
 
@@ -50,43 +50,7 @@ interface IOperatorTableCalculator {
   },
   {
     "type": "function",
-    "name": "getOperatorWeight",
-    "inputs": [
-      {
-        "name": "operatorSet",
-        "type": "tuple",
-        "internalType": "struct OperatorSet",
-        "components": [
-          {
-            "name": "avs",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "id",
-            "type": "uint32",
-            "internalType": "uint32"
-          }
-        ]
-      },
-      {
-        "name": "operator",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "weight",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getOperatorWeights",
+    "name": "getOperatorSetWeights",
     "inputs": [
       {
         "name": "operatorSet",
@@ -116,6 +80,42 @@ interface IOperatorTableCalculator {
         "name": "weights",
         "type": "uint256[][]",
         "internalType": "uint256[][]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getOperatorWeights",
+    "inputs": [
+      {
+        "name": "operatorSet",
+        "type": "tuple",
+        "internalType": "struct OperatorSet",
+        "components": [
+          {
+            "name": "avs",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "id",
+            "type": "uint32",
+            "internalType": "uint32"
+          }
+        ]
+      },
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "weights",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
       }
     ],
     "stateMutability": "view"
@@ -476,167 +476,21 @@ pub mod IOperatorTableCalculator {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `getOperatorWeight((address,uint32),address)` and selector `0x1088794a`.
+    /**Function with signature `getOperatorSetWeights((address,uint32))` and selector `0xbff2de25`.
     ```solidity
-    function getOperatorWeight(OperatorSet memory operatorSet, address operator) external view returns (uint256 weight);
+    function getOperatorSetWeights(OperatorSet memory operatorSet) external view returns (address[] memory operators, uint256[][] memory weights);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getOperatorWeightCall {
-        #[allow(missing_docs)]
-        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-        #[allow(missing_docs)]
-        pub operator: alloy::sol_types::private::Address,
-    }
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    ///Container type for the return parameters of the [`getOperatorWeight((address,uint32),address)`](getOperatorWeightCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct getOperatorWeightReturn {
-        #[allow(missing_docs)]
-        pub weight: alloy::sol_types::private::primitives::aliases::U256,
-    }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (OperatorSet, alloy::sol_types::sol_data::Address);
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (
-                <OperatorSet as alloy::sol_types::SolType>::RustType,
-                alloy::sol_types::private::Address,
-            );
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<getOperatorWeightCall> for UnderlyingRustTuple<'_> {
-                fn from(value: getOperatorWeightCall) -> Self {
-                    (value.operatorSet, value.operator)
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getOperatorWeightCall {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {
-                        operatorSet: tuple.0,
-                        operator: tuple.1,
-                    }
-                }
-            }
-        }
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<getOperatorWeightReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: getOperatorWeightReturn) -> Self {
-                    (value.weight,)
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getOperatorWeightReturn {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self { weight: tuple.0 }
-                }
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolCall for getOperatorWeightCall {
-            type Parameters<'a> = (OperatorSet, alloy::sol_types::sol_data::Address);
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = alloy::sol_types::private::primitives::aliases::U256;
-            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
-            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "getOperatorWeight((address,uint32),address)";
-            const SELECTOR: [u8; 4] = [16u8, 136u8, 121u8, 74u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                (
-                    <OperatorSet as alloy_sol_types::SolType>::tokenize(&self.operatorSet),
-                    <alloy::sol_types::sol_data::Address as alloy_sol_types::SolType>::tokenize(
-                        &self.operator,
-                    ),
-                )
-            }
-            #[inline]
-            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                (
-                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
-                        ret,
-                    ),
-                )
-            }
-            #[inline]
-            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
-                    |r| {
-                        let r: getOperatorWeightReturn = r.into();
-                        r.weight
-                    },
-                )
-            }
-            #[inline]
-            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
-                    data,
-                )
-                .map(|r| {
-                    let r: getOperatorWeightReturn = r.into();
-                    r.weight
-                })
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `getOperatorWeights((address,uint32))` and selector `0x71ca71d9`.
-    ```solidity
-    function getOperatorWeights(OperatorSet memory operatorSet) external view returns (address[] memory operators, uint256[][] memory weights);
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct getOperatorWeightsCall {
+    pub struct getOperatorSetWeightsCall {
         #[allow(missing_docs)]
         pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
     }
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    ///Container type for the return parameters of the [`getOperatorWeights((address,uint32))`](getOperatorWeightsCall) function.
+    ///Container type for the return parameters of the [`getOperatorSetWeights((address,uint32))`](getOperatorSetWeightsCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getOperatorWeightsReturn {
+    pub struct getOperatorSetWeightsReturn {
         #[allow(missing_docs)]
         pub operators: alloy::sol_types::private::Vec<alloy::sol_types::private::Address>,
         #[allow(missing_docs)]
@@ -668,14 +522,14 @@ pub mod IOperatorTableCalculator {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getOperatorWeightsCall> for UnderlyingRustTuple<'_> {
-                fn from(value: getOperatorWeightsCall) -> Self {
+            impl ::core::convert::From<getOperatorSetWeightsCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getOperatorSetWeightsCall) -> Self {
                     (value.operatorSet,)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getOperatorWeightsCall {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getOperatorSetWeightsCall {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self {
                         operatorSet: tuple.0,
@@ -711,14 +565,14 @@ pub mod IOperatorTableCalculator {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getOperatorWeightsReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: getOperatorWeightsReturn) -> Self {
+            impl ::core::convert::From<getOperatorSetWeightsReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getOperatorSetWeightsReturn) -> Self {
                     (value.operators, value.weights)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getOperatorWeightsReturn {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getOperatorSetWeightsReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self {
                         operators: tuple.0,
@@ -727,10 +581,11 @@ pub mod IOperatorTableCalculator {
                 }
             }
         }
-        impl getOperatorWeightsReturn {
+        impl getOperatorSetWeightsReturn {
             fn _tokenize(
                 &self,
-            ) -> <getOperatorWeightsCall as alloy_sol_types::SolCall>::ReturnToken<'_> {
+            ) -> <getOperatorSetWeightsCall as alloy_sol_types::SolCall>::ReturnToken<'_>
+            {
                 (
                     <alloy::sol_types::sol_data::Array<
                         alloy::sol_types::sol_data::Address,
@@ -744,10 +599,10 @@ pub mod IOperatorTableCalculator {
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::SolCall for getOperatorWeightsCall {
+        impl alloy_sol_types::SolCall for getOperatorSetWeightsCall {
             type Parameters<'a> = (OperatorSet,);
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = getOperatorWeightsReturn;
+            type Return = getOperatorSetWeightsReturn;
             type ReturnTuple<'a> = (
                 alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Address>,
                 alloy::sol_types::sol_data::Array<
@@ -755,8 +610,8 @@ pub mod IOperatorTableCalculator {
                 >,
             );
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "getOperatorWeights((address,uint32))";
-            const SELECTOR: [u8; 4] = [113u8, 202u8, 113u8, 217u8];
+            const SIGNATURE: &'static str = "getOperatorSetWeights((address,uint32))";
+            const SELECTOR: [u8; 4] = [191u8, 242u8, 222u8, 37u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -771,7 +626,7 @@ pub mod IOperatorTableCalculator {
             }
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                getOperatorWeightsReturn::_tokenize(ret)
+                getOperatorSetWeightsReturn::_tokenize(ret)
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
@@ -787,13 +642,166 @@ pub mod IOperatorTableCalculator {
             }
         }
     };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `getOperatorWeights((address,uint32),address)` and selector `0xbdf3ad27`.
+    ```solidity
+    function getOperatorWeights(OperatorSet memory operatorSet, address operator) external view returns (uint256[] memory weights);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getOperatorWeightsCall {
+        #[allow(missing_docs)]
+        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
+        #[allow(missing_docs)]
+        pub operator: alloy::sol_types::private::Address,
+    }
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`getOperatorWeights((address,uint32),address)`](getOperatorWeightsCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getOperatorWeightsReturn {
+        #[allow(missing_docs)]
+        pub weights:
+            alloy::sol_types::private::Vec<alloy::sol_types::private::primitives::aliases::U256>,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (OperatorSet, alloy::sol_types::sol_data::Address);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (
+                <OperatorSet as alloy::sol_types::SolType>::RustType,
+                alloy::sol_types::private::Address,
+            );
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getOperatorWeightsCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getOperatorWeightsCall) -> Self {
+                    (value.operatorSet, value.operator)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getOperatorWeightsCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self {
+                        operatorSet: tuple.0,
+                        operator: tuple.1,
+                    }
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> =
+                (alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (
+                alloy::sol_types::private::Vec<
+                    alloy::sol_types::private::primitives::aliases::U256,
+                >,
+            );
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getOperatorWeightsReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getOperatorWeightsReturn) -> Self {
+                    (value.weights,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getOperatorWeightsReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { weights: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for getOperatorWeightsCall {
+            type Parameters<'a> = (OperatorSet, alloy::sol_types::sol_data::Address);
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = alloy::sol_types::private::Vec<
+                alloy::sol_types::private::primitives::aliases::U256,
+            >;
+            type ReturnTuple<'a> =
+                (alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "getOperatorWeights((address,uint32),address)";
+            const SELECTOR: [u8; 4] = [189u8, 243u8, 173u8, 39u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                (
+                    <OperatorSet as alloy_sol_types::SolType>::tokenize(&self.operatorSet),
+                    <alloy::sol_types::sol_data::Address as alloy_sol_types::SolType>::tokenize(
+                        &self.operator,
+                    ),
+                )
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (<alloy::sol_types::sol_data::Array<
+                    alloy::sol_types::sol_data::Uint<256>,
+                > as alloy_sol_types::SolType>::tokenize(ret),)
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getOperatorWeightsReturn = r.into();
+                        r.weights
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: getOperatorWeightsReturn = r.into();
+                    r.weights
+                })
+            }
+        }
+    };
     ///Container for all the [`IOperatorTableCalculator`](self) function calls.
     #[derive(serde::Serialize, serde::Deserialize)]
     pub enum IOperatorTableCalculatorCalls {
         #[allow(missing_docs)]
         calculateOperatorTableBytes(calculateOperatorTableBytesCall),
         #[allow(missing_docs)]
-        getOperatorWeight(getOperatorWeightCall),
+        getOperatorSetWeights(getOperatorSetWeightsCall),
         #[allow(missing_docs)]
         getOperatorWeights(getOperatorWeightsCall),
     }
@@ -806,9 +814,9 @@ pub mod IOperatorTableCalculator {
         ///
         /// Prefer using `SolInterface` methods instead.
         pub const SELECTORS: &'static [[u8; 4usize]] = &[
-            [16u8, 136u8, 121u8, 74u8],
             [65u8, 238u8, 109u8, 14u8],
-            [113u8, 202u8, 113u8, 217u8],
+            [189u8, 243u8, 173u8, 39u8],
+            [191u8, 242u8, 222u8, 37u8],
         ];
     }
     #[automatically_derived]
@@ -822,8 +830,8 @@ pub mod IOperatorTableCalculator {
                 Self::calculateOperatorTableBytes(_) => {
                     <calculateOperatorTableBytesCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::getOperatorWeight(_) => {
-                    <getOperatorWeightCall as alloy_sol_types::SolCall>::SELECTOR
+                Self::getOperatorSetWeights(_) => {
+                    <getOperatorSetWeightsCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::getOperatorWeights(_) => {
                     <getOperatorWeightsCall as alloy_sol_types::SolCall>::SELECTOR
@@ -845,16 +853,6 @@ pub mod IOperatorTableCalculator {
                 &[u8],
             )
                 -> alloy_sol_types::Result<IOperatorTableCalculatorCalls>] = &[
-                {
-                    fn getOperatorWeight(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IOperatorTableCalculatorCalls>
-                    {
-                        <getOperatorWeightCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
-                            .map(IOperatorTableCalculatorCalls::getOperatorWeight)
-                    }
-                    getOperatorWeight
-                },
                 {
                     fn calculateOperatorTableBytes(
                         data: &[u8],
@@ -879,6 +877,18 @@ pub mod IOperatorTableCalculator {
                     }
                     getOperatorWeights
                 },
+                {
+                    fn getOperatorSetWeights(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableCalculatorCalls>
+                    {
+                        <getOperatorSetWeightsCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                            data,
+                        )
+                        .map(IOperatorTableCalculatorCalls::getOperatorSetWeights)
+                    }
+                    getOperatorSetWeights
+                },
             ];
             let Ok(idx) = Self::SELECTORS.binary_search(&selector) else {
                 return Err(alloy_sol_types::Error::unknown_selector(
@@ -899,18 +909,6 @@ pub mod IOperatorTableCalculator {
             ) -> alloy_sol_types::Result<
                 IOperatorTableCalculatorCalls,
             >] = &[
-                {
-                    fn getOperatorWeight(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IOperatorTableCalculatorCalls>
-                    {
-                        <getOperatorWeightCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(IOperatorTableCalculatorCalls::getOperatorWeight)
-                    }
-                    getOperatorWeight
-                },
                 {
                     fn calculateOperatorTableBytes(
                         data: &[u8],
@@ -937,6 +935,18 @@ pub mod IOperatorTableCalculator {
                     }
                     getOperatorWeights
                 },
+                {
+                    fn getOperatorSetWeights(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableCalculatorCalls>
+                    {
+                        <getOperatorSetWeightsCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IOperatorTableCalculatorCalls::getOperatorSetWeights)
+                    }
+                    getOperatorSetWeights
+                },
             ];
             let Ok(idx) = Self::SELECTORS.binary_search(&selector) else {
                 return Err(alloy_sol_types::Error::unknown_selector(
@@ -954,8 +964,8 @@ pub mod IOperatorTableCalculator {
                         inner,
                     )
                 }
-                Self::getOperatorWeight(inner) => {
-                    <getOperatorWeightCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
+                Self::getOperatorSetWeights(inner) => {
+                    <getOperatorSetWeightsCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
                 }
                 Self::getOperatorWeights(inner) => {
                     <getOperatorWeightsCall as alloy_sol_types::SolCall>::abi_encoded_size(inner)
@@ -970,8 +980,10 @@ pub mod IOperatorTableCalculator {
                         inner, out,
                     )
                 }
-                Self::getOperatorWeight(inner) => {
-                    <getOperatorWeightCall as alloy_sol_types::SolCall>::abi_encode_raw(inner, out)
+                Self::getOperatorSetWeights(inner) => {
+                    <getOperatorSetWeightsCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner, out,
+                    )
                 }
                 Self::getOperatorWeights(inner) => {
                     <getOperatorWeightsCall as alloy_sol_types::SolCall>::abi_encode_raw(inner, out)
@@ -1141,23 +1153,23 @@ pub mod IOperatorTableCalculator {
         ) -> alloy_contract::SolCallBuilder<&P, calculateOperatorTableBytesCall, N> {
             self.call_builder(&calculateOperatorTableBytesCall { operatorSet })
         }
-        ///Creates a new call builder for the [`getOperatorWeight`] function.
-        pub fn getOperatorWeight(
+        ///Creates a new call builder for the [`getOperatorSetWeights`] function.
+        pub fn getOperatorSetWeights(
             &self,
             operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-            operator: alloy::sol_types::private::Address,
-        ) -> alloy_contract::SolCallBuilder<&P, getOperatorWeightCall, N> {
-            self.call_builder(&getOperatorWeightCall {
-                operatorSet,
-                operator,
-            })
+        ) -> alloy_contract::SolCallBuilder<&P, getOperatorSetWeightsCall, N> {
+            self.call_builder(&getOperatorSetWeightsCall { operatorSet })
         }
         ///Creates a new call builder for the [`getOperatorWeights`] function.
         pub fn getOperatorWeights(
             &self,
             operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
+            operator: alloy::sol_types::private::Address,
         ) -> alloy_contract::SolCallBuilder<&P, getOperatorWeightsCall, N> {
-            self.call_builder(&getOperatorWeightsCall { operatorSet })
+            self.call_builder(&getOperatorWeightsCall {
+                operatorSet,
+                operator,
+            })
         }
     }
     /// Event filters.

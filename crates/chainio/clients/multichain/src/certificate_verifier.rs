@@ -4,8 +4,8 @@ use alloy::providers::Provider;
 use async_trait::async_trait;
 use eigen_common::get_provider;
 use eigen_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier;
-use eigen_utils::slashing::multichain::ecdsa_certificate_verifier::ECDSACertificateVerifier;
 use eigen_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry::OperatorSet as ContractOperatorSet;
+use eigen_utils::slashing::multichain::ecdsa_certificate_verifier::ECDSACertificateVerifier;
 use tracing::instrument;
 
 #[derive(Debug, Clone)]
@@ -160,10 +160,14 @@ impl CertificateVerifierReaderTrait for CertificateVerifierReader {
     ) -> Result<Vec<U256>, MultichainError> {
         match self {
             CertificateVerifierReader::BN254(reader) => {
-                reader.verify_certificate(avs, operator_set_id, certificate).await
+                reader
+                    .verify_certificate(avs, operator_set_id, certificate)
+                    .await
             }
             CertificateVerifierReader::ECDSA(reader) => {
-                reader.verify_certificate(avs, operator_set_id, certificate).await
+                reader
+                    .verify_certificate(avs, operator_set_id, certificate)
+                    .await
             }
         }
     }

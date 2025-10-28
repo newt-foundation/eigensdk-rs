@@ -2422,20 +2422,22 @@ interface IOperatorTableUpdater {
         uint32 id;
     }
 
+    error CannotDisableGeneratorRoot();
     error CertificateInvalid();
     error GlobalTableRootInFuture();
     error GlobalTableRootStale();
     error InvalidConfirmationThreshold();
     error InvalidCurveType();
+    error InvalidGenerator();
     error InvalidGlobalTableRoot();
     error InvalidMessageHash();
+    error InvalidOperatorSet();
     error InvalidOperatorSetProof();
     error InvalidRoot();
-    error InvalidSignatureLength();
     error TableUpdateForPastTimestamp();
 
+    event GeneratorUpdated(OperatorSet operatorSet);
     event GlobalRootConfirmationThresholdUpdated(uint16 bps);
-    event GlobalRootConfirmerSetUpdated(OperatorSet operatorSet);
     event GlobalRootDisabled(bytes32 indexed globalTableRoot);
     event NewGlobalTableRoot(uint32 indexed referenceTimestamp, bytes32 indexed globalTableRoot);
 
@@ -2443,10 +2445,12 @@ interface IOperatorTableUpdater {
     function disableRoot(bytes32 globalTableRoot) external;
     function getCertificateVerifier(IKeyRegistrarTypes.CurveType curveType) external view returns (address);
     function getCurrentGlobalTableRoot() external view returns (bytes32 globalTableRoot);
-    function getGlobalConfirmerSetReferenceTimestamp() external view returns (uint32);
-    function getGlobalRootConfirmerSet() external view returns (OperatorSet memory);
+    function getGenerator() external view returns (OperatorSet memory);
+    function getGeneratorConfig() external view returns (ICrossChainRegistryTypes.OperatorSetConfig memory);
+    function getGeneratorReferenceTimestamp() external view returns (uint32);
     function getGlobalTableRootByTimestamp(uint32 referenceTimestamp) external view returns (bytes32 tableRoot);
     function getGlobalTableUpdateMessageHash(bytes32 globalTableRoot, uint32 referenceTimestamp, uint32 referenceBlockNumber) external view returns (bytes32);
+    function getGlobalTableUpdateSignableDigest(bytes32 globalTableRoot, uint32 referenceTimestamp, uint32 referenceBlockNumber) external view returns (bytes32);
     function getLatestReferenceBlockNumber() external view returns (uint32);
     function getLatestReferenceTimestamp() external view returns (uint32);
     function getReferenceBlockNumberByTimestamp(uint32 referenceTimestamp) external view returns (uint32);
@@ -2454,8 +2458,7 @@ interface IOperatorTableUpdater {
     function isRootValid(bytes32 globalTableRoot) external view returns (bool);
     function isRootValidByTimestamp(uint32 referenceTimestamp) external view returns (bool);
     function setGlobalRootConfirmationThreshold(uint16 bps) external;
-    function setGlobalRootConfirmerSet(OperatorSet memory operatorSet) external;
-    function updateGlobalRootConfirmerSet(uint32 referenceTimestamp, IOperatorTableCalculatorTypes.BN254OperatorSetInfo memory globalRootConfirmerSetInfo, ICrossChainRegistryTypes.OperatorSetConfig memory globalRootConfirmerSetConfig) external;
+    function updateGenerator(OperatorSet memory generator, IOperatorTableCalculatorTypes.BN254OperatorSetInfo memory generatorInfo) external;
     function updateOperatorTable(uint32 referenceTimestamp, bytes32 globalTableRoot, uint32 operatorSetIndex, bytes memory proof, bytes memory operatorTableBytes) external;
 }
 ```
@@ -2630,20 +2633,7 @@ interface IOperatorTableUpdater {
   },
   {
     "type": "function",
-    "name": "getGlobalConfirmerSetReferenceTimestamp",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint32",
-        "internalType": "uint32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getGlobalRootConfirmerSet",
+    "name": "getGenerator",
     "inputs": [],
     "outputs": [
       {
@@ -2662,6 +2652,44 @@ interface IOperatorTableUpdater {
             "internalType": "uint32"
           }
         ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getGeneratorConfig",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct ICrossChainRegistryTypes.OperatorSetConfig",
+        "components": [
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "maxStalenessPeriod",
+            "type": "uint32",
+            "internalType": "uint32"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getGeneratorReferenceTimestamp",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
       }
     ],
     "stateMutability": "view"
@@ -2688,6 +2716,35 @@ interface IOperatorTableUpdater {
   {
     "type": "function",
     "name": "getGlobalTableUpdateMessageHash",
+    "inputs": [
+      {
+        "name": "globalTableRoot",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "referenceTimestamp",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "referenceBlockNumber",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getGlobalTableUpdateSignableDigest",
     "inputs": [
       {
         "name": "globalTableRoot",
@@ -2831,10 +2888,10 @@ interface IOperatorTableUpdater {
   },
   {
     "type": "function",
-    "name": "setGlobalRootConfirmerSet",
+    "name": "updateGenerator",
     "inputs": [
       {
-        "name": "operatorSet",
+        "name": "generator",
         "type": "tuple",
         "internalType": "struct OperatorSet",
         "components": [
@@ -2849,22 +2906,9 @@ interface IOperatorTableUpdater {
             "internalType": "uint32"
           }
         ]
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "updateGlobalRootConfirmerSet",
-    "inputs": [
-      {
-        "name": "referenceTimestamp",
-        "type": "uint32",
-        "internalType": "uint32"
       },
       {
-        "name": "globalRootConfirmerSetInfo",
+        "name": "generatorInfo",
         "type": "tuple",
         "internalType": "struct IOperatorTableCalculatorTypes.BN254OperatorSetInfo",
         "components": [
@@ -2899,23 +2943,6 @@ interface IOperatorTableUpdater {
             "name": "totalWeights",
             "type": "uint256[]",
             "internalType": "uint256[]"
-          }
-        ]
-      },
-      {
-        "name": "globalRootConfirmerSetConfig",
-        "type": "tuple",
-        "internalType": "struct ICrossChainRegistryTypes.OperatorSetConfig",
-        "components": [
-          {
-            "name": "owner",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "maxStalenessPeriod",
-            "type": "uint32",
-            "internalType": "uint32"
           }
         ]
       }
@@ -2958,20 +2985,7 @@ interface IOperatorTableUpdater {
   },
   {
     "type": "event",
-    "name": "GlobalRootConfirmationThresholdUpdated",
-    "inputs": [
-      {
-        "name": "bps",
-        "type": "uint16",
-        "indexed": false,
-        "internalType": "uint16"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "GlobalRootConfirmerSetUpdated",
+    "name": "GeneratorUpdated",
     "inputs": [
       {
         "name": "operatorSet",
@@ -2990,6 +3004,19 @@ interface IOperatorTableUpdater {
             "internalType": "uint32"
           }
         ]
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "GlobalRootConfirmationThresholdUpdated",
+    "inputs": [
+      {
+        "name": "bps",
+        "type": "uint16",
+        "indexed": false,
+        "internalType": "uint16"
       }
     ],
     "anonymous": false
@@ -3028,6 +3055,11 @@ interface IOperatorTableUpdater {
   },
   {
     "type": "error",
+    "name": "CannotDisableGeneratorRoot",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "CertificateInvalid",
     "inputs": []
   },
@@ -3053,6 +3085,11 @@ interface IOperatorTableUpdater {
   },
   {
     "type": "error",
+    "name": "InvalidGenerator",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InvalidGlobalTableRoot",
     "inputs": []
   },
@@ -3063,17 +3100,17 @@ interface IOperatorTableUpdater {
   },
   {
     "type": "error",
+    "name": "InvalidOperatorSet",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InvalidOperatorSetProof",
     "inputs": []
   },
   {
     "type": "error",
     "name": "InvalidRoot",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "InvalidSignatureLength",
     "inputs": []
   },
   {
@@ -3298,6 +3335,74 @@ pub mod IOperatorTableUpdater {
                 let mut out = alloy_sol_types::private::Vec::new();
                 <Self as alloy_sol_types::EventTopic>::encode_topic_preimage(rust, &mut out);
                 alloy_sol_types::abi::token::WordToken(alloy_sol_types::private::keccak256(out))
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `CannotDisableGeneratorRoot()` and selector `0x332415fa`.
+    ```solidity
+    error CannotDisableGeneratorRoot();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct CannotDisableGeneratorRoot;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<CannotDisableGeneratorRoot> for UnderlyingRustTuple<'_> {
+            fn from(value: CannotDisableGeneratorRoot) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for CannotDisableGeneratorRoot {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for CannotDisableGeneratorRoot {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "CannotDisableGeneratorRoot()";
+            const SELECTOR: [u8; 4] = [51u8, 36u8, 21u8, 250u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
             }
         }
     };
@@ -3642,6 +3747,74 @@ pub mod IOperatorTableUpdater {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `InvalidGenerator()` and selector `0x6446f917`.
+    ```solidity
+    error InvalidGenerator();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct InvalidGenerator;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<InvalidGenerator> for UnderlyingRustTuple<'_> {
+            fn from(value: InvalidGenerator) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for InvalidGenerator {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for InvalidGenerator {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "InvalidGenerator()";
+            const SELECTOR: [u8; 4] = [100u8, 70u8, 249u8, 23u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Custom error with signature `InvalidGlobalTableRoot()` and selector `0xc73a136a`.
     ```solidity
     error InvalidGlobalTableRoot();
@@ -3758,6 +3931,74 @@ pub mod IOperatorTableUpdater {
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "InvalidMessageHash()";
             const SELECTOR: [u8; 4] = [139u8, 86u8, 100u8, 45u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `InvalidOperatorSet()` and selector `0x7ec5c154`.
+    ```solidity
+    error InvalidOperatorSet();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct InvalidOperatorSet;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<InvalidOperatorSet> for UnderlyingRustTuple<'_> {
+            fn from(value: InvalidOperatorSet) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for InvalidOperatorSet {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for InvalidOperatorSet {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "InvalidOperatorSet()";
+            const SELECTOR: [u8; 4] = [126u8, 197u8, 193u8, 84u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -3914,74 +4155,6 @@ pub mod IOperatorTableUpdater {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Custom error with signature `InvalidSignatureLength()` and selector `0x4be6321b`.
-    ```solidity
-    error InvalidSignatureLength();
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct InvalidSignatureLength;
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        #[doc(hidden)]
-        type UnderlyingSolTuple<'a> = ();
-        #[doc(hidden)]
-        type UnderlyingRustTuple<'a> = ();
-        #[cfg(test)]
-        #[allow(dead_code, unreachable_patterns)]
-        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-            match _t {
-                alloy_sol_types::private::AssertTypeEq::<
-                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                >(_) => {}
-            }
-        }
-        #[automatically_derived]
-        #[doc(hidden)]
-        impl ::core::convert::From<InvalidSignatureLength> for UnderlyingRustTuple<'_> {
-            fn from(value: InvalidSignatureLength) -> Self {
-                ()
-            }
-        }
-        #[automatically_derived]
-        #[doc(hidden)]
-        impl ::core::convert::From<UnderlyingRustTuple<'_>> for InvalidSignatureLength {
-            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                Self
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolError for InvalidSignatureLength {
-            type Parameters<'a> = UnderlyingSolTuple<'a>;
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "InvalidSignatureLength()";
-            const SELECTOR: [u8; 4] = [75u8, 230u8, 50u8, 27u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                ()
-            }
-            #[inline]
-            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
-                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
-                    data,
-                )
-                .map(Self::new)
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Custom error with signature `TableUpdateForPastTimestamp()` and selector `0x207617df`.
     ```solidity
     error TableUpdateForPastTimestamp();
@@ -4046,6 +4219,105 @@ pub mod IOperatorTableUpdater {
                     data,
                 )
                 .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Event with signature `GeneratorUpdated((address,uint32))` and selector `0x3463431b09dfd43dec7349f8f24acfa753fe4cf40a26235402d213373df15856`.
+    ```solidity
+    event GeneratorUpdated(OperatorSet operatorSet);
+    ```*/
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    #[derive(Clone)]
+    pub struct GeneratorUpdated {
+        #[allow(missing_docs)]
+        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[automatically_derived]
+        impl alloy_sol_types::SolEvent for GeneratorUpdated {
+            type DataTuple<'a> = (OperatorSet,);
+            type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type TopicList = (alloy_sol_types::sol_data::FixedBytes<32>,);
+            const SIGNATURE: &'static str = "GeneratorUpdated((address,uint32))";
+            const SIGNATURE_HASH: alloy_sol_types::private::B256 =
+                alloy_sol_types::private::B256::new([
+                    52u8, 99u8, 67u8, 27u8, 9u8, 223u8, 212u8, 61u8, 236u8, 115u8, 73u8, 248u8,
+                    242u8, 74u8, 207u8, 167u8, 83u8, 254u8, 76u8, 244u8, 10u8, 38u8, 35u8, 84u8,
+                    2u8, 210u8, 19u8, 55u8, 61u8, 241u8, 88u8, 86u8,
+                ]);
+            const ANONYMOUS: bool = false;
+            #[allow(unused_variables)]
+            #[inline]
+            fn new(
+                topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
+                data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                Self {
+                    operatorSet: data.0,
+                }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
+            }
+            #[inline]
+            fn tokenize_body(&self) -> Self::DataToken<'_> {
+                (<OperatorSet as alloy_sol_types::SolType>::tokenize(
+                    &self.operatorSet,
+                ),)
+            }
+            #[inline]
+            fn topics(&self) -> <Self::TopicList as alloy_sol_types::SolType>::RustType {
+                (Self::SIGNATURE_HASH.into(),)
+            }
+            #[inline]
+            fn encode_topics_raw(
+                &self,
+                out: &mut [alloy_sol_types::abi::token::WordToken],
+            ) -> alloy_sol_types::Result<()> {
+                if out.len() < <Self::TopicList as alloy_sol_types::TopicList>::COUNT {
+                    return Err(alloy_sol_types::Error::Overrun);
+                }
+                out[0usize] = alloy_sol_types::abi::token::WordToken(Self::SIGNATURE_HASH);
+                Ok(())
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::private::IntoLogData for GeneratorUpdated {
+            fn to_log_data(&self) -> alloy_sol_types::private::LogData {
+                From::from(self)
+            }
+            fn into_log_data(self) -> alloy_sol_types::private::LogData {
+                From::from(&self)
+            }
+        }
+        #[automatically_derived]
+        impl From<&GeneratorUpdated> for alloy_sol_types::private::LogData {
+            #[inline]
+            fn from(this: &GeneratorUpdated) -> alloy_sol_types::private::LogData {
+                alloy_sol_types::SolEvent::encode_log_data(this)
             }
         }
     };
@@ -4146,105 +4418,6 @@ pub mod IOperatorTableUpdater {
             fn from(
                 this: &GlobalRootConfirmationThresholdUpdated,
             ) -> alloy_sol_types::private::LogData {
-                alloy_sol_types::SolEvent::encode_log_data(this)
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `GlobalRootConfirmerSetUpdated((address,uint32))` and selector `0x20100394950e66014c25009b45d12b675210a6e7a002044a0e3de6544e3c4b37`.
-    ```solidity
-    event GlobalRootConfirmerSetUpdated(OperatorSet operatorSet);
-    ```*/
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    #[derive(Clone)]
-    pub struct GlobalRootConfirmerSetUpdated {
-        #[allow(missing_docs)]
-        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-    }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        #[automatically_derived]
-        impl alloy_sol_types::SolEvent for GlobalRootConfirmerSetUpdated {
-            type DataTuple<'a> = (OperatorSet,);
-            type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type TopicList = (alloy_sol_types::sol_data::FixedBytes<32>,);
-            const SIGNATURE: &'static str = "GlobalRootConfirmerSetUpdated((address,uint32))";
-            const SIGNATURE_HASH: alloy_sol_types::private::B256 =
-                alloy_sol_types::private::B256::new([
-                    32u8, 16u8, 3u8, 148u8, 149u8, 14u8, 102u8, 1u8, 76u8, 37u8, 0u8, 155u8, 69u8,
-                    209u8, 43u8, 103u8, 82u8, 16u8, 166u8, 231u8, 160u8, 2u8, 4u8, 74u8, 14u8,
-                    61u8, 230u8, 84u8, 78u8, 60u8, 75u8, 55u8,
-                ]);
-            const ANONYMOUS: bool = false;
-            #[allow(unused_variables)]
-            #[inline]
-            fn new(
-                topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
-                data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                Self {
-                    operatorSet: data.0,
-                }
-            }
-            #[inline]
-            fn check_signature(
-                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
-            ) -> alloy_sol_types::Result<()> {
-                if topics.0 != Self::SIGNATURE_HASH {
-                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
-                        Self::SIGNATURE,
-                        topics.0,
-                        Self::SIGNATURE_HASH,
-                    ));
-                }
-                Ok(())
-            }
-            #[inline]
-            fn tokenize_body(&self) -> Self::DataToken<'_> {
-                (<OperatorSet as alloy_sol_types::SolType>::tokenize(
-                    &self.operatorSet,
-                ),)
-            }
-            #[inline]
-            fn topics(&self) -> <Self::TopicList as alloy_sol_types::SolType>::RustType {
-                (Self::SIGNATURE_HASH.into(),)
-            }
-            #[inline]
-            fn encode_topics_raw(
-                &self,
-                out: &mut [alloy_sol_types::abi::token::WordToken],
-            ) -> alloy_sol_types::Result<()> {
-                if out.len() < <Self::TopicList as alloy_sol_types::TopicList>::COUNT {
-                    return Err(alloy_sol_types::Error::Overrun);
-                }
-                out[0usize] = alloy_sol_types::abi::token::WordToken(Self::SIGNATURE_HASH);
-                Ok(())
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::private::IntoLogData for GlobalRootConfirmerSetUpdated {
-            fn to_log_data(&self) -> alloy_sol_types::private::LogData {
-                From::from(self)
-            }
-            fn into_log_data(self) -> alloy_sol_types::private::LogData {
-                From::from(&self)
-            }
-        }
-        #[automatically_derived]
-        impl From<&GlobalRootConfirmerSetUpdated> for alloy_sol_types::private::LogData {
-            #[inline]
-            fn from(this: &GlobalRootConfirmerSetUpdated) -> alloy_sol_types::private::LogData {
                 alloy_sol_types::SolEvent::encode_log_data(this)
             }
         }
@@ -5038,156 +5211,18 @@ pub mod IOperatorTableUpdater {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `getGlobalConfirmerSetReferenceTimestamp()` and selector `0x0f3f8edd`.
+    /**Function with signature `getGenerator()` and selector `0x1e2ca260`.
     ```solidity
-    function getGlobalConfirmerSetReferenceTimestamp() external view returns (uint32);
+    function getGenerator() external view returns (OperatorSet memory);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getGlobalConfirmerSetReferenceTimestampCall;
+    pub struct getGeneratorCall;
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    ///Container type for the return parameters of the [`getGlobalConfirmerSetReferenceTimestamp()`](getGlobalConfirmerSetReferenceTimestampCall) function.
+    ///Container type for the return parameters of the [`getGenerator()`](getGeneratorCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getGlobalConfirmerSetReferenceTimestampReturn {
-        #[allow(missing_docs)]
-        pub _0: u32,
-    }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = ();
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = ();
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<getGlobalConfirmerSetReferenceTimestampCall>
-                for UnderlyingRustTuple<'_>
-            {
-                fn from(value: getGlobalConfirmerSetReferenceTimestampCall) -> Self {
-                    ()
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>>
-                for getGlobalConfirmerSetReferenceTimestampCall
-            {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self
-                }
-            }
-        }
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (u32,);
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<getGlobalConfirmerSetReferenceTimestampReturn>
-                for UnderlyingRustTuple<'_>
-            {
-                fn from(value: getGlobalConfirmerSetReferenceTimestampReturn) -> Self {
-                    (value._0,)
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>>
-                for getGlobalConfirmerSetReferenceTimestampReturn
-            {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self { _0: tuple.0 }
-                }
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolCall for getGlobalConfirmerSetReferenceTimestampCall {
-            type Parameters<'a> = ();
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = u32;
-            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
-            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "getGlobalConfirmerSetReferenceTimestamp()";
-            const SELECTOR: [u8; 4] = [15u8, 63u8, 142u8, 221u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                ()
-            }
-            #[inline]
-            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                (
-                    <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
-                        ret,
-                    ),
-                )
-            }
-            #[inline]
-            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
-                    |r| {
-                        let r: getGlobalConfirmerSetReferenceTimestampReturn = r.into();
-                        r._0
-                    },
-                )
-            }
-            #[inline]
-            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
-                    data,
-                )
-                .map(|r| {
-                    let r: getGlobalConfirmerSetReferenceTimestampReturn = r.into();
-                    r._0
-                })
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `getGlobalRootConfirmerSet()` and selector `0x46282889`.
-    ```solidity
-    function getGlobalRootConfirmerSet() external view returns (OperatorSet memory);
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct getGlobalRootConfirmerSetCall;
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    ///Container type for the return parameters of the [`getGlobalRootConfirmerSet()`](getGlobalRootConfirmerSetCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct getGlobalRootConfirmerSetReturn {
+    pub struct getGeneratorReturn {
         #[allow(missing_docs)]
         pub _0: <OperatorSet as alloy::sol_types::SolType>::RustType,
     }
@@ -5215,14 +5250,14 @@ pub mod IOperatorTableUpdater {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getGlobalRootConfirmerSetCall> for UnderlyingRustTuple<'_> {
-                fn from(value: getGlobalRootConfirmerSetCall) -> Self {
+            impl ::core::convert::From<getGeneratorCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getGeneratorCall) -> Self {
                     ()
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGlobalRootConfirmerSetCall {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGeneratorCall {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self
                 }
@@ -5244,28 +5279,28 @@ pub mod IOperatorTableUpdater {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getGlobalRootConfirmerSetReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: getGlobalRootConfirmerSetReturn) -> Self {
+            impl ::core::convert::From<getGeneratorReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getGeneratorReturn) -> Self {
                     (value._0,)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGlobalRootConfirmerSetReturn {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGeneratorReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self { _0: tuple.0 }
                 }
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::SolCall for getGlobalRootConfirmerSetCall {
+        impl alloy_sol_types::SolCall for getGeneratorCall {
             type Parameters<'a> = ();
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             type Return = <OperatorSet as alloy::sol_types::SolType>::RustType;
             type ReturnTuple<'a> = (OperatorSet,);
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "getGlobalRootConfirmerSet()";
-            const SELECTOR: [u8; 4] = [70u8, 40u8, 40u8, 137u8];
+            const SIGNATURE: &'static str = "getGenerator()";
+            const SELECTOR: [u8; 4] = [30u8, 44u8, 162u8, 96u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -5284,7 +5319,7 @@ pub mod IOperatorTableUpdater {
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
                 <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
                     |r| {
-                        let r: getGlobalRootConfirmerSetReturn = r.into();
+                        let r: getGeneratorReturn = r.into();
                         r._0
                     },
                 )
@@ -5295,7 +5330,270 @@ pub mod IOperatorTableUpdater {
                     data,
                 )
                 .map(|r| {
-                    let r: getGlobalRootConfirmerSetReturn = r.into();
+                    let r: getGeneratorReturn = r.into();
+                    r._0
+                })
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `getGeneratorConfig()` and selector `0xb0cb3a24`.
+    ```solidity
+    function getGeneratorConfig() external view returns (ICrossChainRegistryTypes.OperatorSetConfig memory);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getGeneratorConfigCall;
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`getGeneratorConfig()`](getGeneratorConfigCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getGeneratorConfigReturn {
+        #[allow(missing_docs)]
+        pub _0:
+            <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getGeneratorConfigCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getGeneratorConfigCall) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGeneratorConfigCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (ICrossChainRegistryTypes::OperatorSetConfig,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (
+                <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType,
+            );
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getGeneratorConfigReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getGeneratorConfigReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGeneratorConfigReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for getGeneratorConfigCall {
+            type Parameters<'a> = ();
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType;
+            type ReturnTuple<'a> = (ICrossChainRegistryTypes::OperatorSetConfig,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "getGeneratorConfig()";
+            const SELECTOR: [u8; 4] = [176u8, 203u8, 58u8, 36u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (
+                    <ICrossChainRegistryTypes::OperatorSetConfig as alloy_sol_types::SolType>::tokenize(
+                        ret,
+                    ),
+                )
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getGeneratorConfigReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: getGeneratorConfigReturn = r.into();
+                    r._0
+                })
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `getGeneratorReferenceTimestamp()` and selector `0x7551ba34`.
+    ```solidity
+    function getGeneratorReferenceTimestamp() external view returns (uint32);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getGeneratorReferenceTimestampCall;
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`getGeneratorReferenceTimestamp()`](getGeneratorReferenceTimestampCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getGeneratorReferenceTimestampReturn {
+        #[allow(missing_docs)]
+        pub _0: u32,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getGeneratorReferenceTimestampCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getGeneratorReferenceTimestampCall) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGeneratorReferenceTimestampCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (u32,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getGeneratorReferenceTimestampReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getGeneratorReferenceTimestampReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGeneratorReferenceTimestampReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for getGeneratorReferenceTimestampCall {
+            type Parameters<'a> = ();
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = u32;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "getGeneratorReferenceTimestamp()";
+            const SELECTOR: [u8; 4] = [117u8, 81u8, 186u8, 52u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (
+                    <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
+                        ret,
+                    ),
+                )
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getGeneratorReferenceTimestampReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: getGeneratorReferenceTimestampReturn = r.into();
                     r._0
                 })
             }
@@ -5599,6 +5897,170 @@ pub mod IOperatorTableUpdater {
                 )
                 .map(|r| {
                     let r: getGlobalTableUpdateMessageHashReturn = r.into();
+                    r._0
+                })
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `getGlobalTableUpdateSignableDigest(bytes32,uint32,uint32)` and selector `0x401c370f`.
+    ```solidity
+    function getGlobalTableUpdateSignableDigest(bytes32 globalTableRoot, uint32 referenceTimestamp, uint32 referenceBlockNumber) external view returns (bytes32);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getGlobalTableUpdateSignableDigestCall {
+        #[allow(missing_docs)]
+        pub globalTableRoot: alloy::sol_types::private::FixedBytes<32>,
+        #[allow(missing_docs)]
+        pub referenceTimestamp: u32,
+        #[allow(missing_docs)]
+        pub referenceBlockNumber: u32,
+    }
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`getGlobalTableUpdateSignableDigest(bytes32,uint32,uint32)`](getGlobalTableUpdateSignableDigestCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getGlobalTableUpdateSignableDigestReturn {
+        #[allow(missing_docs)]
+        pub _0: alloy::sol_types::private::FixedBytes<32>,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (
+                alloy::sol_types::sol_data::FixedBytes<32>,
+                alloy::sol_types::sol_data::Uint<32>,
+                alloy::sol_types::sol_data::Uint<32>,
+            );
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::FixedBytes<32>, u32, u32);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getGlobalTableUpdateSignableDigestCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getGlobalTableUpdateSignableDigestCall) -> Self {
+                    (
+                        value.globalTableRoot,
+                        value.referenceTimestamp,
+                        value.referenceBlockNumber,
+                    )
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGlobalTableUpdateSignableDigestCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self {
+                        globalTableRoot: tuple.0,
+                        referenceTimestamp: tuple.1,
+                        referenceBlockNumber: tuple.2,
+                    }
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::FixedBytes<32>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::FixedBytes<32>,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getGlobalTableUpdateSignableDigestReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getGlobalTableUpdateSignableDigestReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getGlobalTableUpdateSignableDigestReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for getGlobalTableUpdateSignableDigestCall {
+            type Parameters<'a> = (
+                alloy::sol_types::sol_data::FixedBytes<32>,
+                alloy::sol_types::sol_data::Uint<32>,
+                alloy::sol_types::sol_data::Uint<32>,
+            );
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = alloy::sol_types::private::FixedBytes<32>;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::FixedBytes<32>,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str =
+                "getGlobalTableUpdateSignableDigest(bytes32,uint32,uint32)";
+            const SELECTOR: [u8; 4] = [64u8, 28u8, 55u8, 15u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                (
+                    <alloy::sol_types::sol_data::FixedBytes<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(&self.globalTableRoot),
+                    <alloy::sol_types::sol_data::Uint<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(&self.referenceTimestamp),
+                    <alloy::sol_types::sol_data::Uint<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(&self.referenceBlockNumber),
+                )
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (
+                    <alloy::sol_types::sol_data::FixedBytes<
+                        32,
+                    > as alloy_sol_types::SolType>::tokenize(ret),
+                )
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getGlobalTableUpdateSignableDigestReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: getGlobalTableUpdateSignableDigestReturn = r.into();
                     r._0
                 })
             }
@@ -6543,154 +7005,22 @@ pub mod IOperatorTableUpdater {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `setGlobalRootConfirmerSet((address,uint32))` and selector `0x0371406e`.
+    /**Function with signature `updateGenerator((address,uint32),(bytes32,uint256,(uint256,uint256),uint256[]))` and selector `0x9f7e206f`.
     ```solidity
-    function setGlobalRootConfirmerSet(OperatorSet memory operatorSet) external;
+    function updateGenerator(OperatorSet memory generator, IOperatorTableCalculatorTypes.BN254OperatorSetInfo memory generatorInfo) external;
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct setGlobalRootConfirmerSetCall {
+    pub struct updateGeneratorCall {
         #[allow(missing_docs)]
-        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
+        pub generator: <OperatorSet as alloy::sol_types::SolType>::RustType,
+        #[allow(missing_docs)]
+        pub generatorInfo: <IOperatorTableCalculatorTypes::BN254OperatorSetInfo as alloy::sol_types::SolType>::RustType,
     }
-    ///Container type for the return parameters of the [`setGlobalRootConfirmerSet((address,uint32))`](setGlobalRootConfirmerSetCall) function.
+    ///Container type for the return parameters of the [`updateGenerator((address,uint32),(bytes32,uint256,(uint256,uint256),uint256[]))`](updateGeneratorCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct setGlobalRootConfirmerSetReturn {}
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (OperatorSet,);
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (<OperatorSet as alloy::sol_types::SolType>::RustType,);
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<setGlobalRootConfirmerSetCall> for UnderlyingRustTuple<'_> {
-                fn from(value: setGlobalRootConfirmerSetCall) -> Self {
-                    (value.operatorSet,)
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for setGlobalRootConfirmerSetCall {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {
-                        operatorSet: tuple.0,
-                    }
-                }
-            }
-        }
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = ();
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = ();
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<setGlobalRootConfirmerSetReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: setGlobalRootConfirmerSetReturn) -> Self {
-                    ()
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for setGlobalRootConfirmerSetReturn {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {}
-                }
-            }
-        }
-        impl setGlobalRootConfirmerSetReturn {
-            fn _tokenize(
-                &self,
-            ) -> <setGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::ReturnToken<'_>
-            {
-                ()
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolCall for setGlobalRootConfirmerSetCall {
-            type Parameters<'a> = (OperatorSet,);
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = setGlobalRootConfirmerSetReturn;
-            type ReturnTuple<'a> = ();
-            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "setGlobalRootConfirmerSet((address,uint32))";
-            const SELECTOR: [u8; 4] = [3u8, 113u8, 64u8, 110u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                (<OperatorSet as alloy_sol_types::SolType>::tokenize(
-                    &self.operatorSet,
-                ),)
-            }
-            #[inline]
-            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                setGlobalRootConfirmerSetReturn::_tokenize(ret)
-            }
-            #[inline]
-            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
-                    .map(Into::into)
-            }
-            #[inline]
-            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
-                    data,
-                )
-                .map(Into::into)
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `updateGlobalRootConfirmerSet(uint32,(bytes32,uint256,(uint256,uint256),uint256[]),(address,uint32))` and selector `0x1ab78d90`.
-    ```solidity
-    function updateGlobalRootConfirmerSet(uint32 referenceTimestamp, IOperatorTableCalculatorTypes.BN254OperatorSetInfo memory globalRootConfirmerSetInfo, ICrossChainRegistryTypes.OperatorSetConfig memory globalRootConfirmerSetConfig) external;
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct updateGlobalRootConfirmerSetCall {
-        #[allow(missing_docs)]
-        pub referenceTimestamp: u32,
-        #[allow(missing_docs)]
-        pub globalRootConfirmerSetInfo: <IOperatorTableCalculatorTypes::BN254OperatorSetInfo as alloy::sol_types::SolType>::RustType,
-        #[allow(missing_docs)]
-        pub globalRootConfirmerSetConfig: <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType,
-    }
-    ///Container type for the return parameters of the [`updateGlobalRootConfirmerSet(uint32,(bytes32,uint256,(uint256,uint256),uint256[]),(address,uint32))`](updateGlobalRootConfirmerSetCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct updateGlobalRootConfirmerSetReturn {}
+    pub struct updateGeneratorReturn {}
     #[allow(
         non_camel_case_types,
         non_snake_case,
@@ -6702,15 +7032,13 @@ pub mod IOperatorTableUpdater {
         {
             #[doc(hidden)]
             type UnderlyingSolTuple<'a> = (
-                alloy::sol_types::sol_data::Uint<32>,
+                OperatorSet,
                 IOperatorTableCalculatorTypes::BN254OperatorSetInfo,
-                ICrossChainRegistryTypes::OperatorSetConfig,
             );
             #[doc(hidden)]
             type UnderlyingRustTuple<'a> = (
-                u32,
+                <OperatorSet as alloy::sol_types::SolType>::RustType,
                 <IOperatorTableCalculatorTypes::BN254OperatorSetInfo as alloy::sol_types::SolType>::RustType,
-                <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType,
             );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
@@ -6723,23 +7051,18 @@ pub mod IOperatorTableUpdater {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<updateGlobalRootConfirmerSetCall> for UnderlyingRustTuple<'_> {
-                fn from(value: updateGlobalRootConfirmerSetCall) -> Self {
-                    (
-                        value.referenceTimestamp,
-                        value.globalRootConfirmerSetInfo,
-                        value.globalRootConfirmerSetConfig,
-                    )
+            impl ::core::convert::From<updateGeneratorCall> for UnderlyingRustTuple<'_> {
+                fn from(value: updateGeneratorCall) -> Self {
+                    (value.generator, value.generatorInfo)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for updateGlobalRootConfirmerSetCall {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for updateGeneratorCall {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self {
-                        referenceTimestamp: tuple.0,
-                        globalRootConfirmerSetInfo: tuple.1,
-                        globalRootConfirmerSetConfig: tuple.2,
+                        generator: tuple.0,
+                        generatorInfo: tuple.1,
                     }
                 }
             }
@@ -6760,40 +7083,39 @@ pub mod IOperatorTableUpdater {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<updateGlobalRootConfirmerSetReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: updateGlobalRootConfirmerSetReturn) -> Self {
+            impl ::core::convert::From<updateGeneratorReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: updateGeneratorReturn) -> Self {
                     ()
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for updateGlobalRootConfirmerSetReturn {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for updateGeneratorReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self {}
                 }
             }
         }
-        impl updateGlobalRootConfirmerSetReturn {
+        impl updateGeneratorReturn {
             fn _tokenize(
                 &self,
-            ) -> <updateGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::ReturnToken<'_>
-            {
+            ) -> <updateGeneratorCall as alloy_sol_types::SolCall>::ReturnToken<'_> {
                 ()
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::SolCall for updateGlobalRootConfirmerSetCall {
+        impl alloy_sol_types::SolCall for updateGeneratorCall {
             type Parameters<'a> = (
-                alloy::sol_types::sol_data::Uint<32>,
+                OperatorSet,
                 IOperatorTableCalculatorTypes::BN254OperatorSetInfo,
-                ICrossChainRegistryTypes::OperatorSetConfig,
             );
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = updateGlobalRootConfirmerSetReturn;
+            type Return = updateGeneratorReturn;
             type ReturnTuple<'a> = ();
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "updateGlobalRootConfirmerSet(uint32,(bytes32,uint256,(uint256,uint256),uint256[]),(address,uint32))";
-            const SELECTOR: [u8; 4] = [26u8, 183u8, 141u8, 144u8];
+            const SIGNATURE: &'static str =
+                "updateGenerator((address,uint32),(bytes32,uint256,(uint256,uint256),uint256[]))";
+            const SELECTOR: [u8; 4] = [159u8, 126u8, 32u8, 111u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -6803,20 +7125,15 @@ pub mod IOperatorTableUpdater {
             #[inline]
             fn tokenize(&self) -> Self::Token<'_> {
                 (
-                    <alloy::sol_types::sol_data::Uint<
-                        32,
-                    > as alloy_sol_types::SolType>::tokenize(&self.referenceTimestamp),
+                    <OperatorSet as alloy_sol_types::SolType>::tokenize(&self.generator),
                     <IOperatorTableCalculatorTypes::BN254OperatorSetInfo as alloy_sol_types::SolType>::tokenize(
-                        &self.globalRootConfirmerSetInfo,
-                    ),
-                    <ICrossChainRegistryTypes::OperatorSetConfig as alloy_sol_types::SolType>::tokenize(
-                        &self.globalRootConfirmerSetConfig,
+                        &self.generatorInfo,
                     ),
                 )
             }
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                updateGlobalRootConfirmerSetReturn::_tokenize(ret)
+                updateGeneratorReturn::_tokenize(ret)
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
@@ -7025,13 +7342,17 @@ pub mod IOperatorTableUpdater {
         #[allow(missing_docs)]
         getCurrentGlobalTableRoot(getCurrentGlobalTableRootCall),
         #[allow(missing_docs)]
-        getGlobalConfirmerSetReferenceTimestamp(getGlobalConfirmerSetReferenceTimestampCall),
+        getGenerator(getGeneratorCall),
         #[allow(missing_docs)]
-        getGlobalRootConfirmerSet(getGlobalRootConfirmerSetCall),
+        getGeneratorConfig(getGeneratorConfigCall),
+        #[allow(missing_docs)]
+        getGeneratorReferenceTimestamp(getGeneratorReferenceTimestampCall),
         #[allow(missing_docs)]
         getGlobalTableRootByTimestamp(getGlobalTableRootByTimestampCall),
         #[allow(missing_docs)]
         getGlobalTableUpdateMessageHash(getGlobalTableUpdateMessageHashCall),
+        #[allow(missing_docs)]
+        getGlobalTableUpdateSignableDigest(getGlobalTableUpdateSignableDigestCall),
         #[allow(missing_docs)]
         getLatestReferenceBlockNumber(getLatestReferenceBlockNumberCall),
         #[allow(missing_docs)]
@@ -7047,9 +7368,7 @@ pub mod IOperatorTableUpdater {
         #[allow(missing_docs)]
         setGlobalRootConfirmationThreshold(setGlobalRootConfirmationThresholdCall),
         #[allow(missing_docs)]
-        setGlobalRootConfirmerSet(setGlobalRootConfirmerSetCall),
-        #[allow(missing_docs)]
-        updateGlobalRootConfirmerSet(updateGlobalRootConfirmerSetCall),
+        updateGenerator(updateGeneratorCall),
         #[allow(missing_docs)]
         updateOperatorTable(updateOperatorTableCall),
     }
@@ -7062,20 +7381,21 @@ pub mod IOperatorTableUpdater {
         ///
         /// Prefer using `SolInterface` methods instead.
         pub const SELECTORS: &'static [[u8; 4usize]] = &[
-            [3u8, 113u8, 64u8, 110u8],
-            [15u8, 63u8, 142u8, 221u8],
             [25u8, 59u8, 121u8, 243u8],
-            [26u8, 183u8, 141u8, 144u8],
+            [30u8, 44u8, 162u8, 96u8],
             [35u8, 112u8, 53u8, 108u8],
             [35u8, 183u8, 181u8, 178u8],
             [40u8, 82u8, 45u8, 121u8],
             [48u8, 239u8, 65u8, 180u8],
             [49u8, 165u8, 153u8, 210u8],
+            [64u8, 28u8, 55u8, 15u8],
             [70u8, 36u8, 230u8, 163u8],
-            [70u8, 40u8, 40u8, 137u8],
             [100u8, 225u8, 223u8, 132u8],
             [111u8, 114u8, 140u8, 80u8],
+            [117u8, 81u8, 186u8, 52u8],
             [158u8, 169u8, 71u8, 120u8],
+            [159u8, 126u8, 32u8, 111u8],
+            [176u8, 203u8, 58u8, 36u8],
             [195u8, 98u8, 31u8, 10u8],
             [195u8, 190u8, 30u8, 51u8],
             [197u8, 145u8, 106u8, 57u8],
@@ -7086,33 +7406,35 @@ pub mod IOperatorTableUpdater {
     impl alloy_sol_types::SolInterface for IOperatorTableUpdaterCalls {
         const NAME: &'static str = "IOperatorTableUpdaterCalls";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 18usize;
+        const COUNT: usize = 19usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
                 Self::confirmGlobalTableRoot(_) => {
                     <confirmGlobalTableRootCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::disableRoot(_) => {
-                    <disableRootCall as alloy_sol_types::SolCall>::SELECTOR
-                }
+                Self::disableRoot(_) => <disableRootCall as alloy_sol_types::SolCall>::SELECTOR,
                 Self::getCertificateVerifier(_) => {
                     <getCertificateVerifierCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::getCurrentGlobalTableRoot(_) => {
                     <getCurrentGlobalTableRootCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::getGlobalConfirmerSetReferenceTimestamp(_) => {
-                    <getGlobalConfirmerSetReferenceTimestampCall as alloy_sol_types::SolCall>::SELECTOR
+                Self::getGenerator(_) => <getGeneratorCall as alloy_sol_types::SolCall>::SELECTOR,
+                Self::getGeneratorConfig(_) => {
+                    <getGeneratorConfigCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::getGlobalRootConfirmerSet(_) => {
-                    <getGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::SELECTOR
+                Self::getGeneratorReferenceTimestamp(_) => {
+                    <getGeneratorReferenceTimestampCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::getGlobalTableRootByTimestamp(_) => {
                     <getGlobalTableRootByTimestampCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::getGlobalTableUpdateMessageHash(_) => {
                     <getGlobalTableUpdateMessageHashCall as alloy_sol_types::SolCall>::SELECTOR
+                }
+                Self::getGlobalTableUpdateSignableDigest(_) => {
+                    <getGlobalTableUpdateSignableDigestCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::getLatestReferenceBlockNumber(_) => {
                     <getLatestReferenceBlockNumberCall as alloy_sol_types::SolCall>::SELECTOR
@@ -7126,20 +7448,15 @@ pub mod IOperatorTableUpdater {
                 Self::getReferenceTimestampByBlockNumber(_) => {
                     <getReferenceTimestampByBlockNumberCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::isRootValid(_) => {
-                    <isRootValidCall as alloy_sol_types::SolCall>::SELECTOR
-                }
+                Self::isRootValid(_) => <isRootValidCall as alloy_sol_types::SolCall>::SELECTOR,
                 Self::isRootValidByTimestamp(_) => {
                     <isRootValidByTimestampCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::setGlobalRootConfirmationThreshold(_) => {
                     <setGlobalRootConfirmationThresholdCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::setGlobalRootConfirmerSet(_) => {
-                    <setGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::SELECTOR
-                }
-                Self::updateGlobalRootConfirmerSet(_) => {
-                    <updateGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::SELECTOR
+                Self::updateGenerator(_) => {
+                    <updateGeneratorCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::updateOperatorTable(_) => {
                     <updateOperatorTableCall as alloy_sol_types::SolCall>::SELECTOR
@@ -7162,30 +7479,6 @@ pub mod IOperatorTableUpdater {
             )
                 -> alloy_sol_types::Result<IOperatorTableUpdaterCalls>] = &[
                 {
-                    fn setGlobalRootConfirmerSet(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
-                        <setGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_decode_raw(
-                            data,
-                        )
-                        .map(IOperatorTableUpdaterCalls::setGlobalRootConfirmerSet)
-                    }
-                    setGlobalRootConfirmerSet
-                },
-                {
-                    fn getGlobalConfirmerSetReferenceTimestamp(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
-                        <getGlobalConfirmerSetReferenceTimestampCall as alloy_sol_types::SolCall>::abi_decode_raw(
-                                data,
-                            )
-                            .map(
-                                IOperatorTableUpdaterCalls::getGlobalConfirmerSetReferenceTimestamp,
-                            )
-                    }
-                    getGlobalConfirmerSetReferenceTimestamp
-                },
-                {
                     fn getReferenceTimestampByBlockNumber(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
@@ -7199,17 +7492,13 @@ pub mod IOperatorTableUpdater {
                     getReferenceTimestampByBlockNumber
                 },
                 {
-                    fn updateGlobalRootConfirmerSet(
+                    fn getGenerator(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
-                        <updateGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_decode_raw(
-                                data,
-                            )
-                            .map(
-                                IOperatorTableUpdaterCalls::updateGlobalRootConfirmerSet,
-                            )
+                        <getGeneratorCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
+                            .map(IOperatorTableUpdaterCalls::getGenerator)
                     }
-                    updateGlobalRootConfirmerSet
+                    getGenerator
                 },
                 {
                     fn setGlobalRootConfirmationThreshold(
@@ -7271,6 +7560,19 @@ pub mod IOperatorTableUpdater {
                     getLatestReferenceBlockNumber
                 },
                 {
+                    fn getGlobalTableUpdateSignableDigest(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
+                        <getGlobalTableUpdateSignableDigestCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                                data,
+                            )
+                            .map(
+                                IOperatorTableUpdaterCalls::getGlobalTableUpdateSignableDigest,
+                            )
+                    }
+                    getGlobalTableUpdateSignableDigest
+                },
+                {
                     fn getLatestReferenceTimestamp(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
@@ -7280,17 +7582,6 @@ pub mod IOperatorTableUpdater {
                             .map(IOperatorTableUpdaterCalls::getLatestReferenceTimestamp)
                     }
                     getLatestReferenceTimestamp
-                },
-                {
-                    fn getGlobalRootConfirmerSet(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
-                        <getGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_decode_raw(
-                            data,
-                        )
-                        .map(IOperatorTableUpdaterCalls::getGlobalRootConfirmerSet)
-                    }
-                    getGlobalRootConfirmerSet
                 },
                 {
                     fn isRootValidByTimestamp(
@@ -7315,6 +7606,19 @@ pub mod IOperatorTableUpdater {
                     getCertificateVerifier
                 },
                 {
+                    fn getGeneratorReferenceTimestamp(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
+                        <getGeneratorReferenceTimestampCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                                data,
+                            )
+                            .map(
+                                IOperatorTableUpdaterCalls::getGeneratorReferenceTimestamp,
+                            )
+                    }
+                    getGeneratorReferenceTimestamp
+                },
+                {
                     fn updateOperatorTable(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
@@ -7322,6 +7626,24 @@ pub mod IOperatorTableUpdater {
                             .map(IOperatorTableUpdaterCalls::updateOperatorTable)
                     }
                     updateOperatorTable
+                },
+                {
+                    fn updateGenerator(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
+                        <updateGeneratorCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
+                            .map(IOperatorTableUpdaterCalls::updateGenerator)
+                    }
+                    updateGenerator
+                },
+                {
+                    fn getGeneratorConfig(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
+                        <getGeneratorConfigCall as alloy_sol_types::SolCall>::abi_decode_raw(data)
+                            .map(IOperatorTableUpdaterCalls::getGeneratorConfig)
+                    }
+                    getGeneratorConfig
                 },
                 {
                     fn disableRoot(
@@ -7390,30 +7712,6 @@ pub mod IOperatorTableUpdater {
                 IOperatorTableUpdaterCalls,
             >] = &[
                 {
-                    fn setGlobalRootConfirmerSet(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
-                        <setGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(IOperatorTableUpdaterCalls::setGlobalRootConfirmerSet)
-                    }
-                    setGlobalRootConfirmerSet
-                },
-                {
-                    fn getGlobalConfirmerSetReferenceTimestamp(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
-                        <getGlobalConfirmerSetReferenceTimestampCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(
-                                IOperatorTableUpdaterCalls::getGlobalConfirmerSetReferenceTimestamp,
-                            )
-                    }
-                    getGlobalConfirmerSetReferenceTimestamp
-                },
-                {
                     fn getReferenceTimestampByBlockNumber(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
@@ -7427,17 +7725,15 @@ pub mod IOperatorTableUpdater {
                     getReferenceTimestampByBlockNumber
                 },
                 {
-                    fn updateGlobalRootConfirmerSet(
+                    fn getGenerator(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
-                        <updateGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(
-                                IOperatorTableUpdaterCalls::updateGlobalRootConfirmerSet,
-                            )
+                        <getGeneratorCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IOperatorTableUpdaterCalls::getGenerator)
                     }
-                    updateGlobalRootConfirmerSet
+                    getGenerator
                 },
                 {
                     fn setGlobalRootConfirmationThreshold(
@@ -7499,6 +7795,19 @@ pub mod IOperatorTableUpdater {
                     getLatestReferenceBlockNumber
                 },
                 {
+                    fn getGlobalTableUpdateSignableDigest(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
+                        <getGlobalTableUpdateSignableDigestCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(
+                                IOperatorTableUpdaterCalls::getGlobalTableUpdateSignableDigest,
+                            )
+                    }
+                    getGlobalTableUpdateSignableDigest
+                },
+                {
                     fn getLatestReferenceTimestamp(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
@@ -7508,17 +7817,6 @@ pub mod IOperatorTableUpdater {
                             .map(IOperatorTableUpdaterCalls::getLatestReferenceTimestamp)
                     }
                     getLatestReferenceTimestamp
-                },
-                {
-                    fn getGlobalRootConfirmerSet(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
-                        <getGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(IOperatorTableUpdaterCalls::getGlobalRootConfirmerSet)
-                    }
-                    getGlobalRootConfirmerSet
                 },
                 {
                     fn isRootValidByTimestamp(
@@ -7543,6 +7841,19 @@ pub mod IOperatorTableUpdater {
                     getCertificateVerifier
                 },
                 {
+                    fn getGeneratorReferenceTimestamp(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
+                        <getGeneratorReferenceTimestampCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(
+                                IOperatorTableUpdaterCalls::getGeneratorReferenceTimestamp,
+                            )
+                    }
+                    getGeneratorReferenceTimestamp
+                },
+                {
                     fn updateOperatorTable(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
@@ -7552,6 +7863,28 @@ pub mod IOperatorTableUpdater {
                             .map(IOperatorTableUpdaterCalls::updateOperatorTable)
                     }
                     updateOperatorTable
+                },
+                {
+                    fn updateGenerator(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
+                        <updateGeneratorCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IOperatorTableUpdaterCalls::updateGenerator)
+                    }
+                    updateGenerator
+                },
+                {
+                    fn getGeneratorConfig(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterCalls> {
+                        <getGeneratorConfigCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(IOperatorTableUpdaterCalls::getGeneratorConfig)
+                    }
+                    getGeneratorConfig
                 },
                 {
                     fn disableRoot(
@@ -7631,13 +7964,18 @@ pub mod IOperatorTableUpdater {
                         inner,
                     )
                 }
-                Self::getGlobalConfirmerSetReferenceTimestamp(inner) => {
-                    <getGlobalConfirmerSetReferenceTimestampCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                Self::getGenerator(inner) => {
+                    <getGeneratorCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
-                Self::getGlobalRootConfirmerSet(inner) => {
-                    <getGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                Self::getGeneratorConfig(inner) => {
+                    <getGeneratorConfigCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::getGeneratorReferenceTimestamp(inner) => {
+                    <getGeneratorReferenceTimestampCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
@@ -7648,6 +7986,11 @@ pub mod IOperatorTableUpdater {
                 }
                 Self::getGlobalTableUpdateMessageHash(inner) => {
                     <getGlobalTableUpdateMessageHashCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::getGlobalTableUpdateSignableDigest(inner) => {
+                    <getGlobalTableUpdateSignableDigestCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
@@ -7686,13 +8029,8 @@ pub mod IOperatorTableUpdater {
                         inner,
                     )
                 }
-                Self::setGlobalRootConfirmerSet(inner) => {
-                    <setGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_encoded_size(
-                        inner,
-                    )
-                }
-                Self::updateGlobalRootConfirmerSet(inner) => {
-                    <updateGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                Self::updateGenerator(inner) => {
+                    <updateGeneratorCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
@@ -7730,14 +8068,20 @@ pub mod IOperatorTableUpdater {
                         out,
                     )
                 }
-                Self::getGlobalConfirmerSetReferenceTimestamp(inner) => {
-                    <getGlobalConfirmerSetReferenceTimestampCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                Self::getGenerator(inner) => {
+                    <getGeneratorCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
                 }
-                Self::getGlobalRootConfirmerSet(inner) => {
-                    <getGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                Self::getGeneratorConfig(inner) => {
+                    <getGeneratorConfigCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::getGeneratorReferenceTimestamp(inner) => {
+                    <getGeneratorReferenceTimestampCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -7750,6 +8094,12 @@ pub mod IOperatorTableUpdater {
                 }
                 Self::getGlobalTableUpdateMessageHash(inner) => {
                     <getGlobalTableUpdateMessageHashCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::getGlobalTableUpdateSignableDigest(inner) => {
+                    <getGlobalTableUpdateSignableDigestCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -7796,14 +8146,8 @@ pub mod IOperatorTableUpdater {
                         out,
                     )
                 }
-                Self::setGlobalRootConfirmerSet(inner) => {
-                    <setGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner,
-                        out,
-                    )
-                }
-                Self::updateGlobalRootConfirmerSet(inner) => {
-                    <updateGlobalRootConfirmerSetCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                Self::updateGenerator(inner) => {
+                    <updateGeneratorCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -7821,6 +8165,8 @@ pub mod IOperatorTableUpdater {
     #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Hash)]
     pub enum IOperatorTableUpdaterErrors {
         #[allow(missing_docs)]
+        CannotDisableGeneratorRoot(CannotDisableGeneratorRoot),
+        #[allow(missing_docs)]
         CertificateInvalid(CertificateInvalid),
         #[allow(missing_docs)]
         GlobalTableRootInFuture(GlobalTableRootInFuture),
@@ -7831,15 +8177,17 @@ pub mod IOperatorTableUpdater {
         #[allow(missing_docs)]
         InvalidCurveType(InvalidCurveType),
         #[allow(missing_docs)]
+        InvalidGenerator(InvalidGenerator),
+        #[allow(missing_docs)]
         InvalidGlobalTableRoot(InvalidGlobalTableRoot),
         #[allow(missing_docs)]
         InvalidMessageHash(InvalidMessageHash),
         #[allow(missing_docs)]
+        InvalidOperatorSet(InvalidOperatorSet),
+        #[allow(missing_docs)]
         InvalidOperatorSetProof(InvalidOperatorSetProof),
         #[allow(missing_docs)]
         InvalidRoot(InvalidRoot),
-        #[allow(missing_docs)]
-        InvalidSignatureLength(InvalidSignatureLength),
         #[allow(missing_docs)]
         TableUpdateForPastTimestamp(TableUpdateForPastTimestamp),
     }
@@ -7855,8 +8203,10 @@ pub mod IOperatorTableUpdater {
             [14u8, 102u8, 222u8, 6u8],
             [27u8, 253u8, 67u8, 88u8],
             [32u8, 118u8, 23u8, 223u8],
-            [75u8, 230u8, 50u8, 27u8],
+            [51u8, 36u8, 21u8, 250u8],
             [80u8, 69u8, 112u8, 227u8],
+            [100u8, 70u8, 249u8, 23u8],
+            [126u8, 197u8, 193u8, 84u8],
             [139u8, 86u8, 100u8, 45u8],
             [175u8, 164u8, 44u8, 167u8],
             [180u8, 35u8, 59u8, 106u8],
@@ -7869,10 +8219,13 @@ pub mod IOperatorTableUpdater {
     impl alloy_sol_types::SolInterface for IOperatorTableUpdaterErrors {
         const NAME: &'static str = "IOperatorTableUpdaterErrors";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 11usize;
+        const COUNT: usize = 13usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
+                Self::CannotDisableGeneratorRoot(_) => {
+                    <CannotDisableGeneratorRoot as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::CertificateInvalid(_) => {
                     <CertificateInvalid as alloy_sol_types::SolError>::SELECTOR
                 }
@@ -7888,19 +8241,22 @@ pub mod IOperatorTableUpdater {
                 Self::InvalidCurveType(_) => {
                     <InvalidCurveType as alloy_sol_types::SolError>::SELECTOR
                 }
+                Self::InvalidGenerator(_) => {
+                    <InvalidGenerator as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::InvalidGlobalTableRoot(_) => {
                     <InvalidGlobalTableRoot as alloy_sol_types::SolError>::SELECTOR
                 }
                 Self::InvalidMessageHash(_) => {
                     <InvalidMessageHash as alloy_sol_types::SolError>::SELECTOR
                 }
+                Self::InvalidOperatorSet(_) => {
+                    <InvalidOperatorSet as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::InvalidOperatorSetProof(_) => {
                     <InvalidOperatorSetProof as alloy_sol_types::SolError>::SELECTOR
                 }
                 Self::InvalidRoot(_) => <InvalidRoot as alloy_sol_types::SolError>::SELECTOR,
-                Self::InvalidSignatureLength(_) => {
-                    <InvalidSignatureLength as alloy_sol_types::SolError>::SELECTOR
-                }
                 Self::TableUpdateForPastTimestamp(_) => {
                     <TableUpdateForPastTimestamp as alloy_sol_types::SolError>::SELECTOR
                 }
@@ -7953,13 +8309,15 @@ pub mod IOperatorTableUpdater {
                     TableUpdateForPastTimestamp
                 },
                 {
-                    fn InvalidSignatureLength(
+                    fn CannotDisableGeneratorRoot(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterErrors> {
-                        <InvalidSignatureLength as alloy_sol_types::SolError>::abi_decode_raw(data)
-                            .map(IOperatorTableUpdaterErrors::InvalidSignatureLength)
+                        <CannotDisableGeneratorRoot as alloy_sol_types::SolError>::abi_decode_raw(
+                            data,
+                        )
+                        .map(IOperatorTableUpdaterErrors::CannotDisableGeneratorRoot)
                     }
-                    InvalidSignatureLength
+                    CannotDisableGeneratorRoot
                 },
                 {
                     fn InvalidRoot(
@@ -7969,6 +8327,24 @@ pub mod IOperatorTableUpdater {
                             .map(IOperatorTableUpdaterErrors::InvalidRoot)
                     }
                     InvalidRoot
+                },
+                {
+                    fn InvalidGenerator(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterErrors> {
+                        <InvalidGenerator as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IOperatorTableUpdaterErrors::InvalidGenerator)
+                    }
+                    InvalidGenerator
+                },
+                {
+                    fn InvalidOperatorSet(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterErrors> {
+                        <InvalidOperatorSet as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(IOperatorTableUpdaterErrors::InvalidOperatorSet)
+                    }
+                    InvalidOperatorSet
                 },
                 {
                     fn InvalidMessageHash(
@@ -8082,15 +8458,15 @@ pub mod IOperatorTableUpdater {
                     TableUpdateForPastTimestamp
                 },
                 {
-                    fn InvalidSignatureLength(
+                    fn CannotDisableGeneratorRoot(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<IOperatorTableUpdaterErrors> {
-                        <InvalidSignatureLength as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                        <CannotDisableGeneratorRoot as alloy_sol_types::SolError>::abi_decode_raw_validate(
                                 data,
                             )
-                            .map(IOperatorTableUpdaterErrors::InvalidSignatureLength)
+                            .map(IOperatorTableUpdaterErrors::CannotDisableGeneratorRoot)
                     }
-                    InvalidSignatureLength
+                    CannotDisableGeneratorRoot
                 },
                 {
                     fn InvalidRoot(
@@ -8100,6 +8476,28 @@ pub mod IOperatorTableUpdater {
                             .map(IOperatorTableUpdaterErrors::InvalidRoot)
                     }
                     InvalidRoot
+                },
+                {
+                    fn InvalidGenerator(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterErrors> {
+                        <InvalidGenerator as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IOperatorTableUpdaterErrors::InvalidGenerator)
+                    }
+                    InvalidGenerator
+                },
+                {
+                    fn InvalidOperatorSet(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<IOperatorTableUpdaterErrors> {
+                        <InvalidOperatorSet as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(IOperatorTableUpdaterErrors::InvalidOperatorSet)
+                    }
+                    InvalidOperatorSet
                 },
                 {
                     fn InvalidMessageHash(
@@ -8179,6 +8577,11 @@ pub mod IOperatorTableUpdater {
         #[inline]
         fn abi_encoded_size(&self) -> usize {
             match self {
+                Self::CannotDisableGeneratorRoot(inner) => {
+                    <CannotDisableGeneratorRoot as alloy_sol_types::SolError>::abi_encoded_size(
+                        inner,
+                    )
+                }
                 Self::CertificateInvalid(inner) => {
                     <CertificateInvalid as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
@@ -8196,20 +8599,23 @@ pub mod IOperatorTableUpdater {
                 Self::InvalidCurveType(inner) => {
                     <InvalidCurveType as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
+                Self::InvalidGenerator(inner) => {
+                    <InvalidGenerator as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
                 Self::InvalidGlobalTableRoot(inner) => {
                     <InvalidGlobalTableRoot as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
                 Self::InvalidMessageHash(inner) => {
                     <InvalidMessageHash as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
+                Self::InvalidOperatorSet(inner) => {
+                    <InvalidOperatorSet as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
                 Self::InvalidOperatorSetProof(inner) => {
                     <InvalidOperatorSetProof as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
                 Self::InvalidRoot(inner) => {
                     <InvalidRoot as alloy_sol_types::SolError>::abi_encoded_size(inner)
-                }
-                Self::InvalidSignatureLength(inner) => {
-                    <InvalidSignatureLength as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
                 Self::TableUpdateForPastTimestamp(inner) => {
                     <TableUpdateForPastTimestamp as alloy_sol_types::SolError>::abi_encoded_size(
@@ -8221,6 +8627,11 @@ pub mod IOperatorTableUpdater {
         #[inline]
         fn abi_encode_raw(&self, out: &mut alloy_sol_types::private::Vec<u8>) {
             match self {
+                Self::CannotDisableGeneratorRoot(inner) => {
+                    <CannotDisableGeneratorRoot as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner, out,
+                    )
+                }
                 Self::CertificateInvalid(inner) => {
                     <CertificateInvalid as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
@@ -8240,6 +8651,9 @@ pub mod IOperatorTableUpdater {
                 Self::InvalidCurveType(inner) => {
                     <InvalidCurveType as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
+                Self::InvalidGenerator(inner) => {
+                    <InvalidGenerator as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
+                }
                 Self::InvalidGlobalTableRoot(inner) => {
                     <InvalidGlobalTableRoot as alloy_sol_types::SolError>::abi_encode_raw(
                         inner, out,
@@ -8248,6 +8662,9 @@ pub mod IOperatorTableUpdater {
                 Self::InvalidMessageHash(inner) => {
                     <InvalidMessageHash as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
+                Self::InvalidOperatorSet(inner) => {
+                    <InvalidOperatorSet as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
+                }
                 Self::InvalidOperatorSetProof(inner) => {
                     <InvalidOperatorSetProof as alloy_sol_types::SolError>::abi_encode_raw(
                         inner, out,
@@ -8255,11 +8672,6 @@ pub mod IOperatorTableUpdater {
                 }
                 Self::InvalidRoot(inner) => {
                     <InvalidRoot as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
-                }
-                Self::InvalidSignatureLength(inner) => {
-                    <InvalidSignatureLength as alloy_sol_types::SolError>::abi_encode_raw(
-                        inner, out,
-                    )
                 }
                 Self::TableUpdateForPastTimestamp(inner) => {
                     <TableUpdateForPastTimestamp as alloy_sol_types::SolError>::abi_encode_raw(
@@ -8273,9 +8685,9 @@ pub mod IOperatorTableUpdater {
     #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Hash)]
     pub enum IOperatorTableUpdaterEvents {
         #[allow(missing_docs)]
-        GlobalRootConfirmationThresholdUpdated(GlobalRootConfirmationThresholdUpdated),
+        GeneratorUpdated(GeneratorUpdated),
         #[allow(missing_docs)]
-        GlobalRootConfirmerSetUpdated(GlobalRootConfirmerSetUpdated),
+        GlobalRootConfirmationThresholdUpdated(GlobalRootConfirmationThresholdUpdated),
         #[allow(missing_docs)]
         GlobalRootDisabled(GlobalRootDisabled),
         #[allow(missing_docs)]
@@ -8296,9 +8708,9 @@ pub mod IOperatorTableUpdater {
                 251u8, 94u8, 204u8, 238u8, 200u8, 211u8, 105u8,
             ],
             [
-                32u8, 16u8, 3u8, 148u8, 149u8, 14u8, 102u8, 1u8, 76u8, 37u8, 0u8, 155u8, 69u8,
-                209u8, 43u8, 103u8, 82u8, 16u8, 166u8, 231u8, 160u8, 2u8, 4u8, 74u8, 14u8, 61u8,
-                230u8, 84u8, 78u8, 60u8, 75u8, 55u8,
+                52u8, 99u8, 67u8, 27u8, 9u8, 223u8, 212u8, 61u8, 236u8, 115u8, 73u8, 248u8, 242u8,
+                74u8, 207u8, 167u8, 83u8, 254u8, 76u8, 244u8, 10u8, 38u8, 35u8, 84u8, 2u8, 210u8,
+                19u8, 55u8, 61u8, 241u8, 88u8, 86u8,
             ],
             [
                 139u8, 212u8, 61u8, 225u8, 37u8, 15u8, 88u8, 254u8, 110u8, 201u8, 167u8, 134u8,
@@ -8321,6 +8733,13 @@ pub mod IOperatorTableUpdater {
             data: &[u8],
         ) -> alloy_sol_types::Result<Self> {
             match topics.first().copied() {
+                Some(<GeneratorUpdated as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
+                    <GeneratorUpdated as alloy_sol_types::SolEvent>::decode_raw_log(
+                            topics,
+                            data,
+                        )
+                        .map(Self::GeneratorUpdated)
+                }
                 Some(
                     <GlobalRootConfirmationThresholdUpdated as alloy_sol_types::SolEvent>::SIGNATURE_HASH,
                 ) => {
@@ -8329,15 +8748,6 @@ pub mod IOperatorTableUpdater {
                             data,
                         )
                         .map(Self::GlobalRootConfirmationThresholdUpdated)
-                }
-                Some(
-                    <GlobalRootConfirmerSetUpdated as alloy_sol_types::SolEvent>::SIGNATURE_HASH,
-                ) => {
-                    <GlobalRootConfirmerSetUpdated as alloy_sol_types::SolEvent>::decode_raw_log(
-                            topics,
-                            data,
-                        )
-                        .map(Self::GlobalRootConfirmerSetUpdated)
                 }
                 Some(
                     <GlobalRootDisabled as alloy_sol_types::SolEvent>::SIGNATURE_HASH,
@@ -8375,10 +8785,10 @@ pub mod IOperatorTableUpdater {
     impl alloy_sol_types::private::IntoLogData for IOperatorTableUpdaterEvents {
         fn to_log_data(&self) -> alloy_sol_types::private::LogData {
             match self {
-                Self::GlobalRootConfirmationThresholdUpdated(inner) => {
+                Self::GeneratorUpdated(inner) => {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
-                Self::GlobalRootConfirmerSetUpdated(inner) => {
+                Self::GlobalRootConfirmationThresholdUpdated(inner) => {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
                 Self::GlobalRootDisabled(inner) => {
@@ -8391,10 +8801,10 @@ pub mod IOperatorTableUpdater {
         }
         fn into_log_data(self) -> alloy_sol_types::private::LogData {
             match self {
-                Self::GlobalRootConfirmationThresholdUpdated(inner) => {
+                Self::GeneratorUpdated(inner) => {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
-                Self::GlobalRootConfirmerSetUpdated(inner) => {
+                Self::GlobalRootConfirmationThresholdUpdated(inner) => {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
                 Self::GlobalRootDisabled(inner) => {
@@ -8595,18 +9005,21 @@ pub mod IOperatorTableUpdater {
         ) -> alloy_contract::SolCallBuilder<&P, getCurrentGlobalTableRootCall, N> {
             self.call_builder(&getCurrentGlobalTableRootCall)
         }
-        ///Creates a new call builder for the [`getGlobalConfirmerSetReferenceTimestamp`] function.
-        pub fn getGlobalConfirmerSetReferenceTimestamp(
-            &self,
-        ) -> alloy_contract::SolCallBuilder<&P, getGlobalConfirmerSetReferenceTimestampCall, N>
-        {
-            self.call_builder(&getGlobalConfirmerSetReferenceTimestampCall)
+        ///Creates a new call builder for the [`getGenerator`] function.
+        pub fn getGenerator(&self) -> alloy_contract::SolCallBuilder<&P, getGeneratorCall, N> {
+            self.call_builder(&getGeneratorCall)
         }
-        ///Creates a new call builder for the [`getGlobalRootConfirmerSet`] function.
-        pub fn getGlobalRootConfirmerSet(
+        ///Creates a new call builder for the [`getGeneratorConfig`] function.
+        pub fn getGeneratorConfig(
             &self,
-        ) -> alloy_contract::SolCallBuilder<&P, getGlobalRootConfirmerSetCall, N> {
-            self.call_builder(&getGlobalRootConfirmerSetCall)
+        ) -> alloy_contract::SolCallBuilder<&P, getGeneratorConfigCall, N> {
+            self.call_builder(&getGeneratorConfigCall)
+        }
+        ///Creates a new call builder for the [`getGeneratorReferenceTimestamp`] function.
+        pub fn getGeneratorReferenceTimestamp(
+            &self,
+        ) -> alloy_contract::SolCallBuilder<&P, getGeneratorReferenceTimestampCall, N> {
+            self.call_builder(&getGeneratorReferenceTimestampCall)
         }
         ///Creates a new call builder for the [`getGlobalTableRootByTimestamp`] function.
         pub fn getGlobalTableRootByTimestamp(
@@ -8623,6 +9036,19 @@ pub mod IOperatorTableUpdater {
             referenceBlockNumber: u32,
         ) -> alloy_contract::SolCallBuilder<&P, getGlobalTableUpdateMessageHashCall, N> {
             self.call_builder(&getGlobalTableUpdateMessageHashCall {
+                globalTableRoot,
+                referenceTimestamp,
+                referenceBlockNumber,
+            })
+        }
+        ///Creates a new call builder for the [`getGlobalTableUpdateSignableDigest`] function.
+        pub fn getGlobalTableUpdateSignableDigest(
+            &self,
+            globalTableRoot: alloy::sol_types::private::FixedBytes<32>,
+            referenceTimestamp: u32,
+            referenceBlockNumber: u32,
+        ) -> alloy_contract::SolCallBuilder<&P, getGlobalTableUpdateSignableDigestCall, N> {
+            self.call_builder(&getGlobalTableUpdateSignableDigestCall {
                 globalTableRoot,
                 referenceTimestamp,
                 referenceBlockNumber,
@@ -8677,24 +9103,15 @@ pub mod IOperatorTableUpdater {
         ) -> alloy_contract::SolCallBuilder<&P, setGlobalRootConfirmationThresholdCall, N> {
             self.call_builder(&setGlobalRootConfirmationThresholdCall { bps })
         }
-        ///Creates a new call builder for the [`setGlobalRootConfirmerSet`] function.
-        pub fn setGlobalRootConfirmerSet(
+        ///Creates a new call builder for the [`updateGenerator`] function.
+        pub fn updateGenerator(
             &self,
-            operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-        ) -> alloy_contract::SolCallBuilder<&P, setGlobalRootConfirmerSetCall, N> {
-            self.call_builder(&setGlobalRootConfirmerSetCall { operatorSet })
-        }
-        ///Creates a new call builder for the [`updateGlobalRootConfirmerSet`] function.
-        pub fn updateGlobalRootConfirmerSet(
-            &self,
-            referenceTimestamp: u32,
-            globalRootConfirmerSetInfo: <IOperatorTableCalculatorTypes::BN254OperatorSetInfo as alloy::sol_types::SolType>::RustType,
-            globalRootConfirmerSetConfig: <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType,
-        ) -> alloy_contract::SolCallBuilder<&P, updateGlobalRootConfirmerSetCall, N> {
-            self.call_builder(&updateGlobalRootConfirmerSetCall {
-                referenceTimestamp,
-                globalRootConfirmerSetInfo,
-                globalRootConfirmerSetConfig,
+            generator: <OperatorSet as alloy::sol_types::SolType>::RustType,
+            generatorInfo: <IOperatorTableCalculatorTypes::BN254OperatorSetInfo as alloy::sol_types::SolType>::RustType,
+        ) -> alloy_contract::SolCallBuilder<&P, updateGeneratorCall, N> {
+            self.call_builder(&updateGeneratorCall {
+                generator,
+                generatorInfo,
             })
         }
         ///Creates a new call builder for the [`updateOperatorTable`] function.
@@ -8729,17 +9146,15 @@ pub mod IOperatorTableUpdater {
         ) -> alloy_contract::Event<&P, E, N> {
             alloy_contract::Event::new_sol(&self.provider, &self.address)
         }
+        ///Creates a new event filter for the [`GeneratorUpdated`] event.
+        pub fn GeneratorUpdated_filter(&self) -> alloy_contract::Event<&P, GeneratorUpdated, N> {
+            self.event_filter::<GeneratorUpdated>()
+        }
         ///Creates a new event filter for the [`GlobalRootConfirmationThresholdUpdated`] event.
         pub fn GlobalRootConfirmationThresholdUpdated_filter(
             &self,
         ) -> alloy_contract::Event<&P, GlobalRootConfirmationThresholdUpdated, N> {
             self.event_filter::<GlobalRootConfirmationThresholdUpdated>()
-        }
-        ///Creates a new event filter for the [`GlobalRootConfirmerSetUpdated`] event.
-        pub fn GlobalRootConfirmerSetUpdated_filter(
-            &self,
-        ) -> alloy_contract::Event<&P, GlobalRootConfirmerSetUpdated, N> {
-            self.event_filter::<GlobalRootConfirmerSetUpdated>()
         }
         ///Creates a new event filter for the [`GlobalRootDisabled`] event.
         pub fn GlobalRootDisabled_filter(

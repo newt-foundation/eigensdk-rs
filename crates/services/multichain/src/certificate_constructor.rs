@@ -2,11 +2,11 @@ use alloy::primitives::U256;
 use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
 use eigen_services_blsaggregation::bls_aggregation_service_response::BlsAggregationServiceResponse;
-use eigen_utils::slashing::multichain::operator_table_updater::BN254::{G1Point, G2Point};
 use eigen_utils::slashing::multichain::operator_table_updater::IBN254CertificateVerifierTypes::{
     BN254Certificate, BN254OperatorInfoWitness,
 };
 use eigen_utils::slashing::multichain::operator_table_updater::IOperatorTableCalculatorTypes::BN254OperatorInfo;
+use eigen_utils::slashing::multichain::operator_table_updater::BN254::{G1Point, G2Point};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -26,10 +26,7 @@ pub fn construct_bn254_certificate(
     let sig_g1 = response.signers_agg_sig_g1.g1_point().g1();
     let sig_x = U256::from_limbs(sig_g1.x().unwrap().into_bigint().0);
     let sig_y = U256::from_limbs(sig_g1.y().unwrap().into_bigint().0);
-    let signature = G1Point {
-        X: sig_x,
-        Y: sig_y,
-    };
+    let signature = G1Point { X: sig_x, Y: sig_y };
 
     let apk_g2 = response.signers_apk_g2.g2();
     let apk_x = apk_g2.x().unwrap();

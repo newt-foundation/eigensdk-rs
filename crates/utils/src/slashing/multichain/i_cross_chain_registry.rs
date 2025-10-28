@@ -357,10 +357,12 @@ interface ICrossChainRegistry {
     error GenerationReservationAlreadyExists();
     error GenerationReservationDoesNotExist();
     error InvalidChainId();
+    error InvalidEndIndex();
     error InvalidOperatorSet();
-    error RequireAtLeastOneTransportDestination();
-    error TransportDestinationAlreadyAdded();
-    error TransportDestinationNotFound();
+    error InvalidRange();
+    error InvalidStalenessPeriod();
+    error InvalidTableUpdateCadence();
+    error KeyTypeNotSet();
 
     event ChainIDAddedToWhitelist(uint256 chainID, address operatorTableUpdater);
     event ChainIDRemovedFromWhitelist(uint256 chainID);
@@ -370,25 +372,24 @@ interface ICrossChainRegistry {
     event OperatorSetConfigSet(OperatorSet operatorSet, ICrossChainRegistryTypes.OperatorSetConfig config);
     event OperatorTableCalculatorRemoved(OperatorSet operatorSet);
     event OperatorTableCalculatorSet(OperatorSet operatorSet, address operatorTableCalculator);
-    event TransportDestinationChainAdded(OperatorSet operatorSet, uint256 chainID);
-    event TransportDestinationChainRemoved(OperatorSet operatorSet, uint256 chainID);
-    event TransportDestinationsRemoved(OperatorSet operatorSet);
+    event TableUpdateCadenceSet(uint32 tableUpdateCadence);
 
     function addChainIDsToWhitelist(uint256[] memory chainIDs, address[] memory operatorTableUpdaters) external;
-    function addTransportDestinations(OperatorSet memory operatorSet, uint256[] memory chainIDs) external;
     function calculateOperatorTableBytes(OperatorSet memory operatorSet) external view returns (bytes memory);
-    function createGenerationReservation(OperatorSet memory operatorSet, address operatorTableCalculator, ICrossChainRegistryTypes.OperatorSetConfig memory config, uint256[] memory chainIDs) external;
+    function createGenerationReservation(OperatorSet memory operatorSet, address operatorTableCalculator, ICrossChainRegistryTypes.OperatorSetConfig memory config) external;
+    function getActiveGenerationReservationCount() external view returns (uint256);
     function getActiveGenerationReservations() external view returns (OperatorSet[] memory);
-    function getActiveTransportReservations() external view returns (OperatorSet[] memory, uint256[][] memory);
+    function getActiveGenerationReservationsByRange(uint256 startIndex, uint256 endIndex) external view returns (OperatorSet[] memory);
     function getOperatorSetConfig(OperatorSet memory operatorSet) external view returns (ICrossChainRegistryTypes.OperatorSetConfig memory);
     function getOperatorTableCalculator(OperatorSet memory operatorSet) external view returns (address);
     function getSupportedChains() external view returns (uint256[] memory, address[] memory);
-    function getTransportDestinations(OperatorSet memory operatorSet) external view returns (uint256[] memory);
+    function getTableUpdateCadence() external view returns (uint32);
+    function hasActiveGenerationReservation(OperatorSet memory operatorSet) external view returns (bool);
     function removeChainIDsFromWhitelist(uint256[] memory chainIDs) external;
     function removeGenerationReservation(OperatorSet memory operatorSet) external;
-    function removeTransportDestinations(OperatorSet memory operatorSet, uint256[] memory chainIDs) external;
     function setOperatorSetConfig(OperatorSet memory operatorSet, ICrossChainRegistryTypes.OperatorSetConfig memory config) external;
     function setOperatorTableCalculator(OperatorSet memory operatorSet, address operatorTableCalculator) external;
+    function setTableUpdateCadence(uint32 tableUpdateCadence) external;
 }
 ```
 
@@ -408,36 +409,6 @@ interface ICrossChainRegistry {
         "name": "operatorTableUpdaters",
         "type": "address[]",
         "internalType": "address[]"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "addTransportDestinations",
-    "inputs": [
-      {
-        "name": "operatorSet",
-        "type": "tuple",
-        "internalType": "struct OperatorSet",
-        "components": [
-          {
-            "name": "avs",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "id",
-            "type": "uint32",
-            "internalType": "uint32"
-          }
-        ]
-      },
-      {
-        "name": "chainIDs",
-        "type": "uint256[]",
-        "internalType": "uint256[]"
       }
     ],
     "outputs": [],
@@ -516,15 +487,23 @@ interface ICrossChainRegistry {
             "internalType": "uint32"
           }
         ]
-      },
-      {
-        "name": "chainIDs",
-        "type": "uint256[]",
-        "internalType": "uint256[]"
       }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getActiveGenerationReservationCount",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -553,8 +532,19 @@ interface ICrossChainRegistry {
   },
   {
     "type": "function",
-    "name": "getActiveTransportReservations",
-    "inputs": [],
+    "name": "getActiveGenerationReservationsByRange",
+    "inputs": [
+      {
+        "name": "startIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "endIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "outputs": [
       {
         "name": "",
@@ -572,11 +562,6 @@ interface ICrossChainRegistry {
             "internalType": "uint32"
           }
         ]
-      },
-      {
-        "name": "",
-        "type": "uint256[][]",
-        "internalType": "uint256[][]"
       }
     ],
     "stateMutability": "view"
@@ -675,7 +660,20 @@ interface ICrossChainRegistry {
   },
   {
     "type": "function",
-    "name": "getTransportDestinations",
+    "name": "getTableUpdateCadence",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "hasActiveGenerationReservation",
     "inputs": [
       {
         "name": "operatorSet",
@@ -698,8 +696,8 @@ interface ICrossChainRegistry {
     "outputs": [
       {
         "name": "",
-        "type": "uint256[]",
-        "internalType": "uint256[]"
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
     "stateMutability": "view"
@@ -737,36 +735,6 @@ interface ICrossChainRegistry {
             "internalType": "uint32"
           }
         ]
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "removeTransportDestinations",
-    "inputs": [
-      {
-        "name": "operatorSet",
-        "type": "tuple",
-        "internalType": "struct OperatorSet",
-        "components": [
-          {
-            "name": "avs",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "id",
-            "type": "uint32",
-            "internalType": "uint32"
-          }
-        ]
-      },
-      {
-        "name": "chainIDs",
-        "type": "uint256[]",
-        "internalType": "uint256[]"
       }
     ],
     "outputs": [],
@@ -839,6 +807,19 @@ interface ICrossChainRegistry {
         "name": "operatorTableCalculator",
         "type": "address",
         "internalType": "contract IOperatorTableCalculator"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setTableUpdateCadence",
+    "inputs": [
+      {
+        "name": "tableUpdateCadence",
+        "type": "uint32",
+        "internalType": "uint32"
       }
     ],
     "outputs": [],
@@ -1052,87 +1033,13 @@ interface ICrossChainRegistry {
   },
   {
     "type": "event",
-    "name": "TransportDestinationChainAdded",
+    "name": "TableUpdateCadenceSet",
     "inputs": [
       {
-        "name": "operatorSet",
-        "type": "tuple",
+        "name": "tableUpdateCadence",
+        "type": "uint32",
         "indexed": false,
-        "internalType": "struct OperatorSet",
-        "components": [
-          {
-            "name": "avs",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "id",
-            "type": "uint32",
-            "internalType": "uint32"
-          }
-        ]
-      },
-      {
-        "name": "chainID",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "TransportDestinationChainRemoved",
-    "inputs": [
-      {
-        "name": "operatorSet",
-        "type": "tuple",
-        "indexed": false,
-        "internalType": "struct OperatorSet",
-        "components": [
-          {
-            "name": "avs",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "id",
-            "type": "uint32",
-            "internalType": "uint32"
-          }
-        ]
-      },
-      {
-        "name": "chainID",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "TransportDestinationsRemoved",
-    "inputs": [
-      {
-        "name": "operatorSet",
-        "type": "tuple",
-        "indexed": false,
-        "internalType": "struct OperatorSet",
-        "components": [
-          {
-            "name": "avs",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "id",
-            "type": "uint32",
-            "internalType": "uint32"
-          }
-        ]
+        "internalType": "uint32"
       }
     ],
     "anonymous": false
@@ -1174,22 +1081,32 @@ interface ICrossChainRegistry {
   },
   {
     "type": "error",
+    "name": "InvalidEndIndex",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InvalidOperatorSet",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "RequireAtLeastOneTransportDestination",
+    "name": "InvalidRange",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "TransportDestinationAlreadyAdded",
+    "name": "InvalidStalenessPeriod",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "TransportDestinationNotFound",
+    "name": "InvalidTableUpdateCadence",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "KeyTypeNotSet",
     "inputs": []
   }
 ]
@@ -1889,6 +1806,74 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `InvalidEndIndex()` and selector `0xb68d84c0`.
+    ```solidity
+    error InvalidEndIndex();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct InvalidEndIndex;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<InvalidEndIndex> for UnderlyingRustTuple<'_> {
+            fn from(value: InvalidEndIndex) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for InvalidEndIndex {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for InvalidEndIndex {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "InvalidEndIndex()";
+            const SELECTOR: [u8; 4] = [182u8, 141u8, 132u8, 192u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Custom error with signature `InvalidOperatorSet()` and selector `0x7ec5c154`.
     ```solidity
     error InvalidOperatorSet();
@@ -1957,13 +1942,13 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Custom error with signature `RequireAtLeastOneTransportDestination()` and selector `0x43629f7b`.
+    /**Custom error with signature `InvalidRange()` and selector `0x561ce9bb`.
     ```solidity
-    error RequireAtLeastOneTransportDestination();
+    error InvalidRange();
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct RequireAtLeastOneTransportDestination;
+    pub struct InvalidRange;
     #[allow(
         non_camel_case_types,
         non_snake_case,
@@ -1987,24 +1972,24 @@ pub mod ICrossChainRegistry {
         }
         #[automatically_derived]
         #[doc(hidden)]
-        impl ::core::convert::From<RequireAtLeastOneTransportDestination> for UnderlyingRustTuple<'_> {
-            fn from(value: RequireAtLeastOneTransportDestination) -> Self {
+        impl ::core::convert::From<InvalidRange> for UnderlyingRustTuple<'_> {
+            fn from(value: InvalidRange) -> Self {
                 ()
             }
         }
         #[automatically_derived]
         #[doc(hidden)]
-        impl ::core::convert::From<UnderlyingRustTuple<'_>> for RequireAtLeastOneTransportDestination {
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for InvalidRange {
             fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                 Self
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::SolError for RequireAtLeastOneTransportDestination {
+        impl alloy_sol_types::SolError for InvalidRange {
             type Parameters<'a> = UnderlyingSolTuple<'a>;
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "RequireAtLeastOneTransportDestination()";
-            const SELECTOR: [u8; 4] = [67u8, 98u8, 159u8, 123u8];
+            const SIGNATURE: &'static str = "InvalidRange()";
+            const SELECTOR: [u8; 4] = [86u8, 28u8, 233u8, 187u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -2025,13 +2010,13 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Custom error with signature `TransportDestinationAlreadyAdded()` and selector `0x96d81ac9`.
+    /**Custom error with signature `InvalidStalenessPeriod()` and selector `0x5c8c9062`.
     ```solidity
-    error TransportDestinationAlreadyAdded();
+    error InvalidStalenessPeriod();
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct TransportDestinationAlreadyAdded;
+    pub struct InvalidStalenessPeriod;
     #[allow(
         non_camel_case_types,
         non_snake_case,
@@ -2055,24 +2040,24 @@ pub mod ICrossChainRegistry {
         }
         #[automatically_derived]
         #[doc(hidden)]
-        impl ::core::convert::From<TransportDestinationAlreadyAdded> for UnderlyingRustTuple<'_> {
-            fn from(value: TransportDestinationAlreadyAdded) -> Self {
+        impl ::core::convert::From<InvalidStalenessPeriod> for UnderlyingRustTuple<'_> {
+            fn from(value: InvalidStalenessPeriod) -> Self {
                 ()
             }
         }
         #[automatically_derived]
         #[doc(hidden)]
-        impl ::core::convert::From<UnderlyingRustTuple<'_>> for TransportDestinationAlreadyAdded {
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for InvalidStalenessPeriod {
             fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                 Self
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::SolError for TransportDestinationAlreadyAdded {
+        impl alloy_sol_types::SolError for InvalidStalenessPeriod {
             type Parameters<'a> = UnderlyingSolTuple<'a>;
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "TransportDestinationAlreadyAdded()";
-            const SELECTOR: [u8; 4] = [150u8, 216u8, 26u8, 201u8];
+            const SIGNATURE: &'static str = "InvalidStalenessPeriod()";
+            const SELECTOR: [u8; 4] = [92u8, 140u8, 144u8, 98u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -2093,13 +2078,13 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Custom error with signature `TransportDestinationNotFound()` and selector `0xab6cce07`.
+    /**Custom error with signature `InvalidTableUpdateCadence()` and selector `0xb6cc70d8`.
     ```solidity
-    error TransportDestinationNotFound();
+    error InvalidTableUpdateCadence();
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct TransportDestinationNotFound;
+    pub struct InvalidTableUpdateCadence;
     #[allow(
         non_camel_case_types,
         non_snake_case,
@@ -2123,24 +2108,92 @@ pub mod ICrossChainRegistry {
         }
         #[automatically_derived]
         #[doc(hidden)]
-        impl ::core::convert::From<TransportDestinationNotFound> for UnderlyingRustTuple<'_> {
-            fn from(value: TransportDestinationNotFound) -> Self {
+        impl ::core::convert::From<InvalidTableUpdateCadence> for UnderlyingRustTuple<'_> {
+            fn from(value: InvalidTableUpdateCadence) -> Self {
                 ()
             }
         }
         #[automatically_derived]
         #[doc(hidden)]
-        impl ::core::convert::From<UnderlyingRustTuple<'_>> for TransportDestinationNotFound {
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for InvalidTableUpdateCadence {
             fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                 Self
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::SolError for TransportDestinationNotFound {
+        impl alloy_sol_types::SolError for InvalidTableUpdateCadence {
             type Parameters<'a> = UnderlyingSolTuple<'a>;
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "TransportDestinationNotFound()";
-            const SELECTOR: [u8; 4] = [171u8, 108u8, 206u8, 7u8];
+            const SIGNATURE: &'static str = "InvalidTableUpdateCadence()";
+            const SELECTOR: [u8; 4] = [182u8, 204u8, 112u8, 216u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn abi_decode_raw_validate(data: &[u8]) -> alloy_sol_types::Result<Self> {
+                <Self::Parameters<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Self::new)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Custom error with signature `KeyTypeNotSet()` and selector `0xe57cacbd`.
+    ```solidity
+    error KeyTypeNotSet();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct KeyTypeNotSet;
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<KeyTypeNotSet> for UnderlyingRustTuple<'_> {
+            fn from(value: KeyTypeNotSet) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for KeyTypeNotSet {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for KeyTypeNotSet {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "KeyTypeNotSet()";
+            const SELECTOR: [u8; 4] = [229u8, 124u8, 172u8, 189u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -2980,9 +3033,9 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `TransportDestinationChainAdded((address,uint32),uint256)` and selector `0x57a1fcb3d9cd447695c46f20944ba562d9547989dcddea0afb119115060c7f0b`.
+    /**Event with signature `TableUpdateCadenceSet(uint32)` and selector `0x4fbcd0cca70015b33db8af4aa4f2bd6fd6c1efa9460b8e2333f252c1467a6327`.
     ```solidity
-    event TransportDestinationChainAdded(OperatorSet operatorSet, uint256 chainID);
+    event TableUpdateCadenceSet(uint32 tableUpdateCadence);
     ```*/
     #[allow(
         non_camel_case_types,
@@ -2991,11 +3044,9 @@ pub mod ICrossChainRegistry {
         clippy::style
     )]
     #[derive(Clone)]
-    pub struct TransportDestinationChainAdded {
+    pub struct TableUpdateCadenceSet {
         #[allow(missing_docs)]
-        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-        #[allow(missing_docs)]
-        pub chainID: alloy::sol_types::private::primitives::aliases::U256,
+        pub tableUpdateCadence: u32,
     }
     #[allow(
         non_camel_case_types,
@@ -3006,17 +3057,16 @@ pub mod ICrossChainRegistry {
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
-        impl alloy_sol_types::SolEvent for TransportDestinationChainAdded {
-            type DataTuple<'a> = (OperatorSet, alloy::sol_types::sol_data::Uint<256>);
+        impl alloy_sol_types::SolEvent for TableUpdateCadenceSet {
+            type DataTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
             type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             type TopicList = (alloy_sol_types::sol_data::FixedBytes<32>,);
-            const SIGNATURE: &'static str =
-                "TransportDestinationChainAdded((address,uint32),uint256)";
+            const SIGNATURE: &'static str = "TableUpdateCadenceSet(uint32)";
             const SIGNATURE_HASH: alloy_sol_types::private::B256 =
                 alloy_sol_types::private::B256::new([
-                    87u8, 161u8, 252u8, 179u8, 217u8, 205u8, 68u8, 118u8, 149u8, 196u8, 111u8,
-                    32u8, 148u8, 75u8, 165u8, 98u8, 217u8, 84u8, 121u8, 137u8, 220u8, 221u8, 234u8,
-                    10u8, 251u8, 17u8, 145u8, 21u8, 6u8, 12u8, 127u8, 11u8,
+                    79u8, 188u8, 208u8, 204u8, 167u8, 0u8, 21u8, 179u8, 61u8, 184u8, 175u8, 74u8,
+                    164u8, 242u8, 189u8, 111u8, 214u8, 193u8, 239u8, 169u8, 70u8, 11u8, 142u8,
+                    35u8, 51u8, 242u8, 82u8, 193u8, 70u8, 122u8, 99u8, 39u8,
                 ]);
             const ANONYMOUS: bool = false;
             #[allow(unused_variables)]
@@ -3026,8 +3076,7 @@ pub mod ICrossChainRegistry {
                 data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
             ) -> Self {
                 Self {
-                    operatorSet: data.0,
-                    chainID: data.1,
+                    tableUpdateCadence: data.0,
                 }
             }
             #[inline]
@@ -3046,9 +3095,8 @@ pub mod ICrossChainRegistry {
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
                 (
-                    <OperatorSet as alloy_sol_types::SolType>::tokenize(&self.operatorSet),
-                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
-                        &self.chainID,
+                    <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
+                        &self.tableUpdateCadence,
                     ),
                 )
             }
@@ -3069,7 +3117,7 @@ pub mod ICrossChainRegistry {
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::private::IntoLogData for TransportDestinationChainAdded {
+        impl alloy_sol_types::private::IntoLogData for TableUpdateCadenceSet {
             fn to_log_data(&self) -> alloy_sol_types::private::LogData {
                 From::from(self)
             }
@@ -3078,214 +3126,9 @@ pub mod ICrossChainRegistry {
             }
         }
         #[automatically_derived]
-        impl From<&TransportDestinationChainAdded> for alloy_sol_types::private::LogData {
+        impl From<&TableUpdateCadenceSet> for alloy_sol_types::private::LogData {
             #[inline]
-            fn from(this: &TransportDestinationChainAdded) -> alloy_sol_types::private::LogData {
-                alloy_sol_types::SolEvent::encode_log_data(this)
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `TransportDestinationChainRemoved((address,uint32),uint256)` and selector `0x499955d838e6f0ca31e83adf81d191cfe6cd8fe252bf826c75c9a80ba077e25e`.
-    ```solidity
-    event TransportDestinationChainRemoved(OperatorSet operatorSet, uint256 chainID);
-    ```*/
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    #[derive(Clone)]
-    pub struct TransportDestinationChainRemoved {
-        #[allow(missing_docs)]
-        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-        #[allow(missing_docs)]
-        pub chainID: alloy::sol_types::private::primitives::aliases::U256,
-    }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        #[automatically_derived]
-        impl alloy_sol_types::SolEvent for TransportDestinationChainRemoved {
-            type DataTuple<'a> = (OperatorSet, alloy::sol_types::sol_data::Uint<256>);
-            type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type TopicList = (alloy_sol_types::sol_data::FixedBytes<32>,);
-            const SIGNATURE: &'static str =
-                "TransportDestinationChainRemoved((address,uint32),uint256)";
-            const SIGNATURE_HASH: alloy_sol_types::private::B256 =
-                alloy_sol_types::private::B256::new([
-                    73u8, 153u8, 85u8, 216u8, 56u8, 230u8, 240u8, 202u8, 49u8, 232u8, 58u8, 223u8,
-                    129u8, 209u8, 145u8, 207u8, 230u8, 205u8, 143u8, 226u8, 82u8, 191u8, 130u8,
-                    108u8, 117u8, 201u8, 168u8, 11u8, 160u8, 119u8, 226u8, 94u8,
-                ]);
-            const ANONYMOUS: bool = false;
-            #[allow(unused_variables)]
-            #[inline]
-            fn new(
-                topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
-                data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                Self {
-                    operatorSet: data.0,
-                    chainID: data.1,
-                }
-            }
-            #[inline]
-            fn check_signature(
-                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
-            ) -> alloy_sol_types::Result<()> {
-                if topics.0 != Self::SIGNATURE_HASH {
-                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
-                        Self::SIGNATURE,
-                        topics.0,
-                        Self::SIGNATURE_HASH,
-                    ));
-                }
-                Ok(())
-            }
-            #[inline]
-            fn tokenize_body(&self) -> Self::DataToken<'_> {
-                (
-                    <OperatorSet as alloy_sol_types::SolType>::tokenize(&self.operatorSet),
-                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
-                        &self.chainID,
-                    ),
-                )
-            }
-            #[inline]
-            fn topics(&self) -> <Self::TopicList as alloy_sol_types::SolType>::RustType {
-                (Self::SIGNATURE_HASH.into(),)
-            }
-            #[inline]
-            fn encode_topics_raw(
-                &self,
-                out: &mut [alloy_sol_types::abi::token::WordToken],
-            ) -> alloy_sol_types::Result<()> {
-                if out.len() < <Self::TopicList as alloy_sol_types::TopicList>::COUNT {
-                    return Err(alloy_sol_types::Error::Overrun);
-                }
-                out[0usize] = alloy_sol_types::abi::token::WordToken(Self::SIGNATURE_HASH);
-                Ok(())
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::private::IntoLogData for TransportDestinationChainRemoved {
-            fn to_log_data(&self) -> alloy_sol_types::private::LogData {
-                From::from(self)
-            }
-            fn into_log_data(self) -> alloy_sol_types::private::LogData {
-                From::from(&self)
-            }
-        }
-        #[automatically_derived]
-        impl From<&TransportDestinationChainRemoved> for alloy_sol_types::private::LogData {
-            #[inline]
-            fn from(this: &TransportDestinationChainRemoved) -> alloy_sol_types::private::LogData {
-                alloy_sol_types::SolEvent::encode_log_data(this)
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Event with signature `TransportDestinationsRemoved((address,uint32))` and selector `0xaf209f19ac00e8ccb4539e96d4141cdc96fea479d258d99910307c7365e68759`.
-    ```solidity
-    event TransportDestinationsRemoved(OperatorSet operatorSet);
-    ```*/
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    #[derive(Clone)]
-    pub struct TransportDestinationsRemoved {
-        #[allow(missing_docs)]
-        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-    }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        #[automatically_derived]
-        impl alloy_sol_types::SolEvent for TransportDestinationsRemoved {
-            type DataTuple<'a> = (OperatorSet,);
-            type DataToken<'a> = <Self::DataTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type TopicList = (alloy_sol_types::sol_data::FixedBytes<32>,);
-            const SIGNATURE: &'static str = "TransportDestinationsRemoved((address,uint32))";
-            const SIGNATURE_HASH: alloy_sol_types::private::B256 =
-                alloy_sol_types::private::B256::new([
-                    175u8, 32u8, 159u8, 25u8, 172u8, 0u8, 232u8, 204u8, 180u8, 83u8, 158u8, 150u8,
-                    212u8, 20u8, 28u8, 220u8, 150u8, 254u8, 164u8, 121u8, 210u8, 88u8, 217u8,
-                    153u8, 16u8, 48u8, 124u8, 115u8, 101u8, 230u8, 135u8, 89u8,
-                ]);
-            const ANONYMOUS: bool = false;
-            #[allow(unused_variables)]
-            #[inline]
-            fn new(
-                topics: <Self::TopicList as alloy_sol_types::SolType>::RustType,
-                data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                Self {
-                    operatorSet: data.0,
-                }
-            }
-            #[inline]
-            fn check_signature(
-                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
-            ) -> alloy_sol_types::Result<()> {
-                if topics.0 != Self::SIGNATURE_HASH {
-                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
-                        Self::SIGNATURE,
-                        topics.0,
-                        Self::SIGNATURE_HASH,
-                    ));
-                }
-                Ok(())
-            }
-            #[inline]
-            fn tokenize_body(&self) -> Self::DataToken<'_> {
-                (<OperatorSet as alloy_sol_types::SolType>::tokenize(
-                    &self.operatorSet,
-                ),)
-            }
-            #[inline]
-            fn topics(&self) -> <Self::TopicList as alloy_sol_types::SolType>::RustType {
-                (Self::SIGNATURE_HASH.into(),)
-            }
-            #[inline]
-            fn encode_topics_raw(
-                &self,
-                out: &mut [alloy_sol_types::abi::token::WordToken],
-            ) -> alloy_sol_types::Result<()> {
-                if out.len() < <Self::TopicList as alloy_sol_types::TopicList>::COUNT {
-                    return Err(alloy_sol_types::Error::Overrun);
-                }
-                out[0usize] = alloy_sol_types::abi::token::WordToken(Self::SIGNATURE_HASH);
-                Ok(())
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::private::IntoLogData for TransportDestinationsRemoved {
-            fn to_log_data(&self) -> alloy_sol_types::private::LogData {
-                From::from(self)
-            }
-            fn into_log_data(self) -> alloy_sol_types::private::LogData {
-                From::from(&self)
-            }
-        }
-        #[automatically_derived]
-        impl From<&TransportDestinationsRemoved> for alloy_sol_types::private::LogData {
-            #[inline]
-            fn from(this: &TransportDestinationsRemoved) -> alloy_sol_types::private::LogData {
+            fn from(this: &TableUpdateCadenceSet) -> alloy_sol_types::private::LogData {
                 alloy_sol_types::SolEvent::encode_log_data(this)
             }
         }
@@ -3442,156 +3285,6 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `addTransportDestinations((address,uint32),uint256[])` and selector `0x49be7d6f`.
-    ```solidity
-    function addTransportDestinations(OperatorSet memory operatorSet, uint256[] memory chainIDs) external;
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct addTransportDestinationsCall {
-        #[allow(missing_docs)]
-        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-        #[allow(missing_docs)]
-        pub chainIDs:
-            alloy::sol_types::private::Vec<alloy::sol_types::private::primitives::aliases::U256>,
-    }
-    ///Container type for the return parameters of the [`addTransportDestinations((address,uint32),uint256[])`](addTransportDestinationsCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct addTransportDestinationsReturn {}
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (
-                OperatorSet,
-                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
-            );
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (
-                <OperatorSet as alloy::sol_types::SolType>::RustType,
-                alloy::sol_types::private::Vec<
-                    alloy::sol_types::private::primitives::aliases::U256,
-                >,
-            );
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<addTransportDestinationsCall> for UnderlyingRustTuple<'_> {
-                fn from(value: addTransportDestinationsCall) -> Self {
-                    (value.operatorSet, value.chainIDs)
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for addTransportDestinationsCall {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {
-                        operatorSet: tuple.0,
-                        chainIDs: tuple.1,
-                    }
-                }
-            }
-        }
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = ();
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = ();
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<addTransportDestinationsReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: addTransportDestinationsReturn) -> Self {
-                    ()
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for addTransportDestinationsReturn {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {}
-                }
-            }
-        }
-        impl addTransportDestinationsReturn {
-            fn _tokenize(
-                &self,
-            ) -> <addTransportDestinationsCall as alloy_sol_types::SolCall>::ReturnToken<'_>
-            {
-                ()
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolCall for addTransportDestinationsCall {
-            type Parameters<'a> = (
-                OperatorSet,
-                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
-            );
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = addTransportDestinationsReturn;
-            type ReturnTuple<'a> = ();
-            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "addTransportDestinations((address,uint32),uint256[])";
-            const SELECTOR: [u8; 4] = [73u8, 190u8, 125u8, 111u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                (
-                    <OperatorSet as alloy_sol_types::SolType>::tokenize(
-                        &self.operatorSet,
-                    ),
-                    <alloy::sol_types::sol_data::Array<
-                        alloy::sol_types::sol_data::Uint<256>,
-                    > as alloy_sol_types::SolType>::tokenize(&self.chainIDs),
-                )
-            }
-            #[inline]
-            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                addTransportDestinationsReturn::_tokenize(ret)
-            }
-            #[inline]
-            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
-                    .map(Into::into)
-            }
-            #[inline]
-            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
-                    data,
-                )
-                .map(Into::into)
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
     /**Function with signature `calculateOperatorTableBytes((address,uint32))` and selector `0x41ee6d0e`.
     ```solidity
     function calculateOperatorTableBytes(OperatorSet memory operatorSet) external view returns (bytes memory);
@@ -3725,9 +3418,9 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `createGenerationReservation((address,uint32),address,(address,uint32),uint256[])` and selector `0xfe596dee`.
+    /**Function with signature `createGenerationReservation((address,uint32),address,(address,uint32))` and selector `0xd5044911`.
     ```solidity
-    function createGenerationReservation(OperatorSet memory operatorSet, address operatorTableCalculator, ICrossChainRegistryTypes.OperatorSetConfig memory config, uint256[] memory chainIDs) external;
+    function createGenerationReservation(OperatorSet memory operatorSet, address operatorTableCalculator, ICrossChainRegistryTypes.OperatorSetConfig memory config) external;
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
@@ -3739,11 +3432,8 @@ pub mod ICrossChainRegistry {
         #[allow(missing_docs)]
         pub config:
             <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType,
-        #[allow(missing_docs)]
-        pub chainIDs:
-            alloy::sol_types::private::Vec<alloy::sol_types::private::primitives::aliases::U256>,
     }
-    ///Container type for the return parameters of the [`createGenerationReservation((address,uint32),address,(address,uint32),uint256[])`](createGenerationReservationCall) function.
+    ///Container type for the return parameters of the [`createGenerationReservation((address,uint32),address,(address,uint32))`](createGenerationReservationCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct createGenerationReservationReturn {}
@@ -3761,16 +3451,12 @@ pub mod ICrossChainRegistry {
                 OperatorSet,
                 alloy::sol_types::sol_data::Address,
                 ICrossChainRegistryTypes::OperatorSetConfig,
-                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
             );
             #[doc(hidden)]
             type UnderlyingRustTuple<'a> = (
                 <OperatorSet as alloy::sol_types::SolType>::RustType,
                 alloy::sol_types::private::Address,
                 <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType,
-                alloy::sol_types::private::Vec<
-                    alloy::sol_types::private::primitives::aliases::U256,
-                >,
             );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
@@ -3789,7 +3475,6 @@ pub mod ICrossChainRegistry {
                         value.operatorSet,
                         value.operatorTableCalculator,
                         value.config,
-                        value.chainIDs,
                     )
                 }
             }
@@ -3801,7 +3486,6 @@ pub mod ICrossChainRegistry {
                         operatorSet: tuple.0,
                         operatorTableCalculator: tuple.1,
                         config: tuple.2,
-                        chainIDs: tuple.3,
                     }
                 }
             }
@@ -3849,15 +3533,14 @@ pub mod ICrossChainRegistry {
                 OperatorSet,
                 alloy::sol_types::sol_data::Address,
                 ICrossChainRegistryTypes::OperatorSetConfig,
-                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
             );
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             type Return = createGenerationReservationReturn;
             type ReturnTuple<'a> = ();
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str =
-                "createGenerationReservation((address,uint32),address,(address,uint32),uint256[])";
-            const SELECTOR: [u8; 4] = [254u8, 89u8, 109u8, 238u8];
+                "createGenerationReservation((address,uint32),address,(address,uint32))";
+            const SELECTOR: [u8; 4] = [213u8, 4u8, 73u8, 17u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -3876,9 +3559,6 @@ pub mod ICrossChainRegistry {
                     <ICrossChainRegistryTypes::OperatorSetConfig as alloy_sol_types::SolType>::tokenize(
                         &self.config,
                     ),
-                    <alloy::sol_types::sol_data::Array<
-                        alloy::sol_types::sol_data::Uint<256>,
-                    > as alloy_sol_types::SolType>::tokenize(&self.chainIDs),
                 )
             }
             #[inline]
@@ -3896,6 +3576,136 @@ pub mod ICrossChainRegistry {
                     data,
                 )
                 .map(Into::into)
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `getActiveGenerationReservationCount()` and selector `0xb186a60e`.
+    ```solidity
+    function getActiveGenerationReservationCount() external view returns (uint256);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getActiveGenerationReservationCountCall;
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`getActiveGenerationReservationCount()`](getActiveGenerationReservationCountCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getActiveGenerationReservationCountReturn {
+        #[allow(missing_docs)]
+        pub _0: alloy::sol_types::private::primitives::aliases::U256,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getActiveGenerationReservationCountCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getActiveGenerationReservationCountCall) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getActiveGenerationReservationCountCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getActiveGenerationReservationCountReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getActiveGenerationReservationCountReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getActiveGenerationReservationCountReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for getActiveGenerationReservationCountCall {
+            type Parameters<'a> = ();
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = alloy::sol_types::private::primitives::aliases::U256;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "getActiveGenerationReservationCount()";
+            const SELECTOR: [u8; 4] = [177u8, 134u8, 166u8, 14u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (
+                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
+                        ret,
+                    ),
+                )
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getActiveGenerationReservationCountReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: getActiveGenerationReservationCountReturn = r.into();
+                    r._0
+                })
             }
         }
     };
@@ -4037,25 +3847,26 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `getActiveTransportReservations()` and selector `0xbfda3b3d`.
+    /**Function with signature `getActiveGenerationReservationsByRange(uint256,uint256)` and selector `0xd9a6729e`.
     ```solidity
-    function getActiveTransportReservations() external view returns (OperatorSet[] memory, uint256[][] memory);
+    function getActiveGenerationReservationsByRange(uint256 startIndex, uint256 endIndex) external view returns (OperatorSet[] memory);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getActiveTransportReservationsCall;
+    pub struct getActiveGenerationReservationsByRangeCall {
+        #[allow(missing_docs)]
+        pub startIndex: alloy::sol_types::private::primitives::aliases::U256,
+        #[allow(missing_docs)]
+        pub endIndex: alloy::sol_types::private::primitives::aliases::U256,
+    }
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    ///Container type for the return parameters of the [`getActiveTransportReservations()`](getActiveTransportReservationsCall) function.
+    ///Container type for the return parameters of the [`getActiveGenerationReservationsByRange(uint256,uint256)`](getActiveGenerationReservationsByRangeCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getActiveTransportReservationsReturn {
+    pub struct getActiveGenerationReservationsByRangeReturn {
         #[allow(missing_docs)]
         pub _0:
             alloy::sol_types::private::Vec<<OperatorSet as alloy::sol_types::SolType>::RustType>,
-        #[allow(missing_docs)]
-        pub _1: alloy::sol_types::private::Vec<
-            alloy::sol_types::private::Vec<alloy::sol_types::private::primitives::aliases::U256>,
-        >,
     }
     #[allow(
         non_camel_case_types,
@@ -4067,9 +3878,15 @@ pub mod ICrossChainRegistry {
         use alloy::sol_types as alloy_sol_types;
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = ();
+            type UnderlyingSolTuple<'a> = (
+                alloy::sol_types::sol_data::Uint<256>,
+                alloy::sol_types::sol_data::Uint<256>,
+            );
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = ();
+            type UnderlyingRustTuple<'a> = (
+                alloy::sol_types::private::primitives::aliases::U256,
+                alloy::sol_types::private::primitives::aliases::U256,
+            );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -4081,36 +3898,29 @@ pub mod ICrossChainRegistry {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getActiveTransportReservationsCall> for UnderlyingRustTuple<'_> {
-                fn from(value: getActiveTransportReservationsCall) -> Self {
-                    ()
+            impl ::core::convert::From<getActiveGenerationReservationsByRangeCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getActiveGenerationReservationsByRangeCall) -> Self {
+                    (value.startIndex, value.endIndex)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getActiveTransportReservationsCall {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getActiveGenerationReservationsByRangeCall {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self
+                    Self {
+                        startIndex: tuple.0,
+                        endIndex: tuple.1,
+                    }
                 }
             }
         }
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (
-                alloy::sol_types::sol_data::Array<OperatorSet>,
-                alloy::sol_types::sol_data::Array<
-                    alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
-                >,
-            );
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Array<OperatorSet>,);
             #[doc(hidden)]
             type UnderlyingRustTuple<'a> = (
                 alloy::sol_types::private::Vec<
                     <OperatorSet as alloy::sol_types::SolType>::RustType,
-                >,
-                alloy::sol_types::private::Vec<
-                    alloy::sol_types::private::Vec<
-                        alloy::sol_types::private::primitives::aliases::U256,
-                    >,
                 >,
             );
             #[cfg(test)]
@@ -4124,53 +3934,38 @@ pub mod ICrossChainRegistry {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getActiveTransportReservationsReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: getActiveTransportReservationsReturn) -> Self {
-                    (value._0, value._1)
+            impl ::core::convert::From<getActiveGenerationReservationsByRangeReturn>
+                for UnderlyingRustTuple<'_>
+            {
+                fn from(value: getActiveGenerationReservationsByRangeReturn) -> Self {
+                    (value._0,)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getActiveTransportReservationsReturn {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>>
+                for getActiveGenerationReservationsByRangeReturn
+            {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {
-                        _0: tuple.0,
-                        _1: tuple.1,
-                    }
+                    Self { _0: tuple.0 }
                 }
             }
         }
-        impl getActiveTransportReservationsReturn {
-            fn _tokenize(
-                &self,
-            ) -> <getActiveTransportReservationsCall as alloy_sol_types::SolCall>::ReturnToken<'_>
-            {
-                (
-                    <alloy::sol_types::sol_data::Array<
-                        OperatorSet,
-                    > as alloy_sol_types::SolType>::tokenize(&self._0),
-                    <alloy::sol_types::sol_data::Array<
-                        alloy::sol_types::sol_data::Array<
-                            alloy::sol_types::sol_data::Uint<256>,
-                        >,
-                    > as alloy_sol_types::SolType>::tokenize(&self._1),
-                )
-            }
-        }
         #[automatically_derived]
-        impl alloy_sol_types::SolCall for getActiveTransportReservationsCall {
-            type Parameters<'a> = ();
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = getActiveTransportReservationsReturn;
-            type ReturnTuple<'a> = (
-                alloy::sol_types::sol_data::Array<OperatorSet>,
-                alloy::sol_types::sol_data::Array<
-                    alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
-                >,
+        impl alloy_sol_types::SolCall for getActiveGenerationReservationsByRangeCall {
+            type Parameters<'a> = (
+                alloy::sol_types::sol_data::Uint<256>,
+                alloy::sol_types::sol_data::Uint<256>,
             );
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = alloy::sol_types::private::Vec<
+                <OperatorSet as alloy::sol_types::SolType>::RustType,
+            >;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Array<OperatorSet>,);
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "getActiveTransportReservations()";
-            const SELECTOR: [u8; 4] = [191u8, 218u8, 59u8, 61u8];
+            const SIGNATURE: &'static str =
+                "getActiveGenerationReservationsByRange(uint256,uint256)";
+            const SELECTOR: [u8; 4] = [217u8, 166u8, 114u8, 158u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -4179,23 +3974,41 @@ pub mod ICrossChainRegistry {
             }
             #[inline]
             fn tokenize(&self) -> Self::Token<'_> {
-                ()
+                (
+                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
+                        &self.startIndex,
+                    ),
+                    <alloy::sol_types::sol_data::Uint<256> as alloy_sol_types::SolType>::tokenize(
+                        &self.endIndex,
+                    ),
+                )
             }
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                getActiveTransportReservationsReturn::_tokenize(ret)
+                (
+                    <alloy::sol_types::sol_data::Array<
+                        OperatorSet,
+                    > as alloy_sol_types::SolType>::tokenize(ret),
+                )
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
-                    .map(Into::into)
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getActiveGenerationReservationsByRangeReturn = r.into();
+                        r._0
+                    },
+                )
             }
             #[inline]
             fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
                 <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
                     data,
                 )
-                .map(Into::into)
+                .map(|r| {
+                    let r: getActiveGenerationReservationsByRangeReturn = r.into();
+                    r._0
+                })
             }
         }
     };
@@ -4627,24 +4440,153 @@ pub mod ICrossChainRegistry {
         }
     };
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `getTransportDestinations((address,uint32))` and selector `0x3c75fddf`.
+    /**Function with signature `getTableUpdateCadence()` and selector `0xac505f4b`.
     ```solidity
-    function getTransportDestinations(OperatorSet memory operatorSet) external view returns (uint256[] memory);
+    function getTableUpdateCadence() external view returns (uint32);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getTransportDestinationsCall {
+    pub struct getTableUpdateCadenceCall;
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    ///Container type for the return parameters of the [`getTableUpdateCadence()`](getTableUpdateCadenceCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct getTableUpdateCadenceReturn {
+        #[allow(missing_docs)]
+        pub _0: u32,
+    }
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getTableUpdateCadenceCall> for UnderlyingRustTuple<'_> {
+                fn from(value: getTableUpdateCadenceCall) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getTableUpdateCadenceCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (u32,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<getTableUpdateCadenceReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: getTableUpdateCadenceReturn) -> Self {
+                    (value._0,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getTableUpdateCadenceReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self { _0: tuple.0 }
+                }
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for getTableUpdateCadenceCall {
+            type Parameters<'a> = ();
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = u32;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "getTableUpdateCadence()";
+            const SELECTOR: [u8; 4] = [172u8, 80u8, 95u8, 75u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                (
+                    <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
+                        ret,
+                    ),
+                )
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
+                    |r| {
+                        let r: getTableUpdateCadenceReturn = r.into();
+                        r._0
+                    },
+                )
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(|r| {
+                    let r: getTableUpdateCadenceReturn = r.into();
+                    r._0
+                })
+            }
+        }
+    };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `hasActiveGenerationReservation((address,uint32))` and selector `0x36b200de`.
+    ```solidity
+    function hasActiveGenerationReservation(OperatorSet memory operatorSet) external view returns (bool);
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct hasActiveGenerationReservationCall {
         #[allow(missing_docs)]
         pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
     }
     #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    ///Container type for the return parameters of the [`getTransportDestinations((address,uint32))`](getTransportDestinationsCall) function.
+    ///Container type for the return parameters of the [`hasActiveGenerationReservation((address,uint32))`](hasActiveGenerationReservationCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
-    pub struct getTransportDestinationsReturn {
+    pub struct hasActiveGenerationReservationReturn {
         #[allow(missing_docs)]
-        pub _0:
-            alloy::sol_types::private::Vec<alloy::sol_types::private::primitives::aliases::U256>,
+        pub _0: bool,
     }
     #[allow(
         non_camel_case_types,
@@ -4670,14 +4612,14 @@ pub mod ICrossChainRegistry {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getTransportDestinationsCall> for UnderlyingRustTuple<'_> {
-                fn from(value: getTransportDestinationsCall) -> Self {
+            impl ::core::convert::From<hasActiveGenerationReservationCall> for UnderlyingRustTuple<'_> {
+                fn from(value: hasActiveGenerationReservationCall) -> Self {
                     (value.operatorSet,)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getTransportDestinationsCall {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for hasActiveGenerationReservationCall {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self {
                         operatorSet: tuple.0,
@@ -4687,14 +4629,9 @@ pub mod ICrossChainRegistry {
         }
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> =
-                (alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,);
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Bool,);
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (
-                alloy::sol_types::private::Vec<
-                    alloy::sol_types::private::primitives::aliases::U256,
-                >,
-            );
+            type UnderlyingRustTuple<'a> = (bool,);
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -4706,31 +4643,28 @@ pub mod ICrossChainRegistry {
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<getTransportDestinationsReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: getTransportDestinationsReturn) -> Self {
+            impl ::core::convert::From<hasActiveGenerationReservationReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: hasActiveGenerationReservationReturn) -> Self {
                     (value._0,)
                 }
             }
             #[automatically_derived]
             #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for getTransportDestinationsReturn {
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for hasActiveGenerationReservationReturn {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self { _0: tuple.0 }
                 }
             }
         }
         #[automatically_derived]
-        impl alloy_sol_types::SolCall for getTransportDestinationsCall {
+        impl alloy_sol_types::SolCall for hasActiveGenerationReservationCall {
             type Parameters<'a> = (OperatorSet,);
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = alloy::sol_types::private::Vec<
-                alloy::sol_types::private::primitives::aliases::U256,
-            >;
-            type ReturnTuple<'a> =
-                (alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,);
+            type Return = bool;
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Bool,);
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "getTransportDestinations((address,uint32))";
-            const SELECTOR: [u8; 4] = [60u8, 117u8, 253u8, 223u8];
+            const SIGNATURE: &'static str = "hasActiveGenerationReservation((address,uint32))";
+            const SELECTOR: [u8; 4] = [54u8, 178u8, 0u8, 222u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -4745,15 +4679,13 @@ pub mod ICrossChainRegistry {
             }
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                (<alloy::sol_types::sol_data::Array<
-                    alloy::sol_types::sol_data::Uint<256>,
-                > as alloy_sol_types::SolType>::tokenize(ret),)
+                (<alloy::sol_types::sol_data::Bool as alloy_sol_types::SolType>::tokenize(ret),)
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
                 <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data).map(
                     |r| {
-                        let r: getTransportDestinationsReturn = r.into();
+                        let r: hasActiveGenerationReservationReturn = r.into();
                         r._0
                     },
                 )
@@ -4764,7 +4696,7 @@ pub mod ICrossChainRegistry {
                     data,
                 )
                 .map(|r| {
-                    let r: getTransportDestinationsReturn = r.into();
+                    let r: hasActiveGenerationReservationReturn = r.into();
                     r._0
                 })
             }
@@ -5022,157 +4954,6 @@ pub mod ICrossChainRegistry {
             #[inline]
             fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
                 removeGenerationReservationReturn::_tokenize(ret)
-            }
-            #[inline]
-            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
-                    .map(Into::into)
-            }
-            #[inline]
-            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
-                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
-                    data,
-                )
-                .map(Into::into)
-            }
-        }
-    };
-    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
-    /**Function with signature `removeTransportDestinations((address,uint32),uint256[])` and selector `0xf3e9f5d4`.
-    ```solidity
-    function removeTransportDestinations(OperatorSet memory operatorSet, uint256[] memory chainIDs) external;
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct removeTransportDestinationsCall {
-        #[allow(missing_docs)]
-        pub operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-        #[allow(missing_docs)]
-        pub chainIDs:
-            alloy::sol_types::private::Vec<alloy::sol_types::private::primitives::aliases::U256>,
-    }
-    ///Container type for the return parameters of the [`removeTransportDestinations((address,uint32),uint256[])`](removeTransportDestinationsCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct removeTransportDestinationsReturn {}
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (
-                OperatorSet,
-                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
-            );
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (
-                <OperatorSet as alloy::sol_types::SolType>::RustType,
-                alloy::sol_types::private::Vec<
-                    alloy::sol_types::private::primitives::aliases::U256,
-                >,
-            );
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<removeTransportDestinationsCall> for UnderlyingRustTuple<'_> {
-                fn from(value: removeTransportDestinationsCall) -> Self {
-                    (value.operatorSet, value.chainIDs)
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for removeTransportDestinationsCall {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {
-                        operatorSet: tuple.0,
-                        chainIDs: tuple.1,
-                    }
-                }
-            }
-        }
-        {
-            #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = ();
-            #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = ();
-            #[cfg(test)]
-            #[allow(dead_code, unreachable_patterns)]
-            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-                match _t {
-                    alloy_sol_types::private::AssertTypeEq::<
-                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                    >(_) => {}
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<removeTransportDestinationsReturn> for UnderlyingRustTuple<'_> {
-                fn from(value: removeTransportDestinationsReturn) -> Self {
-                    ()
-                }
-            }
-            #[automatically_derived]
-            #[doc(hidden)]
-            impl ::core::convert::From<UnderlyingRustTuple<'_>> for removeTransportDestinationsReturn {
-                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                    Self {}
-                }
-            }
-        }
-        impl removeTransportDestinationsReturn {
-            fn _tokenize(
-                &self,
-            ) -> <removeTransportDestinationsCall as alloy_sol_types::SolCall>::ReturnToken<'_>
-            {
-                ()
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolCall for removeTransportDestinationsCall {
-            type Parameters<'a> = (
-                OperatorSet,
-                alloy::sol_types::sol_data::Array<alloy::sol_types::sol_data::Uint<256>>,
-            );
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            type Return = removeTransportDestinationsReturn;
-            type ReturnTuple<'a> = ();
-            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str =
-                "removeTransportDestinations((address,uint32),uint256[])";
-            const SELECTOR: [u8; 4] = [243u8, 233u8, 245u8, 212u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                (
-                    <OperatorSet as alloy_sol_types::SolType>::tokenize(
-                        &self.operatorSet,
-                    ),
-                    <alloy::sol_types::sol_data::Array<
-                        alloy::sol_types::sol_data::Uint<256>,
-                    > as alloy_sol_types::SolType>::tokenize(&self.chainIDs),
-                )
-            }
-            #[inline]
-            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
-                removeTransportDestinationsReturn::_tokenize(ret)
             }
             #[inline]
             fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
@@ -5471,21 +5252,153 @@ pub mod ICrossChainRegistry {
             }
         }
     };
+    #[derive(serde::Serialize, serde::Deserialize, Default, Debug, PartialEq, Eq, Hash)]
+    /**Function with signature `setTableUpdateCadence(uint32)` and selector `0xd6db9e25`.
+    ```solidity
+    function setTableUpdateCadence(uint32 tableUpdateCadence) external;
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct setTableUpdateCadenceCall {
+        #[allow(missing_docs)]
+        pub tableUpdateCadence: u32,
+    }
+    ///Container type for the return parameters of the [`setTableUpdateCadence(uint32)`](setTableUpdateCadenceCall) function.
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct setTableUpdateCadenceReturn {}
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<32>,);
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = (u32,);
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<setTableUpdateCadenceCall> for UnderlyingRustTuple<'_> {
+                fn from(value: setTableUpdateCadenceCall) -> Self {
+                    (value.tableUpdateCadence,)
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for setTableUpdateCadenceCall {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self {
+                        tableUpdateCadence: tuple.0,
+                    }
+                }
+            }
+        }
+        {
+            #[doc(hidden)]
+            type UnderlyingSolTuple<'a> = ();
+            #[doc(hidden)]
+            type UnderlyingRustTuple<'a> = ();
+            #[cfg(test)]
+            #[allow(dead_code, unreachable_patterns)]
+            fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+                match _t {
+                    alloy_sol_types::private::AssertTypeEq::<
+                        <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                    >(_) => {}
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<setTableUpdateCadenceReturn> for UnderlyingRustTuple<'_> {
+                fn from(value: setTableUpdateCadenceReturn) -> Self {
+                    ()
+                }
+            }
+            #[automatically_derived]
+            #[doc(hidden)]
+            impl ::core::convert::From<UnderlyingRustTuple<'_>> for setTableUpdateCadenceReturn {
+                fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                    Self {}
+                }
+            }
+        }
+        impl setTableUpdateCadenceReturn {
+            fn _tokenize(
+                &self,
+            ) -> <setTableUpdateCadenceCall as alloy_sol_types::SolCall>::ReturnToken<'_>
+            {
+                ()
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolCall for setTableUpdateCadenceCall {
+            type Parameters<'a> = (alloy::sol_types::sol_data::Uint<32>,);
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            type Return = setTableUpdateCadenceReturn;
+            type ReturnTuple<'a> = ();
+            type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "setTableUpdateCadence(uint32)";
+            const SELECTOR: [u8; 4] = [214u8, 219u8, 158u8, 37u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                (
+                    <alloy::sol_types::sol_data::Uint<32> as alloy_sol_types::SolType>::tokenize(
+                        &self.tableUpdateCadence,
+                    ),
+                )
+            }
+            #[inline]
+            fn tokenize_returns(ret: &Self::Return) -> Self::ReturnToken<'_> {
+                setTableUpdateCadenceReturn::_tokenize(ret)
+            }
+            #[inline]
+            fn abi_decode_returns(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence(data)
+                    .map(Into::into)
+            }
+            #[inline]
+            fn abi_decode_returns_validate(data: &[u8]) -> alloy_sol_types::Result<Self::Return> {
+                <Self::ReturnTuple<'_> as alloy_sol_types::SolType>::abi_decode_sequence_validate(
+                    data,
+                )
+                .map(Into::into)
+            }
+        }
+    };
     ///Container for all the [`ICrossChainRegistry`](self) function calls.
     #[derive(serde::Serialize, serde::Deserialize)]
     pub enum ICrossChainRegistryCalls {
         #[allow(missing_docs)]
         addChainIDsToWhitelist(addChainIDsToWhitelistCall),
         #[allow(missing_docs)]
-        addTransportDestinations(addTransportDestinationsCall),
-        #[allow(missing_docs)]
         calculateOperatorTableBytes(calculateOperatorTableBytesCall),
         #[allow(missing_docs)]
         createGenerationReservation(createGenerationReservationCall),
         #[allow(missing_docs)]
+        getActiveGenerationReservationCount(getActiveGenerationReservationCountCall),
+        #[allow(missing_docs)]
         getActiveGenerationReservations(getActiveGenerationReservationsCall),
         #[allow(missing_docs)]
-        getActiveTransportReservations(getActiveTransportReservationsCall),
+        getActiveGenerationReservationsByRange(getActiveGenerationReservationsByRangeCall),
         #[allow(missing_docs)]
         getOperatorSetConfig(getOperatorSetConfigCall),
         #[allow(missing_docs)]
@@ -5493,17 +5406,19 @@ pub mod ICrossChainRegistry {
         #[allow(missing_docs)]
         getSupportedChains(getSupportedChainsCall),
         #[allow(missing_docs)]
-        getTransportDestinations(getTransportDestinationsCall),
+        getTableUpdateCadence(getTableUpdateCadenceCall),
+        #[allow(missing_docs)]
+        hasActiveGenerationReservation(hasActiveGenerationReservationCall),
         #[allow(missing_docs)]
         removeChainIDsFromWhitelist(removeChainIDsFromWhitelistCall),
         #[allow(missing_docs)]
         removeGenerationReservation(removeGenerationReservationCall),
         #[allow(missing_docs)]
-        removeTransportDestinations(removeTransportDestinationsCall),
-        #[allow(missing_docs)]
         setOperatorSetConfig(setOperatorSetConfigCall),
         #[allow(missing_docs)]
         setOperatorTableCalculator(setOperatorTableCalculatorCall),
+        #[allow(missing_docs)]
+        setTableUpdateCadence(setTableUpdateCadenceCall),
     }
     #[automatically_derived]
     impl ICrossChainRegistryCalls {
@@ -5518,32 +5433,30 @@ pub mod ICrossChainRegistry {
             [28u8, 169u8, 20u8, 42u8],
             [33u8, 250u8, 127u8, 220u8],
             [39u8, 126u8, 30u8, 98u8],
-            [60u8, 117u8, 253u8, 223u8],
+            [54u8, 178u8, 0u8, 222u8],
             [65u8, 238u8, 109u8, 14u8],
-            [73u8, 190u8, 125u8, 111u8],
             [108u8, 85u8, 163u8, 127u8],
             [117u8, 228u8, 181u8, 57u8],
-            [191u8, 218u8, 59u8, 61u8],
+            [172u8, 80u8, 95u8, 75u8],
+            [177u8, 134u8, 166u8, 14u8],
             [196u8, 191u8, 254u8, 43u8],
             [208u8, 155u8, 151u8, 139u8],
+            [213u8, 4u8, 73u8, 17u8],
+            [214u8, 219u8, 158u8, 37u8],
+            [217u8, 166u8, 114u8, 158u8],
             [223u8, 189u8, 157u8, 253u8],
-            [243u8, 233u8, 245u8, 212u8],
-            [254u8, 89u8, 109u8, 238u8],
         ];
     }
     #[automatically_derived]
     impl alloy_sol_types::SolInterface for ICrossChainRegistryCalls {
         const NAME: &'static str = "ICrossChainRegistryCalls";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 15usize;
+        const COUNT: usize = 16usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
                 Self::addChainIDsToWhitelist(_) => {
                     <addChainIDsToWhitelistCall as alloy_sol_types::SolCall>::SELECTOR
-                }
-                Self::addTransportDestinations(_) => {
-                    <addTransportDestinationsCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::calculateOperatorTableBytes(_) => {
                     <calculateOperatorTableBytesCall as alloy_sol_types::SolCall>::SELECTOR
@@ -5551,11 +5464,14 @@ pub mod ICrossChainRegistry {
                 Self::createGenerationReservation(_) => {
                     <createGenerationReservationCall as alloy_sol_types::SolCall>::SELECTOR
                 }
+                Self::getActiveGenerationReservationCount(_) => {
+                    <getActiveGenerationReservationCountCall as alloy_sol_types::SolCall>::SELECTOR
+                }
                 Self::getActiveGenerationReservations(_) => {
                     <getActiveGenerationReservationsCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::getActiveTransportReservations(_) => {
-                    <getActiveTransportReservationsCall as alloy_sol_types::SolCall>::SELECTOR
+                Self::getActiveGenerationReservationsByRange(_) => {
+                    <getActiveGenerationReservationsByRangeCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::getOperatorSetConfig(_) => {
                     <getOperatorSetConfigCall as alloy_sol_types::SolCall>::SELECTOR
@@ -5566,8 +5482,11 @@ pub mod ICrossChainRegistry {
                 Self::getSupportedChains(_) => {
                     <getSupportedChainsCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::getTransportDestinations(_) => {
-                    <getTransportDestinationsCall as alloy_sol_types::SolCall>::SELECTOR
+                Self::getTableUpdateCadence(_) => {
+                    <getTableUpdateCadenceCall as alloy_sol_types::SolCall>::SELECTOR
+                }
+                Self::hasActiveGenerationReservation(_) => {
+                    <hasActiveGenerationReservationCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::removeChainIDsFromWhitelist(_) => {
                     <removeChainIDsFromWhitelistCall as alloy_sol_types::SolCall>::SELECTOR
@@ -5575,14 +5494,14 @@ pub mod ICrossChainRegistry {
                 Self::removeGenerationReservation(_) => {
                     <removeGenerationReservationCall as alloy_sol_types::SolCall>::SELECTOR
                 }
-                Self::removeTransportDestinations(_) => {
-                    <removeTransportDestinationsCall as alloy_sol_types::SolCall>::SELECTOR
-                }
                 Self::setOperatorSetConfig(_) => {
                     <setOperatorSetConfigCall as alloy_sol_types::SolCall>::SELECTOR
                 }
                 Self::setOperatorTableCalculator(_) => {
                     <setOperatorTableCalculatorCall as alloy_sol_types::SolCall>::SELECTOR
+                }
+                Self::setTableUpdateCadence(_) => {
+                    <setTableUpdateCadenceCall as alloy_sol_types::SolCall>::SELECTOR
                 }
             }
         }
@@ -5642,15 +5561,17 @@ pub mod ICrossChainRegistry {
                     setOperatorSetConfig
                 },
                 {
-                    fn getTransportDestinations(
+                    fn hasActiveGenerationReservation(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <getTransportDestinationsCall as alloy_sol_types::SolCall>::abi_decode_raw(
-                            data,
-                        )
-                        .map(ICrossChainRegistryCalls::getTransportDestinations)
+                        <hasActiveGenerationReservationCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                                data,
+                            )
+                            .map(
+                                ICrossChainRegistryCalls::hasActiveGenerationReservation,
+                            )
                     }
-                    getTransportDestinations
+                    hasActiveGenerationReservation
                 },
                 {
                     fn calculateOperatorTableBytes(
@@ -5662,17 +5583,6 @@ pub mod ICrossChainRegistry {
                             .map(ICrossChainRegistryCalls::calculateOperatorTableBytes)
                     }
                     calculateOperatorTableBytes
-                },
-                {
-                    fn addTransportDestinations(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <addTransportDestinationsCall as alloy_sol_types::SolCall>::abi_decode_raw(
-                            data,
-                        )
-                        .map(ICrossChainRegistryCalls::addTransportDestinations)
-                    }
-                    addTransportDestinations
                 },
                 {
                     fn removeGenerationReservation(
@@ -5697,17 +5607,28 @@ pub mod ICrossChainRegistry {
                     getOperatorTableCalculator
                 },
                 {
-                    fn getActiveTransportReservations(
+                    fn getTableUpdateCadence(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <getActiveTransportReservationsCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                        <getTableUpdateCadenceCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                            data,
+                        )
+                        .map(ICrossChainRegistryCalls::getTableUpdateCadence)
+                    }
+                    getTableUpdateCadence
+                },
+                {
+                    fn getActiveGenerationReservationCount(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
+                        <getActiveGenerationReservationCountCall as alloy_sol_types::SolCall>::abi_decode_raw(
                                 data,
                             )
                             .map(
-                                ICrossChainRegistryCalls::getActiveTransportReservations,
+                                ICrossChainRegistryCalls::getActiveGenerationReservationCount,
                             )
                     }
-                    getActiveTransportReservations
+                    getActiveGenerationReservationCount
                 },
                 {
                     fn getSupportedChains(
@@ -5732,28 +5653,6 @@ pub mod ICrossChainRegistry {
                     getActiveGenerationReservations
                 },
                 {
-                    fn removeChainIDsFromWhitelist(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <removeChainIDsFromWhitelistCall as alloy_sol_types::SolCall>::abi_decode_raw(
-                                data,
-                            )
-                            .map(ICrossChainRegistryCalls::removeChainIDsFromWhitelist)
-                    }
-                    removeChainIDsFromWhitelist
-                },
-                {
-                    fn removeTransportDestinations(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <removeTransportDestinationsCall as alloy_sol_types::SolCall>::abi_decode_raw(
-                                data,
-                            )
-                            .map(ICrossChainRegistryCalls::removeTransportDestinations)
-                    }
-                    removeTransportDestinations
-                },
-                {
                     fn createGenerationReservation(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
@@ -5763,6 +5662,41 @@ pub mod ICrossChainRegistry {
                             .map(ICrossChainRegistryCalls::createGenerationReservation)
                     }
                     createGenerationReservation
+                },
+                {
+                    fn setTableUpdateCadence(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
+                        <setTableUpdateCadenceCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                            data,
+                        )
+                        .map(ICrossChainRegistryCalls::setTableUpdateCadence)
+                    }
+                    setTableUpdateCadence
+                },
+                {
+                    fn getActiveGenerationReservationsByRange(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
+                        <getActiveGenerationReservationsByRangeCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                                data,
+                            )
+                            .map(
+                                ICrossChainRegistryCalls::getActiveGenerationReservationsByRange,
+                            )
+                    }
+                    getActiveGenerationReservationsByRange
+                },
+                {
+                    fn removeChainIDsFromWhitelist(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
+                        <removeChainIDsFromWhitelistCall as alloy_sol_types::SolCall>::abi_decode_raw(
+                                data,
+                            )
+                            .map(ICrossChainRegistryCalls::removeChainIDsFromWhitelist)
+                    }
+                    removeChainIDsFromWhitelist
                 },
             ];
             let Ok(idx) = Self::SELECTORS.binary_search(&selector) else {
@@ -5829,15 +5763,17 @@ pub mod ICrossChainRegistry {
                     setOperatorSetConfig
                 },
                 {
-                    fn getTransportDestinations(
+                    fn hasActiveGenerationReservation(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <getTransportDestinationsCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                        <hasActiveGenerationReservationCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
                                 data,
                             )
-                            .map(ICrossChainRegistryCalls::getTransportDestinations)
+                            .map(
+                                ICrossChainRegistryCalls::hasActiveGenerationReservation,
+                            )
                     }
-                    getTransportDestinations
+                    hasActiveGenerationReservation
                 },
                 {
                     fn calculateOperatorTableBytes(
@@ -5849,17 +5785,6 @@ pub mod ICrossChainRegistry {
                             .map(ICrossChainRegistryCalls::calculateOperatorTableBytes)
                     }
                     calculateOperatorTableBytes
-                },
-                {
-                    fn addTransportDestinations(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <addTransportDestinationsCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(ICrossChainRegistryCalls::addTransportDestinations)
-                    }
-                    addTransportDestinations
                 },
                 {
                     fn removeGenerationReservation(
@@ -5884,17 +5809,28 @@ pub mod ICrossChainRegistry {
                     getOperatorTableCalculator
                 },
                 {
-                    fn getActiveTransportReservations(
+                    fn getTableUpdateCadence(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <getActiveTransportReservationsCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                        <getTableUpdateCadenceCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(ICrossChainRegistryCalls::getTableUpdateCadence)
+                    }
+                    getTableUpdateCadence
+                },
+                {
+                    fn getActiveGenerationReservationCount(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
+                        <getActiveGenerationReservationCountCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
                                 data,
                             )
                             .map(
-                                ICrossChainRegistryCalls::getActiveTransportReservations,
+                                ICrossChainRegistryCalls::getActiveGenerationReservationCount,
                             )
                     }
-                    getActiveTransportReservations
+                    getActiveGenerationReservationCount
                 },
                 {
                     fn getSupportedChains(
@@ -5921,28 +5857,6 @@ pub mod ICrossChainRegistry {
                     getActiveGenerationReservations
                 },
                 {
-                    fn removeChainIDsFromWhitelist(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <removeChainIDsFromWhitelistCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(ICrossChainRegistryCalls::removeChainIDsFromWhitelist)
-                    }
-                    removeChainIDsFromWhitelist
-                },
-                {
-                    fn removeTransportDestinations(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
-                        <removeTransportDestinationsCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(ICrossChainRegistryCalls::removeTransportDestinations)
-                    }
-                    removeTransportDestinations
-                },
-                {
                     fn createGenerationReservation(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
@@ -5952,6 +5866,41 @@ pub mod ICrossChainRegistry {
                             .map(ICrossChainRegistryCalls::createGenerationReservation)
                     }
                     createGenerationReservation
+                },
+                {
+                    fn setTableUpdateCadence(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
+                        <setTableUpdateCadenceCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(ICrossChainRegistryCalls::setTableUpdateCadence)
+                    }
+                    setTableUpdateCadence
+                },
+                {
+                    fn getActiveGenerationReservationsByRange(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
+                        <getActiveGenerationReservationsByRangeCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(
+                                ICrossChainRegistryCalls::getActiveGenerationReservationsByRange,
+                            )
+                    }
+                    getActiveGenerationReservationsByRange
+                },
+                {
+                    fn removeChainIDsFromWhitelist(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryCalls> {
+                        <removeChainIDsFromWhitelistCall as alloy_sol_types::SolCall>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(ICrossChainRegistryCalls::removeChainIDsFromWhitelist)
+                    }
+                    removeChainIDsFromWhitelist
                 },
             ];
             let Ok(idx) = Self::SELECTORS.binary_search(&selector) else {
@@ -5970,11 +5919,6 @@ pub mod ICrossChainRegistry {
                         inner,
                     )
                 }
-                Self::addTransportDestinations(inner) => {
-                    <addTransportDestinationsCall as alloy_sol_types::SolCall>::abi_encoded_size(
-                        inner,
-                    )
-                }
                 Self::calculateOperatorTableBytes(inner) => {
                     <calculateOperatorTableBytesCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
@@ -5985,13 +5929,18 @@ pub mod ICrossChainRegistry {
                         inner,
                     )
                 }
+                Self::getActiveGenerationReservationCount(inner) => {
+                    <getActiveGenerationReservationCountCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
                 Self::getActiveGenerationReservations(inner) => {
                     <getActiveGenerationReservationsCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
-                Self::getActiveTransportReservations(inner) => {
-                    <getActiveTransportReservationsCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                Self::getActiveGenerationReservationsByRange(inner) => {
+                    <getActiveGenerationReservationsByRangeCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
@@ -6010,8 +5959,13 @@ pub mod ICrossChainRegistry {
                         inner,
                     )
                 }
-                Self::getTransportDestinations(inner) => {
-                    <getTransportDestinationsCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                Self::getTableUpdateCadence(inner) => {
+                    <getTableUpdateCadenceCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
+                Self::hasActiveGenerationReservation(inner) => {
+                    <hasActiveGenerationReservationCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
                     )
                 }
@@ -6025,11 +5979,6 @@ pub mod ICrossChainRegistry {
                         inner,
                     )
                 }
-                Self::removeTransportDestinations(inner) => {
-                    <removeTransportDestinationsCall as alloy_sol_types::SolCall>::abi_encoded_size(
-                        inner,
-                    )
-                }
                 Self::setOperatorSetConfig(inner) => {
                     <setOperatorSetConfigCall as alloy_sol_types::SolCall>::abi_encoded_size(
                         inner,
@@ -6040,6 +5989,11 @@ pub mod ICrossChainRegistry {
                         inner,
                     )
                 }
+                Self::setTableUpdateCadence(inner) => {
+                    <setTableUpdateCadenceCall as alloy_sol_types::SolCall>::abi_encoded_size(
+                        inner,
+                    )
+                }
             }
         }
         #[inline]
@@ -6047,12 +6001,6 @@ pub mod ICrossChainRegistry {
             match self {
                 Self::addChainIDsToWhitelist(inner) => {
                     <addChainIDsToWhitelistCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner,
-                        out,
-                    )
-                }
-                Self::addTransportDestinations(inner) => {
-                    <addTransportDestinationsCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -6069,14 +6017,20 @@ pub mod ICrossChainRegistry {
                         out,
                     )
                 }
+                Self::getActiveGenerationReservationCount(inner) => {
+                    <getActiveGenerationReservationCountCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
                 Self::getActiveGenerationReservations(inner) => {
                     <getActiveGenerationReservationsCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
                 }
-                Self::getActiveTransportReservations(inner) => {
-                    <getActiveTransportReservationsCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                Self::getActiveGenerationReservationsByRange(inner) => {
+                    <getActiveGenerationReservationsByRangeCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -6099,8 +6053,14 @@ pub mod ICrossChainRegistry {
                         out,
                     )
                 }
-                Self::getTransportDestinations(inner) => {
-                    <getTransportDestinationsCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                Self::getTableUpdateCadence(inner) => {
+                    <getTableUpdateCadenceCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::hasActiveGenerationReservation(inner) => {
+                    <hasActiveGenerationReservationCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -6117,12 +6077,6 @@ pub mod ICrossChainRegistry {
                         out,
                     )
                 }
-                Self::removeTransportDestinations(inner) => {
-                    <removeTransportDestinationsCall as alloy_sol_types::SolCall>::abi_encode_raw(
-                        inner,
-                        out,
-                    )
-                }
                 Self::setOperatorSetConfig(inner) => {
                     <setOperatorSetConfigCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
@@ -6131,6 +6085,12 @@ pub mod ICrossChainRegistry {
                 }
                 Self::setOperatorTableCalculator(inner) => {
                     <setOperatorTableCalculatorCall as alloy_sol_types::SolCall>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::setTableUpdateCadence(inner) => {
+                    <setTableUpdateCadenceCall as alloy_sol_types::SolCall>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -6156,13 +6116,17 @@ pub mod ICrossChainRegistry {
         #[allow(missing_docs)]
         InvalidChainId(InvalidChainId),
         #[allow(missing_docs)]
+        InvalidEndIndex(InvalidEndIndex),
+        #[allow(missing_docs)]
         InvalidOperatorSet(InvalidOperatorSet),
         #[allow(missing_docs)]
-        RequireAtLeastOneTransportDestination(RequireAtLeastOneTransportDestination),
+        InvalidRange(InvalidRange),
         #[allow(missing_docs)]
-        TransportDestinationAlreadyAdded(TransportDestinationAlreadyAdded),
+        InvalidStalenessPeriod(InvalidStalenessPeriod),
         #[allow(missing_docs)]
-        TransportDestinationNotFound(TransportDestinationNotFound),
+        InvalidTableUpdateCadence(InvalidTableUpdateCadence),
+        #[allow(missing_docs)]
+        KeyTypeNotSet(KeyTypeNotSet),
     }
     #[automatically_derived]
     impl ICrossChainRegistryErrors {
@@ -6174,23 +6138,25 @@ pub mod ICrossChainRegistry {
         /// Prefer using `SolInterface` methods instead.
         pub const SELECTORS: &'static [[u8; 4usize]] = &[
             [24u8, 131u8, 70u8, 21u8],
-            [67u8, 98u8, 159u8, 123u8],
             [73u8, 126u8, 198u8, 54u8],
+            [86u8, 28u8, 233u8, 187u8],
+            [92u8, 140u8, 144u8, 98u8],
             [122u8, 71u8, 201u8, 162u8],
             [126u8, 197u8, 193u8, 84u8],
             [134u8, 49u8, 160u8, 117u8],
-            [150u8, 216u8, 26u8, 201u8],
             [154u8, 87u8, 93u8, 82u8],
             [162u8, 74u8, 19u8, 166u8],
-            [171u8, 108u8, 206u8, 7u8],
             [179u8, 249u8, 43u8, 161u8],
+            [182u8, 141u8, 132u8, 192u8],
+            [182u8, 204u8, 112u8, 216u8],
+            [229u8, 124u8, 172u8, 189u8],
         ];
     }
     #[automatically_derived]
     impl alloy_sol_types::SolInterface for ICrossChainRegistryErrors {
         const NAME: &'static str = "ICrossChainRegistryErrors";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 11usize;
+        const COUNT: usize = 13usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
@@ -6213,18 +6179,20 @@ pub mod ICrossChainRegistry {
                     <GenerationReservationDoesNotExist as alloy_sol_types::SolError>::SELECTOR
                 }
                 Self::InvalidChainId(_) => <InvalidChainId as alloy_sol_types::SolError>::SELECTOR,
+                Self::InvalidEndIndex(_) => {
+                    <InvalidEndIndex as alloy_sol_types::SolError>::SELECTOR
+                }
                 Self::InvalidOperatorSet(_) => {
                     <InvalidOperatorSet as alloy_sol_types::SolError>::SELECTOR
                 }
-                Self::RequireAtLeastOneTransportDestination(_) => {
-                    <RequireAtLeastOneTransportDestination as alloy_sol_types::SolError>::SELECTOR
+                Self::InvalidRange(_) => <InvalidRange as alloy_sol_types::SolError>::SELECTOR,
+                Self::InvalidStalenessPeriod(_) => {
+                    <InvalidStalenessPeriod as alloy_sol_types::SolError>::SELECTOR
                 }
-                Self::TransportDestinationAlreadyAdded(_) => {
-                    <TransportDestinationAlreadyAdded as alloy_sol_types::SolError>::SELECTOR
+                Self::InvalidTableUpdateCadence(_) => {
+                    <InvalidTableUpdateCadence as alloy_sol_types::SolError>::SELECTOR
                 }
-                Self::TransportDestinationNotFound(_) => {
-                    <TransportDestinationNotFound as alloy_sol_types::SolError>::SELECTOR
-                }
+                Self::KeyTypeNotSet(_) => <KeyTypeNotSet as alloy_sol_types::SolError>::SELECTOR,
             }
         }
         #[inline]
@@ -6256,19 +6224,6 @@ pub mod ICrossChainRegistry {
                     GenerationReservationAlreadyExists
                 },
                 {
-                    fn RequireAtLeastOneTransportDestination(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
-                        <RequireAtLeastOneTransportDestination as alloy_sol_types::SolError>::abi_decode_raw(
-                                data,
-                            )
-                            .map(
-                                ICrossChainRegistryErrors::RequireAtLeastOneTransportDestination,
-                            )
-                    }
-                    RequireAtLeastOneTransportDestination
-                },
-                {
                     fn ChainIDAlreadyWhitelisted(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
@@ -6278,6 +6233,24 @@ pub mod ICrossChainRegistry {
                         .map(ICrossChainRegistryErrors::ChainIDAlreadyWhitelisted)
                     }
                     ChainIDAlreadyWhitelisted
+                },
+                {
+                    fn InvalidRange(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <InvalidRange as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(ICrossChainRegistryErrors::InvalidRange)
+                    }
+                    InvalidRange
+                },
+                {
+                    fn InvalidStalenessPeriod(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <InvalidStalenessPeriod as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(ICrossChainRegistryErrors::InvalidStalenessPeriod)
+                    }
+                    InvalidStalenessPeriod
                 },
                 {
                     fn InvalidChainId(
@@ -6307,19 +6280,6 @@ pub mod ICrossChainRegistry {
                     EmptyChainIDsArray
                 },
                 {
-                    fn TransportDestinationAlreadyAdded(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
-                        <TransportDestinationAlreadyAdded as alloy_sol_types::SolError>::abi_decode_raw(
-                                data,
-                            )
-                            .map(
-                                ICrossChainRegistryErrors::TransportDestinationAlreadyAdded,
-                            )
-                    }
-                    TransportDestinationAlreadyAdded
-                },
-                {
                     fn GenerationReservationDoesNotExist(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
@@ -6342,17 +6302,6 @@ pub mod ICrossChainRegistry {
                     ArrayLengthMismatch
                 },
                 {
-                    fn TransportDestinationNotFound(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
-                        <TransportDestinationNotFound as alloy_sol_types::SolError>::abi_decode_raw(
-                            data,
-                        )
-                        .map(ICrossChainRegistryErrors::TransportDestinationNotFound)
-                    }
-                    TransportDestinationNotFound
-                },
-                {
                     fn ChainIDNotWhitelisted(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
@@ -6360,6 +6309,35 @@ pub mod ICrossChainRegistry {
                             .map(ICrossChainRegistryErrors::ChainIDNotWhitelisted)
                     }
                     ChainIDNotWhitelisted
+                },
+                {
+                    fn InvalidEndIndex(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <InvalidEndIndex as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(ICrossChainRegistryErrors::InvalidEndIndex)
+                    }
+                    InvalidEndIndex
+                },
+                {
+                    fn InvalidTableUpdateCadence(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <InvalidTableUpdateCadence as alloy_sol_types::SolError>::abi_decode_raw(
+                            data,
+                        )
+                        .map(ICrossChainRegistryErrors::InvalidTableUpdateCadence)
+                    }
+                    InvalidTableUpdateCadence
+                },
+                {
+                    fn KeyTypeNotSet(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <KeyTypeNotSet as alloy_sol_types::SolError>::abi_decode_raw(data)
+                            .map(ICrossChainRegistryErrors::KeyTypeNotSet)
+                    }
+                    KeyTypeNotSet
                 },
             ];
             let Ok(idx) = Self::SELECTORS.binary_search(&selector) else {
@@ -6395,19 +6373,6 @@ pub mod ICrossChainRegistry {
                     GenerationReservationAlreadyExists
                 },
                 {
-                    fn RequireAtLeastOneTransportDestination(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
-                        <RequireAtLeastOneTransportDestination as alloy_sol_types::SolError>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(
-                                ICrossChainRegistryErrors::RequireAtLeastOneTransportDestination,
-                            )
-                    }
-                    RequireAtLeastOneTransportDestination
-                },
-                {
                     fn ChainIDAlreadyWhitelisted(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
@@ -6417,6 +6382,26 @@ pub mod ICrossChainRegistry {
                             .map(ICrossChainRegistryErrors::ChainIDAlreadyWhitelisted)
                     }
                     ChainIDAlreadyWhitelisted
+                },
+                {
+                    fn InvalidRange(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <InvalidRange as alloy_sol_types::SolError>::abi_decode_raw_validate(data)
+                            .map(ICrossChainRegistryErrors::InvalidRange)
+                    }
+                    InvalidRange
+                },
+                {
+                    fn InvalidStalenessPeriod(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <InvalidStalenessPeriod as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(ICrossChainRegistryErrors::InvalidStalenessPeriod)
+                    }
+                    InvalidStalenessPeriod
                 },
                 {
                     fn InvalidChainId(
@@ -6450,19 +6435,6 @@ pub mod ICrossChainRegistry {
                     EmptyChainIDsArray
                 },
                 {
-                    fn TransportDestinationAlreadyAdded(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
-                        <TransportDestinationAlreadyAdded as alloy_sol_types::SolError>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(
-                                ICrossChainRegistryErrors::TransportDestinationAlreadyAdded,
-                            )
-                    }
-                    TransportDestinationAlreadyAdded
-                },
-                {
                     fn GenerationReservationDoesNotExist(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
@@ -6487,17 +6459,6 @@ pub mod ICrossChainRegistry {
                     ArrayLengthMismatch
                 },
                 {
-                    fn TransportDestinationNotFound(
-                        data: &[u8],
-                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
-                        <TransportDestinationNotFound as alloy_sol_types::SolError>::abi_decode_raw_validate(
-                                data,
-                            )
-                            .map(ICrossChainRegistryErrors::TransportDestinationNotFound)
-                    }
-                    TransportDestinationNotFound
-                },
-                {
                     fn ChainIDNotWhitelisted(
                         data: &[u8],
                     ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
@@ -6507,6 +6468,37 @@ pub mod ICrossChainRegistry {
                             .map(ICrossChainRegistryErrors::ChainIDNotWhitelisted)
                     }
                     ChainIDNotWhitelisted
+                },
+                {
+                    fn InvalidEndIndex(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <InvalidEndIndex as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                            data,
+                        )
+                        .map(ICrossChainRegistryErrors::InvalidEndIndex)
+                    }
+                    InvalidEndIndex
+                },
+                {
+                    fn InvalidTableUpdateCadence(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <InvalidTableUpdateCadence as alloy_sol_types::SolError>::abi_decode_raw_validate(
+                                data,
+                            )
+                            .map(ICrossChainRegistryErrors::InvalidTableUpdateCadence)
+                    }
+                    InvalidTableUpdateCadence
+                },
+                {
+                    fn KeyTypeNotSet(
+                        data: &[u8],
+                    ) -> alloy_sol_types::Result<ICrossChainRegistryErrors> {
+                        <KeyTypeNotSet as alloy_sol_types::SolError>::abi_decode_raw_validate(data)
+                            .map(ICrossChainRegistryErrors::KeyTypeNotSet)
+                    }
+                    KeyTypeNotSet
                 },
             ];
             let Ok(idx) = Self::SELECTORS.binary_search(&selector) else {
@@ -6555,25 +6547,31 @@ pub mod ICrossChainRegistry {
                         inner,
                     )
                 }
+                Self::InvalidEndIndex(inner) => {
+                    <InvalidEndIndex as alloy_sol_types::SolError>::abi_encoded_size(
+                        inner,
+                    )
+                }
                 Self::InvalidOperatorSet(inner) => {
                     <InvalidOperatorSet as alloy_sol_types::SolError>::abi_encoded_size(
                         inner,
                     )
                 }
-                Self::RequireAtLeastOneTransportDestination(inner) => {
-                    <RequireAtLeastOneTransportDestination as alloy_sol_types::SolError>::abi_encoded_size(
+                Self::InvalidRange(inner) => {
+                    <InvalidRange as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
+                Self::InvalidStalenessPeriod(inner) => {
+                    <InvalidStalenessPeriod as alloy_sol_types::SolError>::abi_encoded_size(
                         inner,
                     )
                 }
-                Self::TransportDestinationAlreadyAdded(inner) => {
-                    <TransportDestinationAlreadyAdded as alloy_sol_types::SolError>::abi_encoded_size(
+                Self::InvalidTableUpdateCadence(inner) => {
+                    <InvalidTableUpdateCadence as alloy_sol_types::SolError>::abi_encoded_size(
                         inner,
                     )
                 }
-                Self::TransportDestinationNotFound(inner) => {
-                    <TransportDestinationNotFound as alloy_sol_types::SolError>::abi_encoded_size(
-                        inner,
-                    )
+                Self::KeyTypeNotSet(inner) => {
+                    <KeyTypeNotSet as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
             }
         }
@@ -6622,26 +6620,38 @@ pub mod ICrossChainRegistry {
                         out,
                     )
                 }
+                Self::InvalidEndIndex(inner) => {
+                    <InvalidEndIndex as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
                 Self::InvalidOperatorSet(inner) => {
                     <InvalidOperatorSet as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
                         out,
                     )
                 }
-                Self::RequireAtLeastOneTransportDestination(inner) => {
-                    <RequireAtLeastOneTransportDestination as alloy_sol_types::SolError>::abi_encode_raw(
+                Self::InvalidRange(inner) => {
+                    <InvalidRange as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
                         out,
                     )
                 }
-                Self::TransportDestinationAlreadyAdded(inner) => {
-                    <TransportDestinationAlreadyAdded as alloy_sol_types::SolError>::abi_encode_raw(
+                Self::InvalidStalenessPeriod(inner) => {
+                    <InvalidStalenessPeriod as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
                         out,
                     )
                 }
-                Self::TransportDestinationNotFound(inner) => {
-                    <TransportDestinationNotFound as alloy_sol_types::SolError>::abi_encode_raw(
+                Self::InvalidTableUpdateCadence(inner) => {
+                    <InvalidTableUpdateCadence as alloy_sol_types::SolError>::abi_encode_raw(
+                        inner,
+                        out,
+                    )
+                }
+                Self::KeyTypeNotSet(inner) => {
+                    <KeyTypeNotSet as alloy_sol_types::SolError>::abi_encode_raw(
                         inner,
                         out,
                     )
@@ -6669,11 +6679,7 @@ pub mod ICrossChainRegistry {
         #[allow(missing_docs)]
         OperatorTableCalculatorSet(OperatorTableCalculatorSet),
         #[allow(missing_docs)]
-        TransportDestinationChainAdded(TransportDestinationChainAdded),
-        #[allow(missing_docs)]
-        TransportDestinationChainRemoved(TransportDestinationChainRemoved),
-        #[allow(missing_docs)]
-        TransportDestinationsRemoved(TransportDestinationsRemoved),
+        TableUpdateCadenceSet(TableUpdateCadenceSet),
     }
     #[automatically_derived]
     impl ICrossChainRegistryEvents {
@@ -6695,24 +6701,19 @@ pub mod ICrossChainRegistry {
                 0u8, 52u8, 113u8, 92u8, 240u8, 226u8,
             ],
             [
-                73u8, 153u8, 85u8, 216u8, 56u8, 230u8, 240u8, 202u8, 49u8, 232u8, 58u8, 223u8,
-                129u8, 209u8, 145u8, 207u8, 230u8, 205u8, 143u8, 226u8, 82u8, 191u8, 130u8, 108u8,
-                117u8, 201u8, 168u8, 11u8, 160u8, 119u8, 226u8, 94u8,
-            ],
-            [
                 79u8, 182u8, 239u8, 236u8, 125u8, 214u8, 0u8, 54u8, 206u8, 58u8, 122u8, 248u8,
                 213u8, 196u8, 132u8, 37u8, 1u8, 157u8, 170u8, 15u8, 182u8, 30u8, 180u8, 113u8,
                 169u8, 102u8, 167u8, 172u8, 44u8, 111u8, 166u8, 166u8,
             ],
             [
+                79u8, 188u8, 208u8, 204u8, 167u8, 0u8, 21u8, 179u8, 61u8, 184u8, 175u8, 74u8,
+                164u8, 242u8, 189u8, 111u8, 214u8, 193u8, 239u8, 169u8, 70u8, 11u8, 142u8, 35u8,
+                51u8, 242u8, 82u8, 193u8, 70u8, 122u8, 99u8, 39u8,
+            ],
+            [
                 79u8, 253u8, 253u8, 213u8, 158u8, 158u8, 30u8, 60u8, 48u8, 22u8, 8u8, 120u8, 143u8,
                 120u8, 221u8, 69u8, 142u8, 97u8, 203u8, 140u8, 4u8, 92u8, 169u8, 43u8, 98u8, 167u8,
                 180u8, 132u8, 200u8, 8u8, 36u8, 251u8,
-            ],
-            [
-                87u8, 161u8, 252u8, 179u8, 217u8, 205u8, 68u8, 118u8, 149u8, 196u8, 111u8, 32u8,
-                148u8, 75u8, 165u8, 98u8, 217u8, 84u8, 121u8, 137u8, 220u8, 221u8, 234u8, 10u8,
-                251u8, 17u8, 145u8, 21u8, 6u8, 12u8, 127u8, 11u8,
             ],
             [
                 104u8, 36u8, 211u8, 96u8, 132u8, 236u8, 242u8, 205u8, 129u8, 155u8, 19u8, 124u8,
@@ -6730,11 +6731,6 @@ pub mod ICrossChainRegistry {
                 242u8, 160u8, 39u8, 171u8, 201u8, 179u8, 246u8, 223u8,
             ],
             [
-                175u8, 32u8, 159u8, 25u8, 172u8, 0u8, 232u8, 204u8, 180u8, 83u8, 158u8, 150u8,
-                212u8, 20u8, 28u8, 220u8, 150u8, 254u8, 164u8, 121u8, 210u8, 88u8, 217u8, 153u8,
-                16u8, 48u8, 124u8, 115u8, 101u8, 230u8, 135u8, 89u8,
-            ],
-            [
                 215u8, 129u8, 25u8, 19u8, 239u8, 213u8, 217u8, 143u8, 199u8, 234u8, 13u8, 31u8,
                 221u8, 2u8, 43u8, 61u8, 49u8, 152u8, 120u8, 21u8, 54u8, 8u8, 66u8, 208u8, 91u8,
                 29u8, 28u8, 245u8, 85u8, 120u8, 209u8, 106u8,
@@ -6744,7 +6740,7 @@ pub mod ICrossChainRegistry {
     #[automatically_derived]
     impl alloy_sol_types::SolEventInterface for ICrossChainRegistryEvents {
         const NAME: &'static str = "ICrossChainRegistryEvents";
-        const COUNT: usize = 11usize;
+        const COUNT: usize = 9usize;
         fn decode_raw_log(
             topics: &[alloy_sol_types::Word],
             data: &[u8],
@@ -6798,26 +6794,12 @@ pub mod ICrossChainRegistry {
                     )
                     .map(Self::OperatorTableCalculatorSet)
                 }
-                Some(
-                    <TransportDestinationChainAdded as alloy_sol_types::SolEvent>::SIGNATURE_HASH,
-                ) => <TransportDestinationChainAdded as alloy_sol_types::SolEvent>::decode_raw_log(
-                    topics, data,
-                )
-                .map(Self::TransportDestinationChainAdded),
-                Some(
-                    <TransportDestinationChainRemoved as alloy_sol_types::SolEvent>::SIGNATURE_HASH,
-                ) => {
-                    <TransportDestinationChainRemoved as alloy_sol_types::SolEvent>::decode_raw_log(
+                Some(<TableUpdateCadenceSet as alloy_sol_types::SolEvent>::SIGNATURE_HASH) => {
+                    <TableUpdateCadenceSet as alloy_sol_types::SolEvent>::decode_raw_log(
                         topics, data,
                     )
-                    .map(Self::TransportDestinationChainRemoved)
+                    .map(Self::TableUpdateCadenceSet)
                 }
-                Some(
-                    <TransportDestinationsRemoved as alloy_sol_types::SolEvent>::SIGNATURE_HASH,
-                ) => <TransportDestinationsRemoved as alloy_sol_types::SolEvent>::decode_raw_log(
-                    topics, data,
-                )
-                .map(Self::TransportDestinationsRemoved),
                 _ => alloy_sol_types::private::Err(alloy_sol_types::Error::InvalidLog {
                     name: <Self as alloy_sol_types::SolEventInterface>::NAME,
                     log: alloy_sol_types::private::Box::new(
@@ -6858,13 +6840,7 @@ pub mod ICrossChainRegistry {
                 Self::OperatorTableCalculatorSet(inner) => {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
-                Self::TransportDestinationChainAdded(inner) => {
-                    alloy_sol_types::private::IntoLogData::to_log_data(inner)
-                }
-                Self::TransportDestinationChainRemoved(inner) => {
-                    alloy_sol_types::private::IntoLogData::to_log_data(inner)
-                }
-                Self::TransportDestinationsRemoved(inner) => {
+                Self::TableUpdateCadenceSet(inner) => {
                     alloy_sol_types::private::IntoLogData::to_log_data(inner)
                 }
             }
@@ -6895,13 +6871,7 @@ pub mod ICrossChainRegistry {
                 Self::OperatorTableCalculatorSet(inner) => {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
-                Self::TransportDestinationChainAdded(inner) => {
-                    alloy_sol_types::private::IntoLogData::into_log_data(inner)
-                }
-                Self::TransportDestinationChainRemoved(inner) => {
-                    alloy_sol_types::private::IntoLogData::into_log_data(inner)
-                }
-                Self::TransportDestinationsRemoved(inner) => {
+                Self::TableUpdateCadenceSet(inner) => {
                     alloy_sol_types::private::IntoLogData::into_log_data(inner)
                 }
             }
@@ -7076,19 +7046,6 @@ pub mod ICrossChainRegistry {
                 operatorTableUpdaters,
             })
         }
-        ///Creates a new call builder for the [`addTransportDestinations`] function.
-        pub fn addTransportDestinations(
-            &self,
-            operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-            chainIDs: alloy::sol_types::private::Vec<
-                alloy::sol_types::private::primitives::aliases::U256,
-            >,
-        ) -> alloy_contract::SolCallBuilder<&P, addTransportDestinationsCall, N> {
-            self.call_builder(&addTransportDestinationsCall {
-                operatorSet,
-                chainIDs,
-            })
-        }
         ///Creates a new call builder for the [`calculateOperatorTableBytes`] function.
         pub fn calculateOperatorTableBytes(
             &self,
@@ -7102,16 +7059,19 @@ pub mod ICrossChainRegistry {
             operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
             operatorTableCalculator: alloy::sol_types::private::Address,
             config: <ICrossChainRegistryTypes::OperatorSetConfig as alloy::sol_types::SolType>::RustType,
-            chainIDs: alloy::sol_types::private::Vec<
-                alloy::sol_types::private::primitives::aliases::U256,
-            >,
         ) -> alloy_contract::SolCallBuilder<&P, createGenerationReservationCall, N> {
             self.call_builder(&createGenerationReservationCall {
                 operatorSet,
                 operatorTableCalculator,
                 config,
-                chainIDs,
             })
+        }
+        ///Creates a new call builder for the [`getActiveGenerationReservationCount`] function.
+        pub fn getActiveGenerationReservationCount(
+            &self,
+        ) -> alloy_contract::SolCallBuilder<&P, getActiveGenerationReservationCountCall, N>
+        {
+            self.call_builder(&getActiveGenerationReservationCountCall)
         }
         ///Creates a new call builder for the [`getActiveGenerationReservations`] function.
         pub fn getActiveGenerationReservations(
@@ -7119,11 +7079,17 @@ pub mod ICrossChainRegistry {
         ) -> alloy_contract::SolCallBuilder<&P, getActiveGenerationReservationsCall, N> {
             self.call_builder(&getActiveGenerationReservationsCall)
         }
-        ///Creates a new call builder for the [`getActiveTransportReservations`] function.
-        pub fn getActiveTransportReservations(
+        ///Creates a new call builder for the [`getActiveGenerationReservationsByRange`] function.
+        pub fn getActiveGenerationReservationsByRange(
             &self,
-        ) -> alloy_contract::SolCallBuilder<&P, getActiveTransportReservationsCall, N> {
-            self.call_builder(&getActiveTransportReservationsCall)
+            startIndex: alloy::sol_types::private::primitives::aliases::U256,
+            endIndex: alloy::sol_types::private::primitives::aliases::U256,
+        ) -> alloy_contract::SolCallBuilder<&P, getActiveGenerationReservationsByRangeCall, N>
+        {
+            self.call_builder(&getActiveGenerationReservationsByRangeCall {
+                startIndex,
+                endIndex,
+            })
         }
         ///Creates a new call builder for the [`getOperatorSetConfig`] function.
         pub fn getOperatorSetConfig(
@@ -7145,12 +7111,18 @@ pub mod ICrossChainRegistry {
         ) -> alloy_contract::SolCallBuilder<&P, getSupportedChainsCall, N> {
             self.call_builder(&getSupportedChainsCall)
         }
-        ///Creates a new call builder for the [`getTransportDestinations`] function.
-        pub fn getTransportDestinations(
+        ///Creates a new call builder for the [`getTableUpdateCadence`] function.
+        pub fn getTableUpdateCadence(
+            &self,
+        ) -> alloy_contract::SolCallBuilder<&P, getTableUpdateCadenceCall, N> {
+            self.call_builder(&getTableUpdateCadenceCall)
+        }
+        ///Creates a new call builder for the [`hasActiveGenerationReservation`] function.
+        pub fn hasActiveGenerationReservation(
             &self,
             operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-        ) -> alloy_contract::SolCallBuilder<&P, getTransportDestinationsCall, N> {
-            self.call_builder(&getTransportDestinationsCall { operatorSet })
+        ) -> alloy_contract::SolCallBuilder<&P, hasActiveGenerationReservationCall, N> {
+            self.call_builder(&hasActiveGenerationReservationCall { operatorSet })
         }
         ///Creates a new call builder for the [`removeChainIDsFromWhitelist`] function.
         pub fn removeChainIDsFromWhitelist(
@@ -7167,19 +7139,6 @@ pub mod ICrossChainRegistry {
             operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
         ) -> alloy_contract::SolCallBuilder<&P, removeGenerationReservationCall, N> {
             self.call_builder(&removeGenerationReservationCall { operatorSet })
-        }
-        ///Creates a new call builder for the [`removeTransportDestinations`] function.
-        pub fn removeTransportDestinations(
-            &self,
-            operatorSet: <OperatorSet as alloy::sol_types::SolType>::RustType,
-            chainIDs: alloy::sol_types::private::Vec<
-                alloy::sol_types::private::primitives::aliases::U256,
-            >,
-        ) -> alloy_contract::SolCallBuilder<&P, removeTransportDestinationsCall, N> {
-            self.call_builder(&removeTransportDestinationsCall {
-                operatorSet,
-                chainIDs,
-            })
         }
         ///Creates a new call builder for the [`setOperatorSetConfig`] function.
         pub fn setOperatorSetConfig(
@@ -7202,6 +7161,13 @@ pub mod ICrossChainRegistry {
                 operatorSet,
                 operatorTableCalculator,
             })
+        }
+        ///Creates a new call builder for the [`setTableUpdateCadence`] function.
+        pub fn setTableUpdateCadence(
+            &self,
+            tableUpdateCadence: u32,
+        ) -> alloy_contract::SolCallBuilder<&P, setTableUpdateCadenceCall, N> {
+            self.call_builder(&setTableUpdateCadenceCall { tableUpdateCadence })
         }
     }
     /// Event filters.
@@ -7266,23 +7232,11 @@ pub mod ICrossChainRegistry {
         ) -> alloy_contract::Event<&P, OperatorTableCalculatorSet, N> {
             self.event_filter::<OperatorTableCalculatorSet>()
         }
-        ///Creates a new event filter for the [`TransportDestinationChainAdded`] event.
-        pub fn TransportDestinationChainAdded_filter(
+        ///Creates a new event filter for the [`TableUpdateCadenceSet`] event.
+        pub fn TableUpdateCadenceSet_filter(
             &self,
-        ) -> alloy_contract::Event<&P, TransportDestinationChainAdded, N> {
-            self.event_filter::<TransportDestinationChainAdded>()
-        }
-        ///Creates a new event filter for the [`TransportDestinationChainRemoved`] event.
-        pub fn TransportDestinationChainRemoved_filter(
-            &self,
-        ) -> alloy_contract::Event<&P, TransportDestinationChainRemoved, N> {
-            self.event_filter::<TransportDestinationChainRemoved>()
-        }
-        ///Creates a new event filter for the [`TransportDestinationsRemoved`] event.
-        pub fn TransportDestinationsRemoved_filter(
-            &self,
-        ) -> alloy_contract::Event<&P, TransportDestinationsRemoved, N> {
-            self.event_filter::<TransportDestinationsRemoved>()
+        ) -> alloy_contract::Event<&P, TableUpdateCadenceSet, N> {
+            self.event_filter::<TableUpdateCadenceSet>()
         }
     }
 }

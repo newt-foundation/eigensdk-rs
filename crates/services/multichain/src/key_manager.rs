@@ -2,13 +2,13 @@ use alloy::primitives::{keccak256, Address, Bytes, FixedBytes, U256};
 use alloy::providers::Provider;
 use alloy::signers::{local::PrivateKeySigner, Signer};
 use async_trait::async_trait;
-use std::str::FromStr;
 use eigen_common::{get_provider, get_signer};
 use eigen_types::multichain::{KeyType, OperatorKey, OperatorSet};
 use eigen_utils::convert_cross_chain_registry_operator_set_to_key_registrar_operator_set;
 use eigen_utils::slashing::core::key_registrar::KeyRegistrar;
 use eigen_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry;
 use eigen_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry::OperatorSet as ContractOperatorSet;
+use std::str::FromStr;
 use thiserror::Error;
 use tracing::{info, instrument};
 
@@ -196,7 +196,14 @@ impl DefaultKeyManager {
         domain_separator: FixedBytes<32>,
         struct_hash: FixedBytes<32>,
     ) -> Result<FixedBytes<65>, KeyManagerError> {
-        let digest = keccak256([&[0x19, 0x01], domain_separator.as_slice(), struct_hash.as_slice()].concat());
+        let digest = keccak256(
+            [
+                &[0x19, 0x01],
+                domain_separator.as_slice(),
+                struct_hash.as_slice(),
+            ]
+            .concat(),
+        );
 
         let signer = PrivateKeySigner::from_str(&self.signer)
             .map_err(|e| KeyManagerError::SigningFailed(format!("invalid signer key: {}", e)))?;
@@ -241,19 +248,23 @@ impl KeyManager for DefaultKeyManager {
 
                 let key_registrar_addr = self.get_key_registrar_addr().await?;
                 let domain_separator = self.compute_eip712_domain_separator(key_registrar_addr, 1);
-                let message_hash =
-                    self.compute_ecdsa_registration_message_hash(operator, &operator_set, &key_data);
+                let message_hash = self.compute_ecdsa_registration_message_hash(
+                    operator,
+                    &operator_set,
+                    &key_data,
+                );
                 let signature = self.sign_typed_data(domain_separator, message_hash).await?;
 
                 let provider = get_signer(&self.signer, &self.provider);
                 let key_registrar = KeyRegistrar::new(key_registrar_addr, provider);
 
-                let contract_operator_set = convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
-                    ContractOperatorSet {
-                        avs: operator_set.avs,
-                        id: operator_set.id,
-                    },
-                );
+                let contract_operator_set =
+                    convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
+                        ContractOperatorSet {
+                            avs: operator_set.avs,
+                            id: operator_set.id,
+                        },
+                    );
 
                 let encoded_signature = signature.to_vec().into();
 
@@ -261,31 +272,36 @@ impl KeyManager for DefaultKeyManager {
                     .registerKey(operator, contract_operator_set, key_data, encoded_signature)
                     .send()
                     .await
-                    .map_err(|e| KeyManagerError::RegistrationFailed(format!("send failed: {}", e)))?;
+                    .map_err(|e| {
+                        KeyManagerError::RegistrationFailed(format!("send failed: {}", e))
+                    })?;
 
-                let receipt = tx
-                    .get_receipt()
-                    .await
-                    .map_err(|e| KeyManagerError::RegistrationFailed(format!("receipt failed: {}", e)))?;
+                let receipt = tx.get_receipt().await.map_err(|e| {
+                    KeyManagerError::RegistrationFailed(format!("receipt failed: {}", e))
+                })?;
 
                 Ok(receipt.transaction_hash)
             }
             KeyType::BN254 => {
                 let key_registrar_addr = self.get_key_registrar_addr().await?;
                 let domain_separator = self.compute_eip712_domain_separator(key_registrar_addr, 1);
-                let message_hash =
-                    self.compute_bn254_registration_message_hash(operator, &operator_set, &key_data);
+                let message_hash = self.compute_bn254_registration_message_hash(
+                    operator,
+                    &operator_set,
+                    &key_data,
+                );
                 let signature = self.sign_typed_data(domain_separator, message_hash).await?;
 
                 let provider = get_signer(&self.signer, &self.provider);
                 let key_registrar = KeyRegistrar::new(key_registrar_addr, provider);
 
-                let contract_operator_set = convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
-                    ContractOperatorSet {
-                        avs: operator_set.avs,
-                        id: operator_set.id,
-                    },
-                );
+                let contract_operator_set =
+                    convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
+                        ContractOperatorSet {
+                            avs: operator_set.avs,
+                            id: operator_set.id,
+                        },
+                    );
 
                 let encoded_signature = signature.to_vec().into();
 
@@ -293,12 +309,13 @@ impl KeyManager for DefaultKeyManager {
                     .registerKey(operator, contract_operator_set, key_data, encoded_signature)
                     .send()
                     .await
-                    .map_err(|e| KeyManagerError::RegistrationFailed(format!("send failed: {}", e)))?;
+                    .map_err(|e| {
+                        KeyManagerError::RegistrationFailed(format!("send failed: {}", e))
+                    })?;
 
-                let receipt = tx
-                    .get_receipt()
-                    .await
-                    .map_err(|e| KeyManagerError::RegistrationFailed(format!("receipt failed: {}", e)))?;
+                let receipt = tx.get_receipt().await.map_err(|e| {
+                    KeyManagerError::RegistrationFailed(format!("receipt failed: {}", e))
+                })?;
 
                 Ok(receipt.transaction_hash)
             }
@@ -325,23 +342,25 @@ impl KeyManager for DefaultKeyManager {
         let provider = get_signer(&self.signer, &self.provider);
         let key_registrar = KeyRegistrar::new(key_registrar_addr, provider);
 
-        let contract_operator_set = convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
-            ContractOperatorSet {
-                avs: operator_set.avs,
-                id: operator_set.id,
-            },
-        );
+        let contract_operator_set =
+            convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
+                ContractOperatorSet {
+                    avs: operator_set.avs,
+                    id: operator_set.id,
+                },
+            );
 
         let deregister_tx = key_registrar
             .deregisterKey(operator, contract_operator_set.clone())
             .send()
             .await
-            .map_err(|e| KeyManagerError::RotationFailed(format!("deregister send failed: {}", e)))?;
+            .map_err(|e| {
+                KeyManagerError::RotationFailed(format!("deregister send failed: {}", e))
+            })?;
 
-        deregister_tx
-            .get_receipt()
-            .await
-            .map_err(|e| KeyManagerError::RotationFailed(format!("deregister receipt failed: {}", e)))?;
+        deregister_tx.get_receipt().await.map_err(|e| {
+            KeyManagerError::RotationFailed(format!("deregister receipt failed: {}", e))
+        })?;
 
         let domain_separator = self.compute_eip712_domain_separator(key_registrar_addr, 1);
         let message_hash =
@@ -350,15 +369,19 @@ impl KeyManager for DefaultKeyManager {
         let encoded_signature = signature.to_vec().into();
 
         let register_tx = key_registrar
-            .registerKey(operator, contract_operator_set, new_key_data, encoded_signature)
+            .registerKey(
+                operator,
+                contract_operator_set,
+                new_key_data,
+                encoded_signature,
+            )
             .send()
             .await
             .map_err(|e| KeyManagerError::RotationFailed(format!("register send failed: {}", e)))?;
 
-        let receipt = register_tx
-            .get_receipt()
-            .await
-            .map_err(|e| KeyManagerError::RotationFailed(format!("register receipt failed: {}", e)))?;
+        let receipt = register_tx.get_receipt().await.map_err(|e| {
+            KeyManagerError::RotationFailed(format!("register receipt failed: {}", e))
+        })?;
 
         Ok(receipt.transaction_hash)
     }
@@ -380,12 +403,13 @@ impl KeyManager for DefaultKeyManager {
         let provider = get_provider(&self.provider);
         let key_registrar = KeyRegistrar::new(key_registrar_addr, &provider);
 
-        let contract_operator_set = convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
-            ContractOperatorSet {
-                avs: operator_set.avs,
-                id: operator_set.id,
-            },
-        );
+        let contract_operator_set =
+            convert_cross_chain_registry_operator_set_to_key_registrar_operator_set(
+                ContractOperatorSet {
+                    avs: operator_set.avs,
+                    id: operator_set.id,
+                },
+            );
 
         let result = key_registrar
             .getECDSAKey(contract_operator_set, operator)

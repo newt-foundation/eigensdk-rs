@@ -18,7 +18,11 @@ pub struct CrossChainRegistryReader {
 }
 
 impl CrossChainRegistryReader {
-    pub fn new(cross_chain_registry_addr: Address, key_registrar_addr: Address, provider: String) -> Self {
+    pub fn new(
+        cross_chain_registry_addr: Address,
+        key_registrar_addr: Address,
+        provider: String,
+    ) -> Self {
         Self {
             cross_chain_registry_addr,
             key_registrar_addr,
