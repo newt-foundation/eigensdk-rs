@@ -1,4 +1,5 @@
 use alloy::primitives::U256;
+use alloy::sol_types::SolValue;
 use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
 use eigen_services_blsaggregation::bls_aggregation_service_response::BlsAggregationServiceResponse;
@@ -19,9 +20,10 @@ pub enum CertificateConstructorError {
     WitnessConstructionFailed(String),
 }
 
-pub fn construct_bn254_certificate(
+pub fn construct_bn254_certificate<T: SolValue>(
     response: &BlsAggregationServiceResponse,
     reference_timestamp: u32,
+    task_response: &T,
 ) -> Result<BN254Certificate, CertificateConstructorError> {
     let sig_g1 = response.signers_agg_sig_g1.g1_point().g1();
     let sig_x = U256::from_limbs(sig_g1.x().unwrap().into_bigint().0);
@@ -44,9 +46,14 @@ pub fn construct_bn254_certificate(
 
     let non_signer_witnesses = construct_non_signer_witnesses(response)?;
 
+    // compute message hash from task response instead of using response.task_response_digest
+    // because in multichain mode, response.task_response_digest is the full certificate digest
+    // but the certificate struct expects just the plain message hash
+    let message_hash = alloy::primitives::keccak256(task_response.abi_encode());
+
     Ok(BN254Certificate {
         referenceTimestamp: reference_timestamp,
-        messageHash: response.task_response_digest,
+        messageHash: message_hash,
         signature,
         apk,
         nonSignerWitnesses: non_signer_witnesses,
