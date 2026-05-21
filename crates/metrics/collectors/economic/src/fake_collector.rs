@@ -3,8 +3,8 @@ use std::{collections::HashMap, str::FromStr};
 use crate::error::CollectorMetricError;
 
 use alloy::primitives::{Address, FixedBytes, U256};
-use eigen_client_avsregistry::reader::AvsRegistryChainReader;
-use eigen_types::operator::OperatorId;
+use newton_client_avsregistry::reader::AvsRegistryChainReader;
+use newton_types::operator::OperatorId;
 use metrics::{describe_gauge, gauge, Key, Label};
 use num_bigint::BigInt;
 use tracing::{debug, instrument};

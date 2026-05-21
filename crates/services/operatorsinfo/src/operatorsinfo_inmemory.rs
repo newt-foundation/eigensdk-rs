@@ -2,17 +2,17 @@ use alloy::primitives::{Address, FixedBytes};
 use alloy::providers::Provider;
 use alloy::rpc::types::Filter;
 use async_trait::async_trait;
-use eigen_client_avsregistry::reader::AvsRegistryChainReader;
-use eigen_common::{get_ws_provider, NEW_PUBKEY_REGISTRATION_EVENT, OPERATOR_SOCKET_UPDATE};
-use eigen_crypto_bls::{
+use newton_client_avsregistry::reader::AvsRegistryChainReader;
+use newton_common::{get_ws_provider, NEW_PUBKEY_REGISTRATION_EVENT, OPERATOR_SOCKET_UPDATE};
+use newton_crypto_bls::{
     alloy_registry_g1_point_to_g1_affine, alloy_registry_g2_point_to_g2_affine, BlsG1Point,
     BlsG2Point,
 };
 
-use eigen_types::operator::{
+use newton_types::operator::{
     operator_id_from_g1_pub_key, OperatorId, OperatorPubKeys, OperatorTypesError,
 };
-use eigen_utils::{
+use newton_utils::{
     slashing::middleware::bls_apk_registry::{
         BLSApkRegistry,
         BN254::{G1Point, G2Point},
@@ -500,19 +500,19 @@ mod tests {
     use super::*;
     use alloy::primitives::{address, Bytes, U256};
     use alloy::signers::local::PrivateKeySigner;
-    use eigen_client_avsregistry::writer::AvsRegistryChainWriter;
-    use eigen_client_elcontracts::{reader::ELChainReader, writer::ELChainWriter};
-    use eigen_common::get_provider;
-    use eigen_crypto_bls::BlsKeyPair;
+    use newton_client_avsregistry::writer::AvsRegistryChainWriter;
+    use newton_client_elcontracts::{reader::ELChainReader, writer::ELChainWriter};
+    use newton_common::get_provider;
+    use newton_crypto_bls::BlsKeyPair;
 
-    use eigen_testing_utils::anvil::start_m2_anvil_container;
-    use eigen_testing_utils::anvil_constants::{
+    use newton_testing_utils::anvil::start_m2_anvil_container;
+    use newton_testing_utils::anvil_constants::{
         get_avs_directory_address, get_delegation_manager_address,
         get_operator_state_retriever_address, get_registry_coordinator_address,
         get_rewards_coordinator_address, get_service_manager_address, get_strategy_manager_address,
     };
-    use eigen_testing_utils::transaction::wait_transaction;
-    use eigen_types::operator::Operator;
+    use newton_testing_utils::transaction::wait_transaction;
+    use newton_types::operator::Operator;
     use std::str::FromStr;
     use std::time::{Duration, SystemTime, UNIX_EPOCH};
     use tokio::time::sleep;

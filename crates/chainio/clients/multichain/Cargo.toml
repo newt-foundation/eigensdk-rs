@@ -1,5 +1,5 @@
 [package]
-name = "eigen-client-multichain"
+name = "newton-client-multichain"
 description = "Eigen Layer Multichain Client"
 
 version.workspace = true
@@ -15,12 +15,12 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 alloy.workspace = true
 async-trait.workspace = true
-eigen-types.workspace = true
-eigen-crypto-bls.workspace = true
-eigen-crypto-bn254.workspace = true
-eigen-crypto-ecdsa.workspace = true
-eigen-common.workspace = true
-eigen-utils.workspace = true
+newton-types.workspace = true
+newton-crypto-bls.workspace = true
+newton-crypto-bn254.workspace = true
+newton-crypto-ecdsa.workspace = true
+newton-common.workspace = true
+newton-utils.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 

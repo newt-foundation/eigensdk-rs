@@ -1,5 +1,5 @@
 [package]
-name = "eigen-client-eth"
+name = "newton-client-eth"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -17,7 +17,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 alloy.workspace = true
 async-trait.workspace = true
 
-eigen-metrics-collectors-rpc-calls.workspace = true
+newton-metrics-collectors-rpc-calls.workspace = true
 hex.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
@@ -26,8 +26,8 @@ url.workspace = true
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../../../tests/testing-utils" }
-eigen-common = { path = "../../../common" }
+newton-testing-utils = { path = "../../../../tests/testing-utils" }
+newton-common = { path = "../../../common" }
 
 once_cell.workspace = true
 serial_test.workspace = true

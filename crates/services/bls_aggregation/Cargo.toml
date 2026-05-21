@@ -1,5 +1,5 @@
 [package]
-name = "eigen-services-blsaggregation"
+name = "newton-services-blsaggregation"
 description = "Eigen Layer SDK services blsaggregation"
 
 version.workspace = true
@@ -18,12 +18,12 @@ rustdoc-args = ["--cfg", "docsrs"]
 alloy.workspace = true
 ark-bn254.workspace = true
 ark-ec.workspace = true
-eigen-client-avsregistry.workspace = true
-eigen-common.workspace = true
-eigen-crypto-bls.workspace = true
-eigen-crypto-bn254.workspace = true
-eigen-services-avsregistry.workspace = true
-eigen-types.workspace = true
+newton-client-avsregistry.workspace = true
+newton-common.workspace = true
+newton-crypto-bls.workspace = true
+newton-crypto-bn254.workspace = true
+newton-services-avsregistry.workspace = true
+newton-types.workspace = true
 parking_lot.workspace = true
 thiserror.workspace = true
 tokio = { workspace = true, features = ["full"] }
@@ -35,10 +35,10 @@ simple-mermaid = { version = "0.2.0", optional = true }
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../../tests/testing-utils" }
-eigen-utils = { path = "../../utils" }
-eigen-client-elcontracts = { path = "../../chainio/clients/elcontracts" }
-eigen-services-operatorsinfo = { path = "../../services/operatorsinfo" }
+newton-testing-utils = { path = "../../../tests/testing-utils" }
+newton-utils = { path = "../../utils" }
+newton-client-elcontracts = { path = "../../chainio/clients/elcontracts" }
+newton-services-operatorsinfo = { path = "../../services/operatorsinfo" }
 
 serial_test = "3.1"
 sha2 = "0.10.8"

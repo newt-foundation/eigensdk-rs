@@ -7,21 +7,21 @@ pub mod integration_test {
     use alloy::primitives::{Address, Bytes, FixedBytes, B256, U256};
     use alloy::providers::Provider;
     use alloy::providers::WalletProvider;
-    use eigen_client_avsregistry::{
+    use newton_client_avsregistry::{
         reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter,
     };
-    use eigen_client_elcontracts::{reader::ELChainReader, writer::ELChainWriter};
-    use eigen_common::{get_provider, get_signer};
-    use eigen_crypto_bls::{
+    use newton_client_elcontracts::{reader::ELChainReader, writer::ELChainWriter};
+    use newton_common::{get_provider, get_signer};
+    use newton_crypto_bls::{
         convert_to_bls_checker_g1_point, convert_to_bls_checker_g2_point, BlsKeyPair,
     };
 
-    use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
-    use eigen_services_operatorsinfo::{
+    use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+    use newton_services_operatorsinfo::{
         operatorsinfo_inmemory::OperatorInfoServiceInMemory,
         operatorsinfo_onchain::OperatorInfoOnChain,
     };
-    use eigen_testing_utils::{
+    use newton_testing_utils::{
         anvil::{mine_anvil_blocks, start_anvil_container, start_m2_anvil_container},
         anvil_constants::{
             get_allocation_manager_address, get_bls_apk_registry_address, get_erc20_mock_strategy,
@@ -32,12 +32,12 @@ pub mod integration_test {
         test_data::TestData,
         transaction::wait_transaction,
     };
-    use eigen_types::{
+    use newton_types::{
         avs::TaskIndex,
         operator::{operator_id_from_g1_pub_key, QuorumNum, QuorumThresholdPercentages},
     };
 
-    use eigen_utils::slashing::{
+    use newton_utils::slashing::{
         core::allocation_manager::{AllocationManager::OperatorSet, IAllocationManagerTypes},
         middleware::{
             bls_apk_registry::BLSApkRegistry,

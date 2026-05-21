@@ -2,7 +2,7 @@ use crate::operator::OperatorId;
 use crate::operator::OperatorInfo;
 use crate::operator::QuorumNum;
 use alloy::primitives::U256;
-use eigen_crypto_bls::BlsG1Point;
+use newton_crypto_bls::BlsG1Point;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq, Eq)]

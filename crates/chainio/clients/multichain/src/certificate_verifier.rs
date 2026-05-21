@@ -2,10 +2,10 @@ use crate::error::MultichainError;
 use alloy::primitives::{Address, Bytes, FixedBytes, U256};
 use alloy::providers::Provider;
 use async_trait::async_trait;
-use eigen_common::get_provider;
-use eigen_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier;
-use eigen_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry::OperatorSet as ContractOperatorSet;
-use eigen_utils::slashing::multichain::ecdsa_certificate_verifier::ECDSACertificateVerifier;
+use newton_common::get_provider;
+use newton_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier;
+use newton_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry::OperatorSet as ContractOperatorSet;
+use newton_utils::slashing::multichain::ecdsa_certificate_verifier::ECDSACertificateVerifier;
 use tracing::instrument;
 
 #[derive(Debug, Clone)]
@@ -72,8 +72,8 @@ impl CertificateVerifierReaderTrait for BN254CertificateVerifierReader {
         };
 
         use alloy::sol_types::SolType;
-        use eigen_utils::slashing::multichain::bn254_certificate_verifier::IBN254CertificateVerifierTypes::BN254Certificate as CertType;
-        use eigen_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier::OperatorSet as BN254OperatorSet;
+        use newton_utils::slashing::multichain::bn254_certificate_verifier::IBN254CertificateVerifierTypes::BN254Certificate as CertType;
+        use newton_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier::OperatorSet as BN254OperatorSet;
 
         let cert = <CertType as SolType>::abi_decode(&certificate).map_err(|e| {
             MultichainError::CertificateVerificationFailed(format!(
@@ -120,8 +120,8 @@ impl CertificateVerifierReaderTrait for ECDSACertificateVerifierReader {
         };
 
         use alloy::sol_types::SolType;
-        use eigen_utils::slashing::multichain::ecdsa_certificate_verifier::IECDSACertificateVerifierTypes::ECDSACertificate as CertType;
-        use eigen_utils::slashing::multichain::ecdsa_certificate_verifier::ECDSACertificateVerifier::OperatorSet as ECDSAOperatorSet;
+        use newton_utils::slashing::multichain::ecdsa_certificate_verifier::IECDSACertificateVerifierTypes::ECDSACertificate as CertType;
+        use newton_utils::slashing::multichain::ecdsa_certificate_verifier::ECDSACertificateVerifier::OperatorSet as ECDSAOperatorSet;
 
         let cert = <CertType as SolType>::abi_decode(&certificate).map_err(|e| {
             MultichainError::CertificateVerificationFailed(format!(

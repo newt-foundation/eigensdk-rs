@@ -22,11 +22,11 @@ mod tests {
     use crate::eigenmetrics::EigenPerformanceMetrics;
     use alloy::primitives::Address;
     use alloy::primitives::FixedBytes;
-    use eigen_client_avsregistry::reader::AvsRegistryChainReader;
-    use eigen_metrics_collectors_economic::fake_collector::FakeCollector;
-    use eigen_metrics_collectors_rpc_calls::RpcCallsMetrics;
-    use eigen_testing_utils::anvil::start_anvil_container;
-    use eigen_testing_utils::anvil_constants::{
+    use newton_client_avsregistry::reader::AvsRegistryChainReader;
+    use newton_metrics_collectors_economic::fake_collector::FakeCollector;
+    use newton_metrics_collectors_rpc_calls::RpcCallsMetrics;
+    use newton_testing_utils::anvil::start_anvil_container;
+    use newton_testing_utils::anvil_constants::{
         get_operator_state_retriever_address, get_registry_coordinator_address,
     };
     use num_bigint::BigInt;

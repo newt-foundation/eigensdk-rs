@@ -1,5 +1,5 @@
 [package]
-name = "eigen-services-operatorsinfo"
+name = "newton-services-operatorsinfo"
 description = "Eigen Layer SDK services operatorsinfo"
 
 version.workspace = true
@@ -17,11 +17,11 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 alloy.workspace = true
 async-trait.workspace = true
-eigen-client-avsregistry.workspace = true
-eigen-common.workspace = true
-eigen-crypto-bls.workspace = true
-eigen-types.workspace = true
-eigen-utils.workspace = true
+newton-client-avsregistry.workspace = true
+newton-common.workspace = true
+newton-crypto-bls.workspace = true
+newton-types.workspace = true
+newton-utils.workspace = true
 futures-util.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 thiserror.workspace = true
@@ -33,8 +33,8 @@ eyre.workspace = true
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../../tests/testing-utils" }
-eigen-client-elcontracts = { path = "../../chainio/clients/elcontracts" }
+newton-testing-utils = { path = "../../../tests/testing-utils" }
+newton-client-elcontracts = { path = "../../chainio/clients/elcontracts" }
 
 ark-bn254.workspace = true
 ark-std = { version = "0.4.0", default-features = false }

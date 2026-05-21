@@ -2,12 +2,12 @@ use alloy::primitives::{Bytes, FixedBytes, U256};
 use ark_bn254::G1Projective;
 use ark_ec::{short_weierstrass::Affine, AffineRepr, CurveGroup};
 use async_trait::async_trait;
-use eigen_client_avsregistry::{error::AvsRegistryError, reader::AvsRegistryReader};
-use eigen_crypto_bls::{BlsG1Point, PublicKey};
-use eigen_services_operatorsinfo::operator_info::OperatorInfoService;
-use eigen_types::avs_state::{OperatorAvsState, QuorumAvsState};
-use eigen_types::operator::{OperatorInfo, OperatorPubKeys};
-use eigen_utils::slashing::middleware::operator_state_retriever::OperatorStateRetriever::CheckSignaturesIndices;
+use newton_client_avsregistry::{error::AvsRegistryError, reader::AvsRegistryReader};
+use newton_crypto_bls::{BlsG1Point, PublicKey};
+use newton_services_operatorsinfo::operator_info::OperatorInfoService;
+use newton_types::avs_state::{OperatorAvsState, QuorumAvsState};
+use newton_types::operator::{OperatorInfo, OperatorPubKeys};
+use newton_utils::slashing::middleware::operator_state_retriever::OperatorStateRetriever::CheckSignaturesIndices;
 use std::collections::HashMap;
 
 use crate::AvsRegistryService;
@@ -195,13 +195,13 @@ mod tests {
     use super::AvsRegistryServiceChainCaller;
     use crate::AvsRegistryService;
     use alloy::primitives::{Address, FixedBytes, U256};
-    use eigen_client_avsregistry::fake_reader::FakeAvsRegistryReader;
-    use eigen_crypto_bls::BlsKeyPair;
-    use eigen_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
-    use eigen_testing_utils::test_data::TestData;
-    use eigen_types::avs_state::{OperatorAvsState, QuorumAvsState};
-    use eigen_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
-    use eigen_types::test::TestOperator;
+    use newton_client_avsregistry::fake_reader::FakeAvsRegistryReader;
+    use newton_crypto_bls::BlsKeyPair;
+    use newton_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
+    use newton_testing_utils::test_data::TestData;
+    use newton_types::avs_state::{OperatorAvsState, QuorumAvsState};
+    use newton_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
+    use newton_types::test::TestOperator;
     use serde::Deserialize;
 
     #[derive(Deserialize, Debug)]

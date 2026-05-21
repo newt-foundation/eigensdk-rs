@@ -1975,10 +1975,10 @@ dependencies = [
  "alloy",
  "ark-ff 0.5.0",
  "async-trait",
- "eigen-common",
- "eigen-testing-utils",
- "eigen-utils",
  "futures-util",
+ "newton-common",
+ "newton-testing-utils",
+ "newton-utils",
  "num-bigint 0.4.6",
  "thiserror 1.0.69",
  "tokio",
@@ -2447,415 +2447,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "eigen-cli"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "ark-ec 0.5.0",
- "ark-ff 0.5.0",
- "ark-serialize 0.5.0",
- "clap",
- "colored",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-testing-utils",
- "eigen-utils",
- "eth-keystore",
- "hex",
- "k256",
- "num-bigint 0.4.6",
- "rand 0.8.5",
- "rand_core 0.6.4",
- "rstest",
- "rust-bls-bn254",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "uuid 1.16.0",
-]
-
-[[package]]
-name = "eigen-client-avsregistry"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "ark-ff 0.5.0",
- "async-trait",
- "eigen-client-elcontracts",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-testing-utils",
- "eigen-types",
- "eigen-utils",
- "futures-util",
- "hex",
- "num-bigint 0.4.6",
- "once_cell",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "eigen-client-elcontracts"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-testing-utils",
- "eigen-types",
- "eigen-utils",
- "once_cell",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "eigen-client-eth"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "async-trait",
- "eigen-common",
- "eigen-metrics-collectors-rpc-calls",
- "eigen-testing-utils",
- "hex",
- "once_cell",
- "serial_test",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "eigen-client-fireblocks"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "chrono",
- "eigen-common",
- "hex",
- "jsonwebtoken",
- "mime",
- "once_cell",
- "reqwest 0.11.27",
- "serde",
- "serde_json",
- "sha2",
- "thiserror 1.0.69",
- "tokio",
- "uuid 1.16.0",
-]
-
-[[package]]
-name = "eigen-client-multichain"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "async-trait",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-crypto-bn254",
- "eigen-crypto-ecdsa",
- "eigen-types",
- "eigen-utils",
- "thiserror 1.0.69",
- "tracing",
-]
-
-[[package]]
-name = "eigen-common"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "url",
-]
-
-[[package]]
-name = "eigen-crypto-bls"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "ark-bn254 0.5.0",
- "ark-ec 0.5.0",
- "ark-ff 0.5.0",
- "ark-serialize 0.5.0",
- "ark-std 0.4.0",
- "eigen-crypto-bn254",
- "eigen-testing-utils",
- "eigen-utils",
- "rand 0.8.5",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
-]
-
-[[package]]
-name = "eigen-crypto-bn254"
-version = "2.0.0"
-dependencies = [
- "ark-bn254 0.5.0",
- "ark-ec 0.5.0",
- "ark-ff 0.5.0",
- "rand 0.8.5",
- "rust-bls-bn254",
- "tokio",
-]
-
-[[package]]
-name = "eigen-crypto-ecdsa"
-version = "2.0.0"
-dependencies = [
- "eth-keystore",
-]
-
-[[package]]
-name = "eigen-metrics"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "eigen-client-avsregistry",
- "eigen-client-elcontracts",
- "eigen-metrics-collectors-economic",
- "eigen-metrics-collectors-rpc-calls",
- "eigen-testing-utils",
- "metrics",
- "metrics-exporter-prometheus",
- "metrics-util",
- "num-bigint 0.4.6",
- "reqwest 0.12.15",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "eigen-metrics-collectors-economic"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "eigen-client-avsregistry",
- "eigen-client-elcontracts",
- "eigen-testing-utils",
- "eigen-types",
- "metrics",
- "num-bigint 0.4.6",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "eigen-metrics-collectors-rpc-calls"
-version = "2.0.0"
-dependencies = [
- "metrics",
- "tracing",
-]
-
-[[package]]
-name = "eigen-nodeapi"
-version = "2.0.0"
-dependencies = [
- "ntex",
- "reqwest 0.12.15",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "eigen-services-avsregistry"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "ark-bn254 0.5.0",
- "ark-ec 0.5.0",
- "async-trait",
- "eigen-client-avsregistry",
- "eigen-crypto-bls",
- "eigen-services-operatorsinfo",
- "eigen-testing-utils",
- "eigen-types",
- "eigen-utils",
- "hex",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "eigen-services-blsaggregation"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "ark-bn254 0.5.0",
- "ark-ec 0.5.0",
- "eigen-client-avsregistry",
- "eigen-client-elcontracts",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-crypto-bn254",
- "eigen-services-avsregistry",
- "eigen-services-operatorsinfo",
- "eigen-testing-utils",
- "eigen-types",
- "eigen-utils",
- "parking_lot",
- "serde",
- "serde_json",
- "serial_test",
- "sha2",
- "simple-mermaid",
- "testcontainers",
- "thiserror 1.0.69",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "eigen-services-multichain"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "ark-ec 0.5.0",
- "ark-ff 0.5.0",
- "async-trait",
- "eigen-client-multichain",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-crypto-bn254",
- "eigen-crypto-ecdsa",
- "eigen-services-blsaggregation",
- "eigen-types",
- "eigen-utils",
- "futures",
- "rs_merkle",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "eigen-services-operatorsinfo"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "ark-bn254 0.5.0",
- "ark-ff 0.5.0",
- "ark-std 0.4.0",
- "async-trait",
- "eigen-client-avsregistry",
- "eigen-client-elcontracts",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-testing-utils",
- "eigen-types",
- "eigen-utils",
- "eyre",
- "futures",
- "futures-util",
- "serial_test",
- "thiserror 1.0.69",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "eigen-signer"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "async-trait",
- "aws-config",
- "aws-sdk-kms",
- "eigen-testing-utils",
- "eth-keystore",
- "serde",
- "testcontainers",
- "thiserror 1.0.69",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "eigen-testing-utils"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "eigen-client-avsregistry",
- "eigen-client-elcontracts",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-utils",
- "serde",
- "serde_json",
- "testcontainers",
- "url",
-]
-
-[[package]]
-name = "eigen-types"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "ark-bn254 0.5.0",
- "ark-ff 0.5.0",
- "eigen-crypto-bls",
- "eigen-utils",
- "mime-sniffer",
- "num-bigint 0.4.6",
- "regex",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "eigen-utils"
-version = "2.0.0"
-dependencies = [
- "alloy",
- "regex",
- "reqwest 0.12.15",
- "serde",
-]
-
-[[package]]
-name = "eigensdk"
-version = "2.0.0"
-dependencies = [
- "eigen-client-avsregistry",
- "eigen-client-elcontracts",
- "eigen-client-eth",
- "eigen-client-fireblocks",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-crypto-bn254",
- "eigen-metrics",
- "eigen-metrics-collectors-economic",
- "eigen-metrics-collectors-rpc-calls",
- "eigen-nodeapi",
- "eigen-services-avsregistry",
- "eigen-services-blsaggregation",
- "eigen-services-operatorsinfo",
- "eigen-signer",
- "eigen-testing-utils",
- "eigen-types",
- "eigen-utils",
-]
-
-[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3013,9 +2604,9 @@ name = "examples-anvil-utils"
 version = "2.0.0"
 dependencies = [
  "alloy",
- "eigen-client-avsregistry",
- "eigen-testing-utils",
  "eyre",
+ "newton-client-avsregistry",
+ "newton-testing-utils",
  "tokio",
 ]
 
@@ -3024,9 +2615,9 @@ name = "examples-avsregistry-read"
 version = "2.0.0"
 dependencies = [
  "alloy",
- "eigen-client-avsregistry",
- "eigen-testing-utils",
  "eyre",
+ "newton-client-avsregistry",
+ "newton-testing-utils",
  "tokio",
 ]
 
@@ -3040,16 +2631,16 @@ dependencies = [
  "ark-ff 0.5.0",
  "ark-serialize 0.4.2",
  "ark-std 0.4.0",
- "eigen-client-avsregistry",
- "eigen-client-elcontracts",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-crypto-bn254",
- "eigen-testing-utils",
- "eigen-types",
- "eigen-utils",
  "eyre",
  "lazy_static",
+ "newton-client-avsregistry",
+ "newton-client-elcontracts",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-crypto-bn254",
+ "newton-testing-utils",
+ "newton-types",
+ "newton-utils",
  "tokio",
 ]
 
@@ -3922,13 +3513,13 @@ name = "info-operator-service"
 version = "2.0.0"
 dependencies = [
  "alloy",
- "eigen-client-avsregistry",
- "eigen-client-elcontracts",
- "eigen-common",
- "eigen-crypto-bls",
- "eigen-services-operatorsinfo",
- "eigen-testing-utils",
- "eigen-utils",
+ "newton-client-avsregistry",
+ "newton-client-elcontracts",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-services-operatorsinfo",
+ "newton-testing-utils",
+ "newton-utils",
  "tokio",
  "tokio-util",
  "tracing",
@@ -4299,6 +3890,415 @@ dependencies = [
  "security-framework 2.11.1",
  "security-framework-sys",
  "tempfile",
+]
+
+[[package]]
+name = "newton-client-avsregistry"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-ff 0.5.0",
+ "async-trait",
+ "futures-util",
+ "hex",
+ "newton-client-elcontracts",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-testing-utils",
+ "newton-types",
+ "newton-utils",
+ "num-bigint 0.4.6",
+ "once_cell",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "newton-client-elcontracts"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-testing-utils",
+ "newton-types",
+ "newton-utils",
+ "once_cell",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "newton-client-eth"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "async-trait",
+ "hex",
+ "newton-common",
+ "newton-metrics-collectors-rpc-calls",
+ "newton-testing-utils",
+ "once_cell",
+ "serial_test",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "newton-client-fireblocks"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "chrono",
+ "hex",
+ "jsonwebtoken",
+ "mime",
+ "newton-common",
+ "once_cell",
+ "reqwest 0.11.27",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 1.0.69",
+ "tokio",
+ "uuid 1.16.0",
+]
+
+[[package]]
+name = "newton-client-multichain"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "async-trait",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-crypto-bn254",
+ "newton-crypto-ecdsa",
+ "newton-types",
+ "newton-utils",
+ "thiserror 1.0.69",
+ "tracing",
+]
+
+[[package]]
+name = "newton-common"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "url",
+]
+
+[[package]]
+name = "newton-crypto-bls"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-bn254 0.5.0",
+ "ark-ec 0.5.0",
+ "ark-ff 0.5.0",
+ "ark-serialize 0.5.0",
+ "ark-std 0.4.0",
+ "newton-crypto-bn254",
+ "newton-testing-utils",
+ "newton-utils",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
+name = "newton-crypto-bn254"
+version = "2.0.0"
+dependencies = [
+ "ark-bn254 0.5.0",
+ "ark-ec 0.5.0",
+ "ark-ff 0.5.0",
+ "rand 0.8.5",
+ "rust-bls-bn254",
+ "tokio",
+]
+
+[[package]]
+name = "newton-crypto-ecdsa"
+version = "2.0.0"
+dependencies = [
+ "eth-keystore",
+]
+
+[[package]]
+name = "newton-eigen-cli"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-ec 0.5.0",
+ "ark-ff 0.5.0",
+ "ark-serialize 0.5.0",
+ "clap",
+ "colored",
+ "eth-keystore",
+ "hex",
+ "k256",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-testing-utils",
+ "newton-utils",
+ "num-bigint 0.4.6",
+ "rand 0.8.5",
+ "rand_core 0.6.4",
+ "rstest",
+ "rust-bls-bn254",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "uuid 1.16.0",
+]
+
+[[package]]
+name = "newton-eigensdk"
+version = "2.0.0"
+dependencies = [
+ "newton-client-avsregistry",
+ "newton-client-elcontracts",
+ "newton-client-eth",
+ "newton-client-fireblocks",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-crypto-bn254",
+ "newton-metrics",
+ "newton-metrics-collectors-economic",
+ "newton-metrics-collectors-rpc-calls",
+ "newton-nodeapi",
+ "newton-services-avsregistry",
+ "newton-services-blsaggregation",
+ "newton-services-operatorsinfo",
+ "newton-signer",
+ "newton-testing-utils",
+ "newton-types",
+ "newton-utils",
+]
+
+[[package]]
+name = "newton-metrics"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "metrics",
+ "metrics-exporter-prometheus",
+ "metrics-util",
+ "newton-client-avsregistry",
+ "newton-client-elcontracts",
+ "newton-metrics-collectors-economic",
+ "newton-metrics-collectors-rpc-calls",
+ "newton-testing-utils",
+ "num-bigint 0.4.6",
+ "reqwest 0.12.15",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "newton-metrics-collectors-economic"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "metrics",
+ "newton-client-avsregistry",
+ "newton-client-elcontracts",
+ "newton-testing-utils",
+ "newton-types",
+ "num-bigint 0.4.6",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "newton-metrics-collectors-rpc-calls"
+version = "2.0.0"
+dependencies = [
+ "metrics",
+ "tracing",
+]
+
+[[package]]
+name = "newton-nodeapi"
+version = "2.0.0"
+dependencies = [
+ "ntex",
+ "reqwest 0.12.15",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "newton-services-avsregistry"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-bn254 0.5.0",
+ "ark-ec 0.5.0",
+ "async-trait",
+ "hex",
+ "newton-client-avsregistry",
+ "newton-crypto-bls",
+ "newton-services-operatorsinfo",
+ "newton-testing-utils",
+ "newton-types",
+ "newton-utils",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "newton-services-blsaggregation"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-bn254 0.5.0",
+ "ark-ec 0.5.0",
+ "newton-client-avsregistry",
+ "newton-client-elcontracts",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-crypto-bn254",
+ "newton-services-avsregistry",
+ "newton-services-operatorsinfo",
+ "newton-testing-utils",
+ "newton-types",
+ "newton-utils",
+ "parking_lot",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "sha2",
+ "simple-mermaid",
+ "testcontainers",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "newton-services-multichain"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-ec 0.5.0",
+ "ark-ff 0.5.0",
+ "async-trait",
+ "futures",
+ "newton-client-multichain",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-crypto-bn254",
+ "newton-crypto-ecdsa",
+ "newton-services-blsaggregation",
+ "newton-types",
+ "newton-utils",
+ "rs_merkle",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "newton-services-operatorsinfo"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-bn254 0.5.0",
+ "ark-ff 0.5.0",
+ "ark-std 0.4.0",
+ "async-trait",
+ "eyre",
+ "futures",
+ "futures-util",
+ "newton-client-avsregistry",
+ "newton-client-elcontracts",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-testing-utils",
+ "newton-types",
+ "newton-utils",
+ "serial_test",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "newton-signer"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "async-trait",
+ "aws-config",
+ "aws-sdk-kms",
+ "eth-keystore",
+ "newton-testing-utils",
+ "serde",
+ "testcontainers",
+ "thiserror 1.0.69",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "newton-testing-utils"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "newton-client-avsregistry",
+ "newton-client-elcontracts",
+ "newton-common",
+ "newton-crypto-bls",
+ "newton-utils",
+ "serde",
+ "serde_json",
+ "testcontainers",
+ "url",
+]
+
+[[package]]
+name = "newton-types"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "ark-bn254 0.5.0",
+ "ark-ff 0.5.0",
+ "mime-sniffer",
+ "newton-crypto-bls",
+ "newton-utils",
+ "num-bigint 0.4.6",
+ "regex",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "newton-utils"
+version = "2.0.0"
+dependencies = [
+ "alloy",
+ "regex",
+ "reqwest 0.12.15",
+ "serde",
 ]
 
 [[package]]

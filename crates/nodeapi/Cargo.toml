@@ -1,5 +1,5 @@
 [package]
-name = "eigen-nodeapi"
+name = "newton-nodeapi"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

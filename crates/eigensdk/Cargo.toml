@@ -1,5 +1,5 @@
 [package]
-name = "eigensdk"
+name = "newton-eigensdk"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -14,24 +14,24 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-eigen-client-avsregistry = { workspace = true, optional = true }
-eigen-client-elcontracts = { workspace = true, optional = true }
-eigen-client-eth = { workspace = true, optional = true }
-eigen-client-fireblocks = { workspace = true, optional = true }
-eigen-crypto-bls = { workspace = true, optional = true }
-eigen-crypto-bn254 = { workspace = true, optional = true }
-eigen-metrics = { workspace = true, optional = true }
-eigen-metrics-collectors-economic = { workspace = true, optional = true }
-eigen-metrics-collectors-rpc-calls = { workspace = true, optional = true }
-eigen-services-avsregistry = { workspace = true, optional = true }
-eigen-services-blsaggregation = { workspace = true, optional = true }
-eigen-services-operatorsinfo = { workspace = true, optional = true }
-eigen-signer = { workspace = true, optional = true }
-eigen-testing-utils = { workspace = true, optional = true }
-eigen-types = { workspace = true, optional = true }
-eigen-utils = { workspace = true, optional = true }
-eigen-nodeapi = { workspace = true, optional = true }
-eigen-common = { workspace = true, optional = true }
+newton-client-avsregistry = { workspace = true, optional = true }
+newton-client-elcontracts = { workspace = true, optional = true }
+newton-client-eth = { workspace = true, optional = true }
+newton-client-fireblocks = { workspace = true, optional = true }
+newton-crypto-bls = { workspace = true, optional = true }
+newton-crypto-bn254 = { workspace = true, optional = true }
+newton-metrics = { workspace = true, optional = true }
+newton-metrics-collectors-economic = { workspace = true, optional = true }
+newton-metrics-collectors-rpc-calls = { workspace = true, optional = true }
+newton-services-avsregistry = { workspace = true, optional = true }
+newton-services-blsaggregation = { workspace = true, optional = true }
+newton-services-operatorsinfo = { workspace = true, optional = true }
+newton-signer = { workspace = true, optional = true }
+newton-testing-utils = { workspace = true, optional = true }
+newton-types = { workspace = true, optional = true }
+newton-utils = { workspace = true, optional = true }
+newton-nodeapi = { workspace = true, optional = true }
+newton-common = { workspace = true, optional = true }
 
 # Feature configurations
 [features]
@@ -61,40 +61,40 @@ full = [
 ]
 
 # Client-related features
-client-avsregistry = ["dep:eigen-client-avsregistry"]
-client-elcontracts = ["dep:eigen-client-elcontracts"]
-client-eth = ["dep:eigen-client-eth"]
-client-fireblocks = ["dep:eigen-client-fireblocks"]
+client-avsregistry = ["dep:newton-client-avsregistry"]
+client-elcontracts = ["dep:newton-client-elcontracts"]
+client-eth = ["dep:newton-client-eth"]
+client-fireblocks = ["dep:newton-client-fireblocks"]
 
 
 # Crypto-related features
-crypto-bls = ["dep:eigen-crypto-bls"]
-crypto-bn254 = ["dep:eigen-crypto-bn254"]
+crypto-bls = ["dep:newton-crypto-bls"]
+crypto-bn254 = ["dep:newton-crypto-bn254"]
 
 # Metrics and collectors
-metrics = ["dep:eigen-metrics"]
-metrics-collectors-economic = ["dep:eigen-metrics-collectors-economic"]
-metrics-collectors-rpc-calls = ["dep:eigen-metrics-collectors-rpc-calls"]
+metrics = ["dep:newton-metrics"]
+metrics-collectors-economic = ["dep:newton-metrics-collectors-economic"]
+metrics-collectors-rpc-calls = ["dep:newton-metrics-collectors-rpc-calls"]
 
 # Service-related features
-services-avsregistry = ["dep:eigen-services-avsregistry"]
-services-blsaggregation = ["dep:eigen-services-blsaggregation"]
-services-operatorsinfo = ["dep:eigen-services-operatorsinfo"]
+services-avsregistry = ["dep:newton-services-avsregistry"]
+services-blsaggregation = ["dep:newton-services-blsaggregation"]
+services-operatorsinfo = ["dep:newton-services-operatorsinfo"]
 
 # Node API related features
-nodeapi = ["dep:eigen-nodeapi"]
+nodeapi = ["dep:newton-nodeapi"]
 
 # Utilities
-utils = ["dep:eigen-utils"]
+utils = ["dep:newton-utils"]
 
 # Testing utilities
-testing-utils = ["dep:eigen-testing-utils"]
+testing-utils = ["dep:newton-testing-utils"]
 
 # Signer-related features
-signer = ["dep:eigen-signer"]
+signer = ["dep:newton-signer"]
 
 # types
-types = ["dep:eigen-types"]
+types = ["dep:newton-types"]
 
 #common utilities
-common = ["dep:eigen-common"]
+common = ["dep:newton-common"]

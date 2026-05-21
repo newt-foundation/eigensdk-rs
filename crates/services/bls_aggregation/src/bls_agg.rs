@@ -3,12 +3,12 @@ use super::bls_aggregation_service_response::BlsAggregationServiceResponse;
 use alloy::primitives::{FixedBytes, Uint, U256};
 use ark_bn254::{G1Affine, G2Affine};
 use ark_ec::AffineRepr;
-use eigen_crypto_bls::{BlsG1Point, BlsG2Point, Signature};
-use eigen_crypto_bn254::utils::verify_message;
+use newton_crypto_bls::{BlsG1Point, BlsG2Point, Signature};
+use newton_crypto_bn254::utils::verify_message;
 
-use eigen_services_avsregistry::AvsRegistryService;
-use eigen_types::avs_state::OperatorAvsState;
-use eigen_types::{
+use newton_services_avsregistry::AvsRegistryService;
+use newton_types::avs_state::OperatorAvsState;
+use newton_types::{
     avs::{SignatureVerificationError, TaskIndex, TaskResponseDigest},
     operator::{QuorumThresholdPercentage, QuorumThresholdPercentages},
 };
@@ -990,12 +990,12 @@ mod tests {
     use super::{BlsAggregationServiceError, BlsAggregationServiceResponse, BlsAggregatorService};
     use crate::bls_agg::{TaskMetadata, TaskSignature};
     use alloy::primitives::{B256, U256};
-    use eigen_crypto_bls::{BlsG1Point, BlsG2Point, BlsKeyPair, Signature};
+    use newton_crypto_bls::{BlsG1Point, BlsG2Point, BlsKeyPair, Signature};
 
-    use eigen_services_avsregistry::fake_avs_registry_service::FakeAvsRegistryService;
-    use eigen_types::avs::SignatureVerificationError::{DuplicateSignature, IncorrectSignature};
-    use eigen_types::operator::{QuorumNum, QuorumThresholdPercentages};
-    use eigen_types::{avs::TaskIndex, test::TestOperator};
+    use newton_services_avsregistry::fake_avs_registry_service::FakeAvsRegistryService;
+    use newton_types::avs::SignatureVerificationError::{DuplicateSignature, IncorrectSignature};
+    use newton_types::operator::{QuorumNum, QuorumThresholdPercentages};
+    use newton_types::{avs::TaskIndex, test::TestOperator};
     use sha2::{Digest, Sha256};
     use std::collections::HashMap;
     use std::time::Duration;

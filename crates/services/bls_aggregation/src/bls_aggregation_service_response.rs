@@ -1,5 +1,5 @@
-use eigen_crypto_bls::{BlsG1Point, BlsG2Point, Signature};
-use eigen_types::avs::{TaskIndex, TaskResponseDigest};
+use newton_crypto_bls::{BlsG1Point, BlsG2Point, Signature};
+use newton_types::avs::{TaskIndex, TaskResponseDigest};
 use serde::{Deserialize, Serialize};
 
 /// The response from the BLS aggregation service

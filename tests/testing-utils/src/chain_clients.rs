@@ -3,16 +3,16 @@ use alloy::{
     primitives::{address, keccak256, Address, Bytes, FixedBytes, U256, U8},
     sol_types::{SolCall, SolValue},
 };
-use eigen_client_elcontracts::{reader::ELChainReader, writer::ELChainWriter};
-use eigen_common::{get_provider, get_signer};
+use newton_client_elcontracts::{reader::ELChainReader, writer::ELChainWriter};
+use newton_common::{get_provider, get_signer};
 
 use std::str::FromStr;
 
 use crate::transaction::wait_transaction;
 use alloy::{primitives::aliases::U96, providers::WalletProvider};
-use eigen_client_avsregistry::{reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter};
-use eigen_crypto_bls::BlsKeyPair;
-use eigen_utils::slashing::{
+use newton_client_avsregistry::{reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter};
+use newton_crypto_bls::BlsKeyPair;
+use newton_utils::slashing::{
     core::{
         allocation_manager::AllocationManager,
         delegation_manager::DelegationManager,
@@ -46,7 +46,7 @@ use crate::anvil_constants::{
     FIRST_ADDRESS, FIRST_PRIVATE_KEY,
 };
 
-use eigen_utils::rewardsv2::middleware::registry_coordinator::{
+use newton_utils::rewardsv2::middleware::registry_coordinator::{
     IRegistryCoordinator::OperatorSetParam as RewardsV2OperatorSetParam,
     IStakeRegistry::StrategyParams as RewardsV2StrategyParams,
     RegistryCoordinator as RewardsV2RegistryCoordinator,

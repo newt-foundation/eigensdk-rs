@@ -18,7 +18,7 @@ use alloy::primitives::{Address, U64};
 use alloy::providers::Provider;
 use alloy::rpc::types::transaction::TransactionReceipt;
 use client::{Client, ASSET_ID_BY_CHAIN};
-use eigen_common::get_provider;
+use newton_common::get_provider;
 use error::FireBlockError;
 use get_transaction::GetTransaction;
 use list_contracts::ListContracts;

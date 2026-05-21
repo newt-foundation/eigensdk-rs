@@ -45,12 +45,12 @@
 //! - `GetSockets`: Get the operator socket from memory.
 //!
 //! ```rust,no_run
-//!# use eigen_testing_utils::anvil_constants::{
+//!# use newton_testing_utils::anvil_constants::{
 //!#     ANVIL_HTTP_URL, ANVIL_WS_URL,
 //!#     get_operator_state_retriever_address, get_registry_coordinator_address,
 //!# };
-//!# use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
-//!# use eigen_client_avsregistry::reader::AvsRegistryChainReader;
+//!# use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//!# use newton_client_avsregistry::reader::AvsRegistryChainReader;
 //!# async fn example () {
 //!#     let http_endpoint = ANVIL_HTTP_URL;
 //!#     let ws_endpoint = ANVIL_WS_URL;
@@ -81,14 +81,14 @@
 //! and `OPERATOR_SOCKET_UPDATE` and save the data in memory. To stop the service, you can use the `CancellationToken`.
 //!
 //! ```rust,no_run
-//!# use eigen_testing_utils::anvil_constants::{
+//!# use newton_testing_utils::anvil_constants::{
 //!#     ANVIL_HTTP_URL, ANVIL_WS_URL,
 //!#     get_operator_state_retriever_address, get_registry_coordinator_address,
 //!# };
-//!# use eigen_services_operatorsinfo::{
+//!# use newton_services_operatorsinfo::{
 //!#     operator_info::OperatorInfoService, operatorsinfo_inmemory::OperatorInfoServiceInMemory,
 //!# };
-//!# use eigen_client_avsregistry::reader::AvsRegistryChainReader;
+//!# use newton_client_avsregistry::reader::AvsRegistryChainReader;
 //!# async fn example () {
 //!#     let http_endpoint = ANVIL_HTTP_URL;
 //!#     let ws_endpoint = ANVIL_WS_URL;
@@ -136,14 +136,14 @@
 //! This function will send a `OperatorsInfoMessage` with the `InsertOperatorInfo` action to the service channel and store the data in `OperatorState`.
 //!
 //! ```rust,no_run
-//!# use eigen_testing_utils::anvil_constants::{
+//!# use newton_testing_utils::anvil_constants::{
 //!#     ANVIL_HTTP_URL, ANVIL_WS_URL,
 //!#     get_operator_state_retriever_address, get_registry_coordinator_address,
 //!# };
-//!# use eigen_services_operatorsinfo::{
+//!# use newton_services_operatorsinfo::{
 //!#     operator_info::OperatorInfoService, operatorsinfo_inmemory::OperatorInfoServiceInMemory,
 //!# };
-//!# use eigen_client_avsregistry::reader::AvsRegistryChainReader;
+//!# use newton_client_avsregistry::reader::AvsRegistryChainReader;
 //!# async fn example () {
 //!#     let http_endpoint = ANVIL_HTTP_URL;
 //!#     let ws_endpoint = ANVIL_WS_URL;
@@ -180,14 +180,14 @@
 //!
 //! ```rust,no_run
 //!# use alloy::primitives::{Address};
-//!# use eigen_testing_utils::anvil_constants::{
+//!# use newton_testing_utils::anvil_constants::{
 //!#     ANVIL_HTTP_URL, ANVIL_WS_URL, FIRST_ADDRESS,
 //!#     get_operator_state_retriever_address, get_registry_coordinator_address,
 //!# };
-//!# use eigen_services_operatorsinfo::{
+//!# use newton_services_operatorsinfo::{
 //!#     operator_info::OperatorInfoService, operatorsinfo_inmemory::OperatorInfoServiceInMemory,
 //!# };
-//!# use eigen_client_avsregistry::reader::AvsRegistryChainReader;
+//!# use newton_client_avsregistry::reader::AvsRegistryChainReader;
 //!# async fn example () {
 //!#     let http_endpoint = ANVIL_HTTP_URL;
 //!#     let ws_endpoint = ANVIL_WS_URL;

@@ -4,26 +4,26 @@ use alloy::primitives::{Address, Bytes, FixedBytes, TxHash, U256};
 use alloy::providers::WalletProvider;
 use alloy::signers::local::PrivateKeySigner;
 use alloy::signers::Signer;
-use eigen_client_elcontracts::reader::ELChainReader;
-use eigen_common::{get_provider, get_signer};
-use eigen_crypto_bls::{
+use newton_client_elcontracts::reader::ELChainReader;
+use newton_common::{get_provider, get_signer};
+use newton_crypto_bls::{
     alloy_g1_point_to_g1_affine, convert_to_g1_point, convert_to_g2_point, BlsKeyPair,
 };
-use eigen_types::operator::operator_id_from_g1_pub_key;
-use eigen_types::operator::QuorumNum;
-use eigen_utils::convert_stake_registry_strategy_params_to_registry_coordinator_strategy_params;
-use eigen_utils::slashing::middleware::registry_coordinator::ISlashingRegistryCoordinatorTypes::OperatorKickParam;
-use eigen_utils::slashing::middleware::registry_coordinator::{
+use newton_types::operator::operator_id_from_g1_pub_key;
+use newton_types::operator::QuorumNum;
+use newton_utils::convert_stake_registry_strategy_params_to_registry_coordinator_strategy_params;
+use newton_utils::slashing::middleware::registry_coordinator::ISlashingRegistryCoordinatorTypes::OperatorKickParam;
+use newton_utils::slashing::middleware::registry_coordinator::{
     IBLSApkRegistryTypes::PubkeyRegistrationParams,
     ISignatureUtilsMixinTypes::SignatureWithSaltAndExpiry,
     ISlashingRegistryCoordinatorTypes::OperatorSetParam, RegistryCoordinator,
 };
-use eigen_utils::slashing::middleware::service_manager_base::IRewardsCoordinatorTypes::OperatorDirectedRewardsSubmission;
-use eigen_utils::slashing::middleware::service_manager_base::{
+use newton_utils::slashing::middleware::service_manager_base::IRewardsCoordinatorTypes::OperatorDirectedRewardsSubmission;
+use newton_utils::slashing::middleware::service_manager_base::{
     IRewardsCoordinatorTypes::RewardsSubmission, ServiceManagerBase,
 };
-use eigen_utils::slashing::middleware::stake_registry::IStakeRegistryTypes::StrategyParams;
-use eigen_utils::slashing::middleware::stake_registry::StakeRegistry;
+use newton_utils::slashing::middleware::stake_registry::IStakeRegistryTypes::StrategyParams;
+use newton_utils::slashing::middleware::stake_registry::StakeRegistry;
 use std::str::FromStr;
 use tracing::{info, warn};
 
@@ -1028,25 +1028,25 @@ mod tests {
     use super::AvsRegistryChainWriter;
     use alloy::primitives::{address, aliases::U96, Address, Bytes, FixedBytes, U256};
     use alloy::sol_types::SolCall;
-    use eigen_common::{get_provider, get_signer};
-    use eigen_crypto_bls::BlsKeyPair;
-    use eigen_testing_utils::anvil::{start_anvil_container, start_m2_anvil_container};
-    use eigen_testing_utils::anvil_constants::{
+    use newton_common::{get_provider, get_signer};
+    use newton_crypto_bls::BlsKeyPair;
+    use newton_testing_utils::anvil::{start_anvil_container, start_m2_anvil_container};
+    use newton_testing_utils::anvil_constants::{
         get_allocation_manager_address, get_erc20_mock_strategy, get_registry_coordinator_address,
         get_rewards_coordinator_address, get_service_manager_address,
     };
-    use eigen_testing_utils::anvil_constants::{
+    use newton_testing_utils::anvil_constants::{
         FIFTH_ADDRESS, FIFTH_PRIVATE_KEY, FIRST_ADDRESS, FIRST_PRIVATE_KEY, OPERATOR_BLS_KEY,
         OPERATOR_BLS_KEY_2, SECOND_ADDRESS, SECOND_PRIVATE_KEY, THIRD_ADDRESS, THIRD_PRIVATE_KEY,
     };
-    use eigen_testing_utils::chain_clients::{
+    use newton_testing_utils::chain_clients::{
         build_avs_registry_chain_reader, create_operator_set,
     };
-    use eigen_testing_utils::transaction::wait_transaction;
-    use eigen_utils::slashing::core::{
+    use newton_testing_utils::transaction::wait_transaction;
+    use newton_utils::slashing::core::{
         allocation_manager::AllocationManager, i_rewards_coordinator::IRewardsCoordinator,
     };
-    use eigen_utils::slashing::middleware::{
+    use newton_utils::slashing::middleware::{
         registry_coordinator::{
             ISlashingRegistryCoordinatorTypes::OperatorSetParam, RegistryCoordinator,
         },

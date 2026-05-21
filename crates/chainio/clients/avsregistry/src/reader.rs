@@ -5,22 +5,22 @@ use alloy::providers::Provider;
 use alloy::rpc::types::Filter;
 use ark_ff::Zero;
 use async_trait::async_trait;
-use eigen_common::{get_provider, get_ws_provider, NEW_PUBKEY_REGISTRATION_EVENT};
-use eigen_crypto_bls::{
+use newton_common::{get_provider, get_ws_provider, NEW_PUBKEY_REGISTRATION_EVENT};
+use newton_crypto_bls::{
     alloy_registry_g1_point_to_g1_affine, alloy_registry_g2_point_to_g2_affine, BlsG1Point,
     BlsG2Point,
 };
-use eigen_types::operator::{
+use newton_types::operator::{
     bitmap_to_quorum_ids, bitmap_to_quorum_ids_from_u192, OperatorPubKeys, QuorumNum,
 };
-use eigen_utils::slashing::middleware::bls_apk_registry::BLSApkRegistry;
-use eigen_utils::slashing::middleware::operator_state_retriever::OperatorStateRetriever;
-use eigen_utils::slashing::middleware::registry_coordinator::RegistryCoordinator;
-use eigen_utils::slashing::middleware::service_manager_base::ServiceManagerBase;
-use eigen_utils::slashing::middleware::stake_registry::IStakeRegistryTypes::{
+use newton_utils::slashing::middleware::bls_apk_registry::BLSApkRegistry;
+use newton_utils::slashing::middleware::operator_state_retriever::OperatorStateRetriever;
+use newton_utils::slashing::middleware::registry_coordinator::RegistryCoordinator;
+use newton_utils::slashing::middleware::service_manager_base::ServiceManagerBase;
+use newton_utils::slashing::middleware::stake_registry::IStakeRegistryTypes::{
     StakeUpdate, StrategyParams,
 };
-use eigen_utils::slashing::middleware::stake_registry::StakeRegistry;
+use newton_utils::slashing::middleware::stake_registry::StakeRegistry;
 use num_bigint::BigInt;
 use std::fmt::Debug;
 use std::{collections::HashMap, str::FromStr};
@@ -1051,8 +1051,8 @@ mod tests {
 
     use super::*;
     use alloy::primitives::address;
-    use eigen_crypto_bls::BlsKeyPair;
-    use eigen_testing_utils::{
+    use newton_crypto_bls::BlsKeyPair;
+    use newton_testing_utils::{
         anvil::{start_anvil_container, start_m2_anvil_container},
         anvil_constants::{
             get_operator_state_retriever_address, get_registry_coordinator_address, FIFTH_ADDRESS,

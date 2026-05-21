@@ -7,23 +7,23 @@ use alloy::primitives::{Address, Bytes, FixedBytes, Signature, TxHash, U256};
 use alloy::signers::local::PrivateKeySigner;
 use alloy::signers::Signer;
 use alloy::sol;
-use eigen_common::{get_provider, get_signer};
-use eigen_crypto_bls::{
+use newton_common::{get_provider, get_signer};
+use newton_crypto_bls::{
     alloy_g1_point_slashing_to_g1_affine, alloy_g1_point_to_g1_affine, convert_to_g1_point,
     convert_to_g2_point, BlsKeyPair,
 };
-use eigen_types::operator::operator_id_from_g1_pub_key;
-pub use eigen_types::operator::Operator;
+use newton_types::operator::operator_id_from_g1_pub_key;
+pub use newton_types::operator::Operator;
 
-use eigen_utils::convert_allocation_operator_set_to_rewards_operator_set;
-use eigen_utils::rewardsv2::core::delegation_manager::DelegationManager as RewardsV2DelegationManager;
-use eigen_utils::rewardsv2::core::delegation_manager::IDelegationManager::OperatorDetails;
-use eigen_utils::slashing::core::allocation_manager::AllocationManager::OperatorSet;
+use newton_utils::convert_allocation_operator_set_to_rewards_operator_set;
+use newton_utils::rewardsv2::core::delegation_manager::DelegationManager as RewardsV2DelegationManager;
+use newton_utils::rewardsv2::core::delegation_manager::IDelegationManager::OperatorDetails;
+use newton_utils::slashing::core::allocation_manager::AllocationManager::OperatorSet;
 
-use eigen_utils::slashing::middleware::registry_coordinator::BN254::{G1Point, G2Point};
-use eigen_utils::slashing::middleware::slashing_registry_coordinator::ISlashingRegistryCoordinatorTypes::OperatorKickParam;
-use eigen_utils::slashing::middleware::slashing_registry_coordinator::SlashingRegistryCoordinator;
-use eigen_utils::{
+use newton_utils::slashing::middleware::registry_coordinator::BN254::{G1Point, G2Point};
+use newton_utils::slashing::middleware::slashing_registry_coordinator::ISlashingRegistryCoordinatorTypes::OperatorKickParam;
+use newton_utils::slashing::middleware::slashing_registry_coordinator::SlashingRegistryCoordinator;
+use newton_utils::{
     slashing::core::{
         allocation_manager::{AllocationManager, IAllocationManagerTypes},
         delegation_manager::DelegationManager,
@@ -1224,9 +1224,9 @@ mod tests {
         primitives::{address, ruint::aliases::U256, Address, Bytes, FixedBytes},
         providers::{Provider, WalletProvider},
     };
-    use eigen_common::{get_provider, get_signer};
-    use eigen_crypto_bls::BlsKeyPair;
-    use eigen_testing_utils::{
+    use newton_common::{get_provider, get_signer};
+    use newton_crypto_bls::BlsKeyPair;
+    use newton_testing_utils::{
         anvil::{
             mine_anvil_blocks, set_account_balance, start_anvil_container, start_m2_anvil_container,
         },
@@ -1242,8 +1242,8 @@ mod tests {
         },
         transaction::wait_transaction,
     };
-    use eigen_types::operator::Operator;
-    use eigen_utils::{
+    use newton_types::operator::Operator;
+    use newton_utils::{
         convert_allocation_operator_set_to_rewards_operator_set,
         slashing::{
             core::allocation_manager::{AllocationManager::OperatorSet, IAllocationManagerTypes},

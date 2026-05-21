@@ -1,5 +1,5 @@
 use alloy::primitives::keccak256;
-use eigen_crypto_bls::{error::BlsError, BlsKeyPair};
+use newton_crypto_bls::{error::BlsError, BlsKeyPair};
 
 /// Derives an operator ID from a private key
 ///

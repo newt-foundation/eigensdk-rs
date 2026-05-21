@@ -1,6 +1,6 @@
 use alloy::primitives::{aliases::U192, keccak256, Address, FixedBytes, U256};
-use eigen_crypto_bls::{convert_to_g1_point, error::BlsError, BlsG1Point, BlsKeyPair};
-use eigen_utils::common::get_url_content;
+use newton_crypto_bls::{convert_to_g1_point, error::BlsError, BlsG1Point, BlsKeyPair};
+use newton_utils::common::get_url_content;
 use num_bigint::BigUint;
 use thiserror::Error;
 use url::Url;

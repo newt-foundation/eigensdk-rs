@@ -1,8 +1,8 @@
 //! get operators stake in quorums at block
 use alloy::primitives::{hex::FromHex, Bytes};
-use eigen_client_avsregistry::reader::{AvsRegistryChainReader, AvsRegistryReader};
+use newton_client_avsregistry::reader::{AvsRegistryChainReader, AvsRegistryReader};
 
-use eigen_testing_utils::m2_holesky_constants::{OPERATOR_STATE_RETRIEVER, REGISTRY_COORDINATOR};
+use newton_testing_utils::m2_holesky_constants::{OPERATOR_STATE_RETRIEVER, REGISTRY_COORDINATOR};
 use eyre::Result;
 
 #[tokio::main]

@@ -1,5 +1,5 @@
 [package]
-name = "eigen-client-avsregistry"
+name = "newton-client-avsregistry"
 description = "Eigen Layer AvsRegistry Sdk"
 
 version.workspace = true
@@ -18,12 +18,12 @@ rustdoc-args = ["--cfg", "docsrs"]
 alloy.workspace = true
 async-trait.workspace = true
 num-bigint = "0.4.4"
-eigen-types.workspace = true
-eigen-crypto-bls.workspace = true
+newton-types.workspace = true
+newton-crypto-bls.workspace = true
 ark-ff.workspace = true
-eigen-client-elcontracts.workspace = true
-eigen-common.workspace = true
-eigen-utils.workspace = true
+newton-client-elcontracts.workspace = true
+newton-common.workspace = true
+newton-utils.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 
@@ -33,7 +33,7 @@ workspace = true
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../../../tests/testing-utils" }
+newton-testing-utils = { path = "../../../../tests/testing-utils" }
 
 hex = "0.4.3"
 once_cell.workspace = true

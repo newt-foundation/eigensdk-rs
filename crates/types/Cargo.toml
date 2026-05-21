@@ -1,5 +1,5 @@
 [package]
-name = "eigen-types"
+name = "newton-types"
 description = "Eigen Layer types "
 
 version.workspace = true
@@ -17,8 +17,8 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 alloy.workspace = true
 ark-ff.workspace = true
-eigen-crypto-bls.workspace = true
-eigen-utils.workspace = true
+newton-crypto-bls.workspace = true
+newton-utils.workspace = true
 serde_json.workspace = true
 serde.workspace = true
 thiserror.workspace = true

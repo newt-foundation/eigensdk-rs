@@ -21,7 +21,7 @@ use ark_serialize::SerializationError;
 use bls::BlsKeystore;
 use colored::*;
 use convert::store;
-use eigen_crypto_bls::error::BlsError;
+use newton_crypto_bls::error::BlsError;
 pub use generate::KeyGenerator;
 use operator_id::derive_operator_id;
 use rust_bls_bn254::{errors::KeystoreError as BlsKeystoreError, mnemonics::Mnemonic};
@@ -195,11 +195,11 @@ mod test {
         operator_id::derive_operator_id,
     };
     use alloy::primitives::Address;
-    use eigen_testing_utils::anvil::start_anvil_container;
-    use eigen_testing_utils::anvil_constants::{
+    use newton_testing_utils::anvil::start_anvil_container;
+    use newton_testing_utils::anvil_constants::{
         get_registry_coordinator_address, get_service_manager_address,
     };
-    use eigen_testing_utils::test_data::TestData;
+    use newton_testing_utils::test_data::TestData;
     use eth_keystore::decrypt_key;
     use k256::SecretKey;
     use rstest::rstest;

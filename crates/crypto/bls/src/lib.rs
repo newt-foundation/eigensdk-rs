@@ -13,15 +13,15 @@ use ark_bn254::{g1::G1Affine, Fq, Fr, G1Projective, G2Affine, G2Projective};
 use ark_ec::{AffineRepr, CurveGroup};
 use ark_ff::{fields::PrimeField, BigInt, BigInteger256, Fp2};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use eigen_crypto_bn254::utils::map_to_curve;
-use eigen_utils::slashing::middleware::bls_apk_registry::BN254::{
+use newton_crypto_bn254::utils::map_to_curve;
+use newton_utils::slashing::middleware::bls_apk_registry::BN254::{
     G1Point as G1PointRegistry, G2Point as G2PointRegistry,
 };
-use eigen_utils::slashing::middleware::ibls_signature_checker::BN254::{
+use newton_utils::slashing::middleware::ibls_signature_checker::BN254::{
     G1Point as G1PointChecker, G2Point as G2PointChecker,
 };
-use eigen_utils::slashing::middleware::registry_coordinator::BN254::{G1Point, G2Point};
-use eigen_utils::slashing::middleware::slashing_registry_coordinator::BN254::G1Point as G1PointSlashing;
+use newton_utils::slashing::middleware::registry_coordinator::BN254::{G1Point, G2Point};
+use newton_utils::slashing::middleware::slashing_registry_coordinator::BN254::G1Point as G1PointSlashing;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Serialize};
 pub type PrivateKey = Fr;
@@ -386,8 +386,8 @@ impl Signature {
 mod tests {
     use super::*;
     use ark_bn254::Fq2;
-    use eigen_crypto_bn254::utils::verify_message;
-    use eigen_testing_utils::test_data::TestData;
+    use newton_crypto_bn254::utils::verify_message;
+    use newton_testing_utils::test_data::TestData;
     type Fp = ark_ff::Fp<ark_ff::MontBackend<ark_bn254::FqConfig, 4>, 4>;
 
     #[test]

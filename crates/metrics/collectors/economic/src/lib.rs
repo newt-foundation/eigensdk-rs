@@ -8,9 +8,9 @@ use std::{collections::HashMap, str::FromStr};
 pub mod error;
 pub mod fake_collector;
 use alloy::primitives::{Address, FixedBytes, U256};
-use eigen_client_avsregistry::reader::AvsRegistryChainReader;
-use eigen_client_elcontracts::reader::ELChainReader;
-use eigen_types::operator::OperatorId;
+use newton_client_avsregistry::reader::AvsRegistryChainReader;
+use newton_client_elcontracts::reader::ELChainReader;
+use newton_types::operator::OperatorId;
 use error::CollectorMetricError;
 use metrics::{describe_gauge, gauge, Key, Label};
 use tracing::{debug, instrument, warn};
@@ -137,8 +137,8 @@ mod tests {
     use std::collections::HashMap;
 
     use alloy::primitives::{Address, FixedBytes};
-    use eigen_client_avsregistry::reader::AvsRegistryChainReader;
-    use eigen_testing_utils::{
+    use newton_client_avsregistry::reader::AvsRegistryChainReader;
+    use newton_testing_utils::{
         anvil::start_anvil_container,
         anvil_constants::{get_operator_state_retriever_address, get_registry_coordinator_address},
     };

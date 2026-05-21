@@ -1,6 +1,6 @@
 use alloy::primitives::{Address, Bytes, FixedBytes};
 use async_trait::async_trait;
-use eigen_types::multichain::{Certificate, OperatorTable};
+use newton_types::multichain::{Certificate, OperatorTable};
 use thiserror::Error;
 use tracing::{info, instrument};
 

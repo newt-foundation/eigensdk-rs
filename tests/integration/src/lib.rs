@@ -4,8 +4,8 @@
 mod tests {
 
     use alloy::primitives::{aliases::U96, U256};
-    use eigen_common::{get_provider, get_signer};
-    use eigen_testing_utils::{
+    use newton_common::{get_provider, get_signer};
+    use newton_testing_utils::{
         anvil::start_anvil_container,
         anvil_constants::{
             get_erc20_mock_strategy, get_rewards_coordinator_address, FIRST_PRIVATE_KEY,
@@ -16,7 +16,7 @@ mod tests {
         },
         transaction::wait_transaction,
     };
-    use eigen_utils::slashing::{
+    use newton_utils::slashing::{
         core::i_rewards_coordinator::IRewardsCoordinator,
         middleware::service_manager_base::IRewardsCoordinatorTypes::{
             RewardsSubmission, StrategyAndMultiplier,

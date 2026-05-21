@@ -2,17 +2,17 @@
 use alloy::primitives::U256;
 use alloy::primitives::{Bytes, FixedBytes};
 use alloy::signers::local::PrivateKeySigner;
-use eigen_client_avsregistry::writer::AvsRegistryChainWriter;
-use eigen_client_elcontracts::reader::ELChainReader;
-use eigen_client_elcontracts::writer::ELChainWriter;
-use eigen_crypto_bls::BlsKeyPair;
+use newton_client_avsregistry::writer::AvsRegistryChainWriter;
+use newton_client_elcontracts::reader::ELChainReader;
+use newton_client_elcontracts::writer::ELChainWriter;
+use newton_crypto_bls::BlsKeyPair;
 
-use eigen_testing_utils::anvil_constants::get_registry_coordinator_address;
-use eigen_testing_utils::m2_holesky_constants::{
+use newton_testing_utils::anvil_constants::get_registry_coordinator_address;
+use newton_testing_utils::m2_holesky_constants::{
     AVS_DIRECTORY_ADDRESS, DELEGATION_MANAGER_ADDRESS, OPERATOR_STATE_RETRIEVER,
     REGISTRY_COORDINATOR, REWARDS_COORDINATOR, STRATEGY_MANAGER_ADDRESS,
 };
-use eigen_types::operator::Operator;
+use newton_types::operator::Operator;
 use eyre::Result;
 use lazy_static::lazy_static;
 use std::str::FromStr;

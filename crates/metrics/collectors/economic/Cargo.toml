@@ -1,5 +1,5 @@
 [package]
-name = "eigen-metrics-collectors-economic"
+name = "newton-metrics-collectors-economic"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -15,9 +15,9 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 alloy.workspace = true
-eigen-types.workspace = true
-eigen-client-elcontracts.workspace = true
-eigen-client-avsregistry.workspace = true
+newton-types.workspace = true
+newton-client-elcontracts.workspace = true
+newton-client-avsregistry.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 metrics.workspace = true
@@ -26,6 +26,6 @@ num-bigint.workspace = true
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../../../tests/testing-utils" }
+newton-testing-utils = { path = "../../../../tests/testing-utils" }
 
 tokio.workspace = true

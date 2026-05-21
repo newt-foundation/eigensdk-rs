@@ -34,16 +34,16 @@
 //! To initialize the service, you need to provide an `AvsRegistryReader` and an `OperatorInfoService` and call the [`new`] method.
 //!
 //! ```rust,no_run
-//!# use eigen_testing_utils::anvil_constants::{FIRST_ADDRESS, OPERATOR_BLS_KEY};
-//!# use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
-//!# use eigen_client_avsregistry::fake_reader::FakeAvsRegistryReader;
-//!# use eigen_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
-//!# use eigen_types::test::TestOperator;
-//!# use eigen_crypto_bls::BlsKeyPair;
-//!# use eigen_types::avs_state::{OperatorAvsState, QuorumAvsState};
-//!# use eigen_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
+//!# use newton_testing_utils::anvil_constants::{FIRST_ADDRESS, OPERATOR_BLS_KEY};
+//!# use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//!# use newton_client_avsregistry::fake_reader::FakeAvsRegistryReader;
+//!# use newton_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
+//!# use newton_types::test::TestOperator;
+//!# use newton_crypto_bls::BlsKeyPair;
+//!# use newton_types::avs_state::{OperatorAvsState, QuorumAvsState};
+//!# use newton_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
 //!# use std::collections::HashMap;
-//!# use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+//!# use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
 //!# use alloy::primitives::{FixedBytes, U256, Address};
 //!# fn example () {
 //!#     let operator_id = FixedBytes::from_slice(&[1]);
@@ -68,18 +68,18 @@
 //! The method returns a hashmap with the operator ID as the key and the `OperatorAvsState` as the value.
 //!
 //! ```rust,no_run
-//!# use eigen_testing_utils::anvil_constants::{FIRST_ADDRESS, OPERATOR_BLS_KEY};
-//!# use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
-//!# use eigen_client_avsregistry::fake_reader::FakeAvsRegistryReader;
-//!# use eigen_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
-//!# use eigen_types::test::TestOperator;
-//!# use eigen_crypto_bls::BlsKeyPair;
-//!# use eigen_types::avs_state::{OperatorAvsState, QuorumAvsState};
-//!# use eigen_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
+//!# use newton_testing_utils::anvil_constants::{FIRST_ADDRESS, OPERATOR_BLS_KEY};
+//!# use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//!# use newton_client_avsregistry::fake_reader::FakeAvsRegistryReader;
+//!# use newton_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
+//!# use newton_types::test::TestOperator;
+//!# use newton_crypto_bls::BlsKeyPair;
+//!# use newton_types::avs_state::{OperatorAvsState, QuorumAvsState};
+//!# use newton_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
 //!# use std::collections::HashMap;
-//!# use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+//!# use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
 //!# use alloy::primitives::{FixedBytes, U256, Address};
-//!# use eigen_services_avsregistry::AvsRegistryService;
+//!# use newton_services_avsregistry::AvsRegistryService;
 //!# async fn example () {
 //!#     let operator_id = FixedBytes::from_slice(&[1]);
 //!#     let test_operator = TestOperator {
@@ -107,18 +107,18 @@
 //! The method returns a hashmap with the quorum number as the key and the `QuorumAvsState` as the value.
 //!
 //! ```rust,no_run
-//!# use eigen_testing_utils::anvil_constants::{FIRST_ADDRESS, OPERATOR_BLS_KEY};
-//!# use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
-//!# use eigen_client_avsregistry::fake_reader::FakeAvsRegistryReader;
-//!# use eigen_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
-//!# use eigen_types::test::TestOperator;
-//!# use eigen_crypto_bls::BlsKeyPair;
-//!# use eigen_types::avs_state::{OperatorAvsState, QuorumAvsState};
-//!# use eigen_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
+//!# use newton_testing_utils::anvil_constants::{FIRST_ADDRESS, OPERATOR_BLS_KEY};
+//!# use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//!# use newton_client_avsregistry::fake_reader::FakeAvsRegistryReader;
+//!# use newton_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
+//!# use newton_types::test::TestOperator;
+//!# use newton_crypto_bls::BlsKeyPair;
+//!# use newton_types::avs_state::{OperatorAvsState, QuorumAvsState};
+//!# use newton_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
 //!# use std::collections::HashMap;
-//!# use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+//!# use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
 //!# use alloy::primitives::{FixedBytes, U256, Address};
-//!# use eigen_services_avsregistry::AvsRegistryService;
+//!# use newton_services_avsregistry::AvsRegistryService;
 //!# async fn example () {
 //!#     let operator_id = FixedBytes::from_slice(&[1]);
 //!#     let test_operator = TestOperator {
@@ -147,18 +147,18 @@
 //! To get the signatures indices of quorum members for a specific block, you can use the [`get_check_signatures_indices`] method.
 //!
 //! ```rust,no_run
-//!# use eigen_testing_utils::anvil_constants::{FIRST_ADDRESS, OPERATOR_BLS_KEY};
-//!# use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
-//!# use eigen_client_avsregistry::fake_reader::FakeAvsRegistryReader;
-//!# use eigen_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
-//!# use eigen_types::test::TestOperator;
-//!# use eigen_crypto_bls::BlsKeyPair;
-//!# use eigen_types::avs_state::{OperatorAvsState, QuorumAvsState};
-//!# use eigen_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
+//!# use newton_testing_utils::anvil_constants::{FIRST_ADDRESS, OPERATOR_BLS_KEY};
+//!# use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//!# use newton_client_avsregistry::fake_reader::FakeAvsRegistryReader;
+//!# use newton_services_operatorsinfo::fake_operator_info::FakeOperatorInfoService;
+//!# use newton_types::test::TestOperator;
+//!# use newton_crypto_bls::BlsKeyPair;
+//!# use newton_types::avs_state::{OperatorAvsState, QuorumAvsState};
+//!# use newton_types::operator::{OperatorInfo, OperatorPubKeys, QuorumNum};
 //!# use std::collections::HashMap;
-//!# use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+//!# use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
 //!# use alloy::primitives::{FixedBytes, U256, Address};
-//!# use eigen_services_avsregistry::AvsRegistryService;
+//!# use newton_services_avsregistry::AvsRegistryService;
 //!# async fn example () {
 //!#     let operator_id = FixedBytes::from_slice(&[1]);
 //!#     let test_operator = TestOperator {
@@ -200,9 +200,9 @@ use std::collections::HashMap;
 
 use alloy::primitives::FixedBytes;
 use async_trait::async_trait;
-use eigen_client_avsregistry::error::AvsRegistryError;
-use eigen_types::avs_state::{OperatorAvsState, QuorumAvsState};
-use eigen_utils::slashing::middleware::operator_state_retriever::OperatorStateRetriever::CheckSignaturesIndices;
+use newton_client_avsregistry::error::AvsRegistryError;
+use newton_types::avs_state::{OperatorAvsState, QuorumAvsState};
+use newton_utils::slashing::middleware::operator_state_retriever::OperatorStateRetriever::CheckSignaturesIndices;
 
 pub mod chaincaller;
 #[doc(hidden)]

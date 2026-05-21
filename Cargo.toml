@@ -8,7 +8,7 @@ members = [
     "crates/chainio/clients/multichain/",
     "crates/crypto/bls/",
     "crates/crypto/bn254/",
-    "crates/eigen-cli/",
+    "crates/newton-eigen-cli/",
     "crates/metrics/",
     "crates/metrics/collectors/economic/",
     "crates/metrics/collectors/rpc_calls/",
@@ -35,7 +35,7 @@ version = "2.0.0"
 edition = "2021"
 authors = ["Eigen Layer contributors"]
 rust-version = "1.82"
-repository = "https://github.com/Layr-Labs/eigensdk-rs"
+repository = "https://github.com/newt-foundation/eigensdk-rs"
 homepage = ""
 license-file = "LICENSE"
 
@@ -61,27 +61,27 @@ clippy.implicit_return = "allow"
 
 [workspace.dependencies]
 # eigensdk
-eigen-common = { version = "2.0.0", path = "crates/common/" }
-eigen-client-elcontracts = { version = "2.0.0", path = "crates/chainio/clients/elcontracts" }
-eigen-client-avsregistry = { version = "2.0.0", path = "crates/chainio/clients/avsregistry" }
-eigen-client-eth = { version = "2.0.0", path = "crates/chainio/clients/eth" }
-eigen-client-fireblocks = { version = "2.0.0", path = "crates/chainio/clients/fireblocks" }
-eigen-client-multichain = { version = "2.0.0", path = "crates/chainio/clients/multichain" }
-eigen-crypto-bls = { version = "2.0.0", path = "crates/crypto/bls/" }
-eigen-crypto-bn254 = { version = "2.0.0", path = "crates/crypto/bn254/" }
-eigen-crypto-ecdsa = { version = "2.0.0", path = "crates/crypto/ecdsa/" }
-eigen-metrics = { version = "2.0.0", path = "crates/metrics/" }
-eigen-metrics-collectors-economic = { version = "2.0.0", path = "crates/metrics/collectors/economic" }
-eigen-metrics-collectors-rpc-calls = { version = "2.0.0", path = "crates/metrics/collectors/rpc_calls" }
-eigen-services-avsregistry = { version = "2.0.0", path = "crates/services/avsregistry" }
-eigen-services-blsaggregation = { version = "2.0.0", path = "crates/services/bls_aggregation" }
-eigen-services-multichain = { version = "2.0.0", path = "crates/services/multichain" }
-eigen-services-operatorsinfo = { version = "2.0.0", path = "crates/services/operatorsinfo" }
-eigen-signer = { version = "2.0.0", path = "crates/signer/" }
-eigen-types = { version = "2.0.0", path = "crates/types/" }
-eigen-utils = { version = "2.0.0", path = "crates/utils/" }
-eigen-nodeapi = { version = "2.0.0", path = "crates/nodeapi/" }
-eigen-testing-utils = { version = "2.0.0", path = "tests/testing-utils" }
+newton-common = { version = "2.0.0", path = "crates/common/" }
+newton-client-elcontracts = { version = "2.0.0", path = "crates/chainio/clients/elcontracts" }
+newton-client-avsregistry = { version = "2.0.0", path = "crates/chainio/clients/avsregistry" }
+newton-client-eth = { version = "2.0.0", path = "crates/chainio/clients/eth" }
+newton-client-fireblocks = { version = "2.0.0", path = "crates/chainio/clients/fireblocks" }
+newton-client-multichain = { version = "2.0.0", path = "crates/chainio/clients/multichain" }
+newton-crypto-bls = { version = "2.0.0", path = "crates/crypto/bls/" }
+newton-crypto-bn254 = { version = "2.0.0", path = "crates/crypto/bn254/" }
+newton-crypto-ecdsa = { version = "2.0.0", path = "crates/crypto/ecdsa/" }
+newton-metrics = { version = "2.0.0", path = "crates/metrics/" }
+newton-metrics-collectors-economic = { version = "2.0.0", path = "crates/metrics/collectors/economic" }
+newton-metrics-collectors-rpc-calls = { version = "2.0.0", path = "crates/metrics/collectors/rpc_calls" }
+newton-services-avsregistry = { version = "2.0.0", path = "crates/services/avsregistry" }
+newton-services-blsaggregation = { version = "2.0.0", path = "crates/services/bls_aggregation" }
+newton-services-multichain = { version = "2.0.0", path = "crates/services/multichain" }
+newton-services-operatorsinfo = { version = "2.0.0", path = "crates/services/operatorsinfo" }
+newton-signer = { version = "2.0.0", path = "crates/signer/" }
+newton-types = { version = "2.0.0", path = "crates/types/" }
+newton-utils = { version = "2.0.0", path = "crates/utils/" }
+newton-nodeapi = { version = "2.0.0", path = "crates/nodeapi/" }
+newton-testing-utils = { version = "2.0.0", path = "tests/testing-utils" }
 
 ark-bn254 = "0.5.0"
 ark-ec = "0.5.0"

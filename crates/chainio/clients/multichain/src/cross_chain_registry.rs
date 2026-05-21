@@ -2,12 +2,12 @@ use crate::error::MultichainError;
 use alloy::primitives::Address;
 use alloy::providers::Provider;
 use async_trait::async_trait;
-use eigen_common::get_provider;
-use eigen_types::multichain::OperatorSetConfig;
-use eigen_utils::convert_cross_chain_registry_operator_set_to_key_registrar_operator_set;
-use eigen_utils::slashing::core::key_registrar::KeyRegistrar;
-use eigen_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry;
-use eigen_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry::OperatorSet as ContractOperatorSet;
+use newton_common::get_provider;
+use newton_types::multichain::OperatorSetConfig;
+use newton_utils::convert_cross_chain_registry_operator_set_to_key_registrar_operator_set;
+use newton_utils::slashing::core::key_registrar::KeyRegistrar;
+use newton_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry;
+use newton_utils::slashing::multichain::cross_chain_registry::CrossChainRegistry::OperatorSet as ContractOperatorSet;
 use tracing::instrument;
 
 #[derive(Debug, Clone)]

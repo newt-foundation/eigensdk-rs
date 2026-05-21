@@ -3,9 +3,9 @@ use alloy::{
     primitives::{Address, FixedBytes, U256},
     providers::Provider,
 };
-use eigen_common::{get_provider, SdkProvider};
-use eigen_utils::slashing::core::allocation_manager::AllocationManager::{self, OperatorSet};
-use eigen_utils::slashing::{
+use newton_common::{get_provider, SdkProvider};
+use newton_utils::slashing::core::allocation_manager::AllocationManager::{self, OperatorSet};
+use newton_utils::slashing::{
     core::{
         avs_directory::AVSDirectory,
         delegation_manager::DelegationManager,
@@ -420,7 +420,7 @@ impl ELChainReader {
     pub async fn get_operator_set_split(
         &self,
         operator: Address,
-        operator_set: eigen_utils::slashing::core::i_rewards_coordinator::IRewardsCoordinator::OperatorSet,
+        operator_set: newton_utils::slashing::core::i_rewards_coordinator::IRewardsCoordinator::OperatorSet,
     ) -> Result<u16, ElContractsError> {
         let provider = get_provider(&self.provider);
 
@@ -1391,13 +1391,13 @@ mod tests {
     use alloy::eips::eip1898::BlockNumberOrTag::Number;
     use alloy::primitives::{address, keccak256, Address, FixedBytes, U256};
     use alloy::providers::Provider;
-    use eigen_testing_utils::anvil_constants::get_erc20_mock_strategy;
-    use eigen_testing_utils::{
+    use newton_testing_utils::anvil_constants::get_erc20_mock_strategy;
+    use newton_testing_utils::{
         anvil::start_anvil_container,
         anvil_constants::{get_avs_directory_address, get_delegation_manager_address},
         chain_clients::{build_el_chain_reader, new_test_claim, OPERATOR_ADDRESS},
     };
-    use eigen_utils::slashing::core::{
+    use newton_utils::slashing::core::{
         avs_directory::AVSDirectory, delegation_manager::DelegationManager,
     };
 

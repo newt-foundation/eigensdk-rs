@@ -1,5 +1,5 @@
 [package]
-name = "eigen-cli"
+name = "newton-eigen-cli"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -20,9 +20,9 @@ ark-ff.workspace = true
 ark-serialize.workspace = true
 clap.workspace = true
 colored = "2.1.0"
-eigen-common.workspace = true
-eigen-crypto-bls.workspace = true
-eigen-utils.workspace = true
+newton-common.workspace = true
+newton-crypto-bls.workspace = true
+newton-utils.workspace = true
 eth-keystore.workspace = true
 hex.workspace = true
 k256.workspace = true
@@ -40,7 +40,7 @@ uuid.workspace = true
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../tests/testing-utils" }
+newton-testing-utils = { path = "../../tests/testing-utils" }
 
 rstest.workspace = true
 tempfile.workspace = true

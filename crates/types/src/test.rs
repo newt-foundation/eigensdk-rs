@@ -1,6 +1,6 @@
 use crate::operator::QuorumNum;
 use alloy::primitives::{B256, U256};
-use eigen_crypto_bls::BlsKeyPair;
+use newton_crypto_bls::BlsKeyPair;
 use std::collections::HashMap;
 
 type StakeAmount = U256;

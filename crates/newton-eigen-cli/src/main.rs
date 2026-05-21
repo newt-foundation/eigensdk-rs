@@ -1,5 +1,5 @@
 use clap::Parser;
-use eigen_cli::{args::Args, execute_command};
+use newton_cli::{args::Args, execute_command};
 
 fn main() {
     let args = Args::parse();

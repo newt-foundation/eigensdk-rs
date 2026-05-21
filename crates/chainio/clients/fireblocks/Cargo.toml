@@ -1,5 +1,5 @@
 [package]
-name = "eigen-client-fireblocks"
+name = "newton-client-fireblocks"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -19,7 +19,7 @@ alloy.workspace = true
 chrono = "0.4"
 
 #eigen
-eigen-common.workspace = true
+newton-common.workspace = true
 hex = "0.4"
 jsonwebtoken = "7"
 mime = "0.3.17"

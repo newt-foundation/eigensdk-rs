@@ -1,5 +1,5 @@
 [package]
-name = "eigen-signer"
+name = "newton-signer"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -25,7 +25,7 @@ url.workspace = true
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../tests/testing-utils" }
+newton-testing-utils = { path = "../../tests/testing-utils" }
 
 aws-config.workspace = true
 testcontainers.workspace = true

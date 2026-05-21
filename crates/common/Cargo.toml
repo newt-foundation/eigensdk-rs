@@ -1,5 +1,5 @@
 [package]
-name = "eigen-common"
+name = "newton-common"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

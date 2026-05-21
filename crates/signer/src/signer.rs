@@ -77,8 +77,8 @@ mod test {
         config::{Credentials, SharedCredentialsProvider},
         types::KeyMetadata,
     };
-    use eigen_testing_utils::anvil::start_anvil_container;
-    use eigen_testing_utils::test_data::TestData;
+    use newton_testing_utils::anvil::start_anvil_container;
+    use newton_testing_utils::test_data::TestData;
     use std::str::FromStr;
     use testcontainers::{
         core::{IntoContainerPort, WaitFor},

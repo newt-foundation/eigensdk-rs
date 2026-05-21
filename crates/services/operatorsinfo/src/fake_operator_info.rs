@@ -1,7 +1,7 @@
 use alloy::primitives::Address;
 use async_trait::async_trait;
-use eigen_crypto_bls::BlsKeyPair;
-use eigen_types::operator::{OperatorInfo, OperatorPubKeys};
+use newton_crypto_bls::BlsKeyPair;
+use newton_types::operator::{OperatorInfo, OperatorPubKeys};
 
 use crate::{operator_info::OperatorInfoService, operatorsinfo_inmemory::OperatorInfoServiceError};
 

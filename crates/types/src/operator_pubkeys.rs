@@ -1,7 +1,7 @@
 use alloy::primitives::U256;
 use ark_ff::PrimeField;
-use eigen_crypto_bls::{BlsG1Point, BlsG2Point, BlsKeyPair};
-use eigen_utils::slashing::middleware::bls_apk_registry::BN254::{G1Point, G2Point};
+use newton_crypto_bls::{BlsG1Point, BlsG2Point, BlsKeyPair};
+use newton_utils::slashing::middleware::bls_apk_registry::BN254::{G1Point, G2Point};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OperatorPubKeys {
@@ -48,7 +48,7 @@ mod tests {
     use super::OperatorPubKeys;
     use alloy::primitives::U256;
     use ark_bn254::{G1Affine, G2Affine};
-    use eigen_crypto_bls::{BlsG1Point, BlsG2Point};
+    use newton_crypto_bls::{BlsG1Point, BlsG2Point};
 
     #[test]
     fn test_operator_pub_keys() {

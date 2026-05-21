@@ -1,5 +1,5 @@
 [package]
-name = "eigen-services-avsregistry"
+name = "newton-services-avsregistry"
 description = "Eigen Layer SDK services avsregistry"
 
 version.workspace = true
@@ -19,16 +19,16 @@ alloy.workspace = true
 ark-bn254.workspace = true
 ark-ec.workspace = true
 async-trait.workspace = true
-eigen-client-avsregistry.workspace = true
-eigen-crypto-bls.workspace = true
-eigen-services-operatorsinfo.workspace = true
-eigen-types.workspace = true
-eigen-utils.workspace = true
+newton-client-avsregistry.workspace = true
+newton-crypto-bls.workspace = true
+newton-services-operatorsinfo.workspace = true
+newton-types.workspace = true
+newton-utils.workspace = true
 
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../../tests/testing-utils" }
+newton-testing-utils = { path = "../../../tests/testing-utils" }
 
 hex.workspace = true
 tokio.workspace = true

@@ -2,8 +2,8 @@ use crate::error::MultichainError;
 use alloy::primitives::{Address, Bytes, FixedBytes};
 use alloy::providers::Provider;
 use async_trait::async_trait;
-use eigen_common::{get_provider, get_signer};
-use eigen_utils::slashing::multichain::operator_table_updater::OperatorTableUpdater;
+use newton_common::{get_provider, get_signer};
+use newton_utils::slashing::multichain::operator_table_updater::OperatorTableUpdater;
 use tracing::instrument;
 
 #[derive(Debug, Clone)]

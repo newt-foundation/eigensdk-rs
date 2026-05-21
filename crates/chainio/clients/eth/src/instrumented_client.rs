@@ -11,7 +11,7 @@ use alloy::rpc::types::eth::{
 };
 use alloy::transports::ws::WsConnect;
 use alloy::transports::{TransportError, TransportResult};
-use eigen_metrics_collectors_rpc_calls::RpcCallsMetrics as RpcCallsCollector;
+use newton_metrics_collectors_rpc_calls::RpcCallsMetrics as RpcCallsCollector;
 use hex;
 use std::time::Instant;
 use thiserror::Error;
@@ -721,9 +721,9 @@ mod tests {
     use alloy::primitives::{bytes, TxKind::Call, U256};
     use alloy::rpc::types::eth::{pubsub::SubscriptionResult, BlockId, BlockNumberOrTag};
     use alloy::signers::local::PrivateKeySigner;
-    use eigen_common::get_provider;
-    use eigen_testing_utils::anvil::{set_account_balance, start_anvil_container};
-    use eigen_testing_utils::transaction::wait_transaction;
+    use newton_common::get_provider;
+    use newton_testing_utils::anvil::{set_account_balance, start_anvil_container};
+    use newton_testing_utils::transaction::wait_transaction;
     use tokio;
 
     #[tokio::test]

@@ -1,6 +1,6 @@
 use alloy::contract::Error as AlloyError;
-use eigen_client_elcontracts::error::ElContractsError;
-use eigen_crypto_bls::error::BlsError;
+use newton_client_elcontracts::error::ElContractsError;
+use newton_crypto_bls::error::BlsError;
 use thiserror::Error;
 
 /// Error returned by AvsRegistry

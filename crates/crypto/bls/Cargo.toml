@@ -1,5 +1,5 @@
 [package]
-name = "eigen-crypto-bls"
+name = "newton-crypto-bls"
 description = "Eigen layer bls utilities"
 
 version.workspace = true
@@ -23,13 +23,13 @@ ark-ec.workspace = true
 alloy.workspace = true
 ark-std = { version = "0.4.0", default-features = false }
 serde.workspace = true
-eigen-crypto-bn254.workspace = true
-eigen-utils.workspace = true
+newton-crypto-bn254.workspace = true
+newton-utils.workspace = true
 
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../../tests/testing-utils" }
+newton-testing-utils = { path = "../../../tests/testing-utils" }
 
 rand = "0.8.4"
 tokio = { workspace = true, features = ["full"] }

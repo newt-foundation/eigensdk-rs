@@ -34,20 +34,20 @@
 //! ### Initialize the Service
 //!
 //! ```rust,no_run
-//! # use eigen_services_blsaggregation::bls_agg::{
+//! # use newton_services_blsaggregation::bls_agg::{
 //! #     AggregateReceiver, BlsAggregatorService, TaskMetadata, TaskSignature
 //! # };
-//! # use eigen_client_avsregistry::{
+//! # use newton_client_avsregistry::{
 //! #     reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter,
 //! # };
-//! # use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
-//! # use eigen_services_avsregistry::AvsRegistryService;
-//! # use eigen_testing_utils::{
+//! # use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+//! # use newton_services_avsregistry::AvsRegistryService;
+//! # use newton_testing_utils::{
 //! #     anvil_constants::{
 //! #         get_operator_state_retriever_address, get_registry_coordinator_address,
 //! #     },
 //! # };
-//! # use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//! # use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
 //! # #[tokio::main]
 //! # async fn main() {
 //! #     let http_endpoint = "http://localhost:8545";
@@ -86,22 +86,22 @@
 //! ### Initialize a Task
 //!
 //! ```rust,no_run
-//! # use eigen_services_blsaggregation::bls_agg::{
+//! # use newton_services_blsaggregation::bls_agg::{
 //! #     AggregateReceiver, BlsAggregatorService, TaskMetadata, TaskSignature
 //! # };
-//! # use eigen_client_avsregistry::{
+//! # use newton_client_avsregistry::{
 //! #     reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter,
 //! # };
-//! # use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
-//! # use eigen_services_avsregistry::AvsRegistryService;
-//! # use eigen_testing_utils::{
+//! # use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+//! # use newton_services_avsregistry::AvsRegistryService;
+//! # use newton_testing_utils::{
 //! #     anvil_constants::{
 //! #         get_operator_state_retriever_address, get_registry_coordinator_address,
 //! #     },
 //! # };
-//! # use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//! # use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
 //! # use std::time::Duration;
-//! # use eigen_testing_utils::anvil_constants::{ANVIL_HTTP_URL, ANVIL_WS_URL};
+//! # use newton_testing_utils::anvil_constants::{ANVIL_HTTP_URL, ANVIL_WS_URL};
 //! # #[tokio::main]
 //! # async fn main() {
 //! #     let http_endpoint = ANVIL_HTTP_URL;
@@ -155,24 +155,24 @@
 //! ### Process a Signature
 //!
 //! ```rust,no_run
-//! # use eigen_services_blsaggregation::bls_agg::{
+//! # use newton_services_blsaggregation::bls_agg::{
 //! #     BlsAggregatorService, TaskSignature
 //! # };
-//! # use eigen_client_avsregistry::{
+//! # use newton_client_avsregistry::{
 //! #     reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter,
 //! # };
-//! # use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
-//! # use eigen_services_avsregistry::AvsRegistryService;
-//! # use eigen_testing_utils::{
+//! # use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+//! # use newton_services_avsregistry::AvsRegistryService;
+//! # use newton_testing_utils::{
 //! #     anvil_constants::{
 //! #         get_operator_state_retriever_address, get_registry_coordinator_address,
 //! #     },
 //! # };
-//! # use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//! # use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
 //! # use sha2::{Digest, Sha256};
 //! # use alloy::primitives::{B256, FixedBytes};
-//! # use eigen_crypto_bls::BlsKeyPair;
-//! # use eigen_testing_utils::anvil_constants::{ANVIL_HTTP_URL, ANVIL_WS_URL, OPERATOR_BLS_KEY};
+//! # use newton_crypto_bls::BlsKeyPair;
+//! # use newton_testing_utils::anvil_constants::{ANVIL_HTTP_URL, ANVIL_WS_URL, OPERATOR_BLS_KEY};
 //! # #[tokio::main]
 //! # async fn main() {
 //! #     let http_endpoint = ANVIL_HTTP_URL;
@@ -228,19 +228,19 @@
 //! ### Receive an Aggregated Response
 //!
 //! ```rust,no_run
-//! # use eigen_services_blsaggregation::bls_agg::BlsAggregatorService;
-//! # use eigen_client_avsregistry::{
+//! # use newton_services_blsaggregation::bls_agg::BlsAggregatorService;
+//! # use newton_client_avsregistry::{
 //! #     reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter,
 //! # };
-//! # use eigen_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
-//! # use eigen_services_avsregistry::AvsRegistryService;
-//! # use eigen_testing_utils::{
+//! # use newton_services_avsregistry::chaincaller::AvsRegistryServiceChainCaller;
+//! # use newton_services_avsregistry::AvsRegistryService;
+//! # use newton_testing_utils::{
 //! #     anvil_constants::{
 //! #         get_operator_state_retriever_address, get_registry_coordinator_address,
 //! #     },
 //! # };
-//! # use eigen_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
-//! # use eigen_testing_utils::anvil_constants::{ANVIL_HTTP_URL, ANVIL_WS_URL};
+//! # use newton_services_operatorsinfo::operatorsinfo_inmemory::OperatorInfoServiceInMemory;
+//! # use newton_testing_utils::anvil_constants::{ANVIL_HTTP_URL, ANVIL_WS_URL};
 //! # #[tokio::main]
 //! # async fn main() {
 //! #     let http_endpoint = ANVIL_HTTP_URL;

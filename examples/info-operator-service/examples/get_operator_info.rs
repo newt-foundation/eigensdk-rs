@@ -1,19 +1,19 @@
 use alloy::primitives::{Address, Bytes, FixedBytes, U256};
 use alloy::signers::local::PrivateKeySigner;
-use eigen_client_avsregistry::{reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter};
-use eigen_client_elcontracts::{
+use newton_client_avsregistry::{reader::AvsRegistryChainReader, writer::AvsRegistryChainWriter};
+use newton_client_elcontracts::{
     reader::ELChainReader,
     writer::{ELChainWriter, Operator},
 };
-use eigen_common::get_provider;
-use eigen_crypto_bls::BlsKeyPair;
+use newton_common::get_provider;
+use newton_crypto_bls::BlsKeyPair;
 
-use eigen_services_operatorsinfo::{
+use newton_services_operatorsinfo::{
     operator_info::OperatorInfoService, operatorsinfo_inmemory::OperatorInfoServiceInMemory,
 };
-use eigen_testing_utils::anvil_constants::get_allocation_manager_address;
-use eigen_testing_utils::m2_holesky_constants::DELEGATION_MANAGER_ADDRESS;
-use eigen_testing_utils::{
+use newton_testing_utils::anvil_constants::get_allocation_manager_address;
+use newton_testing_utils::m2_holesky_constants::DELEGATION_MANAGER_ADDRESS;
+use newton_testing_utils::{
     anvil::{set_account_balance, start_anvil_container},
     anvil_constants::{
         get_avs_directory_address, get_delegation_manager_address,
@@ -22,7 +22,7 @@ use eigen_testing_utils::{
     },
     transaction::wait_transaction,
 };
-use eigen_utils::slashing::core::delegation_manager::DelegationManager;
+use newton_utils::slashing::core::delegation_manager::DelegationManager;
 use std::{
     str::FromStr,
     time::{Duration, SystemTime, UNIX_EPOCH},

@@ -1,4 +1,4 @@
-use eigen_types::avs::SignatureVerificationError;
+use newton_types::avs::SignatureVerificationError;
 use thiserror::Error;
 
 /// Possible errors raised in BLS aggregation

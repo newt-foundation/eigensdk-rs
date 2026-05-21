@@ -2,8 +2,8 @@ use crate::EigenAddressCliError;
 use alloy::contract::Error as ContractError;
 use alloy::primitives::Address;
 use alloy::providers::Provider;
-use eigen_common::get_provider;
-use eigen_utils::slashing::{
+use newton_common::get_provider;
+use newton_utils::slashing::{
     core::delegation_manager::DelegationManager,
     middleware::{
         ibls_signature_checker::IBLSSignatureChecker, registry_coordinator::RegistryCoordinator,

@@ -1,13 +1,13 @@
 use crate::{operator_info::OperatorInfoService, operatorsinfo_inmemory::OperatorInfoServiceError};
 use alloy::primitives::Address;
 use async_trait::async_trait;
-use eigen_common::get_provider;
-use eigen_crypto_bls::{
+use newton_common::get_provider;
+use newton_crypto_bls::{
     alloy_registry_g1_point_to_g1_affine, alloy_registry_g2_point_to_g2_affine, BlsG1Point,
     BlsG2Point,
 };
-use eigen_types::operator::OperatorPubKeys;
-use eigen_utils::slashing::middleware::{
+use newton_types::operator::OperatorPubKeys;
+use newton_utils::slashing::middleware::{
     bls_apk_registry::BLSApkRegistry, socket_registry::SocketRegistry,
 };
 
@@ -81,8 +81,8 @@ impl OperatorInfoOnChain {
 
 #[cfg(test)]
 mod tests {
-    use eigen_crypto_bls::BlsKeyPair;
-    use eigen_testing_utils::{
+    use newton_crypto_bls::BlsKeyPair;
+    use newton_testing_utils::{
         anvil::start_anvil_container,
         anvil_constants::{
             get_bls_apk_registry_address, get_service_manager_address, get_socket_registry_address,
@@ -91,7 +91,7 @@ mod tests {
         chain_clients::{build_el_chain_reader, create_operator_set, new_test_writer},
         transaction::wait_transaction,
     };
-    use eigen_utils::slashing::core::allocation_manager::AllocationManager::OperatorSet;
+    use newton_utils::slashing::core::allocation_manager::AllocationManager::OperatorSet;
 
     use crate::{operator_info::OperatorInfoService, operatorsinfo_onchain::OperatorInfoOnChain};
 

@@ -1,5 +1,5 @@
 //! Example to showcase testing EL contracts using anvil
-use eigen_testing_utils::{
+use newton_testing_utils::{
     anvil::start_anvil_container,
     anvil_constants::{
         get_delegation_manager_address, get_erc20_mock_strategy,

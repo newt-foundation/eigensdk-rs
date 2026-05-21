@@ -2,13 +2,13 @@ use alloy::primitives::{keccak256, U256};
 use alloy::sol_types::SolValue;
 use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
-use eigen_services_blsaggregation::bls_aggregation_service_response::BlsAggregationServiceResponse;
-use eigen_utils::slashing::multichain::operator_table_updater::IBN254CertificateVerifierTypes::{
+use newton_services_blsaggregation::bls_aggregation_service_response::BlsAggregationServiceResponse;
+use newton_utils::slashing::multichain::operator_table_updater::IBN254CertificateVerifierTypes::{
     BN254Certificate, BN254OperatorInfoWitness,
 };
-use eigen_utils::slashing::multichain::operator_table_updater::IOperatorTableCalculatorTypes::BN254OperatorInfo as TaskManagerOperatorInfo;
-use eigen_utils::slashing::multichain::bn254_certificate_verifier::IOperatorTableCalculatorTypes::BN254OperatorInfo;
-use eigen_utils::slashing::multichain::operator_table_updater::BN254::{G1Point, G2Point};
+use newton_utils::slashing::multichain::operator_table_updater::IOperatorTableCalculatorTypes::BN254OperatorInfo as TaskManagerOperatorInfo;
+use newton_utils::slashing::multichain::bn254_certificate_verifier::IOperatorTableCalculatorTypes::BN254OperatorInfo;
+use newton_utils::slashing::multichain::operator_table_updater::BN254::{G1Point, G2Point};
 use rs_merkle::{algorithms::Sha256, Hasher, MerkleTree};
 use thiserror::Error;
 
@@ -123,8 +123,8 @@ pub async fn construct_bn254_certificate_with_proofs<T: SolValue, P, N>(
     response: &BlsAggregationServiceResponse,
     reference_timestamp: u32,
     task_response: &T,
-    certificate_verifier: eigen_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier::BN254CertificateVerifierInstance<P, N>,
-    operator_set: eigen_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier::OperatorSet,
+    certificate_verifier: newton_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier::BN254CertificateVerifierInstance<P, N>,
+    operator_set: newton_utils::slashing::multichain::bn254_certificate_verifier::BN254CertificateVerifier::OperatorSet,
 ) -> Result<BN254Certificate, CertificateConstructorError>
 where
     P: alloy::providers::Provider<N> + Clone,

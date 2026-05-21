@@ -1,5 +1,5 @@
 [package]
-name = "eigen-metrics"
+name = "newton-metrics"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -23,11 +23,11 @@ tracing.workspace = true
 [dev-dependencies]
 # We don't use workspace due to:
 # https://github.com/rust-lang/cargo/issues/4242#issuecomment-2578428685
-eigen-testing-utils = { path = "../../tests/testing-utils" }
-eigen-metrics-collectors-rpc-calls = { path = "./collectors/rpc_calls" }
-eigen-metrics-collectors-economic = { path = "./collectors/economic" }
-eigen-client-elcontracts = { path = "../chainio/clients/elcontracts" }
-eigen-client-avsregistry = { path = "../chainio/clients/avsregistry" }
+newton-testing-utils = { path = "../../tests/testing-utils" }
+newton-metrics-collectors-rpc-calls = { path = "./collectors/rpc_calls" }
+newton-metrics-collectors-economic = { path = "./collectors/economic" }
+newton-client-elcontracts = { path = "../chainio/clients/elcontracts" }
+newton-client-avsregistry = { path = "../chainio/clients/avsregistry" }
 
 alloy.workspace = true
 num-bigint.workspace = true

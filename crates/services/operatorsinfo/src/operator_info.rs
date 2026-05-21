@@ -1,6 +1,6 @@
 use alloy::primitives::Address;
 use async_trait::async_trait;
-use eigen_types::operator::OperatorPubKeys;
+use newton_types::operator::OperatorPubKeys;
 
 use crate::operatorsinfo_inmemory::OperatorInfoServiceError;
 
