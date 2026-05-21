@@ -4080,7 +4080,6 @@ dependencies = [
  "newton-services-blsaggregation",
  "newton-services-operatorsinfo",
  "newton-signer",
- "newton-testing-utils",
  "newton-types",
  "newton-utils",
 ]
