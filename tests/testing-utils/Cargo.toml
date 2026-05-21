@@ -1,5 +1,6 @@
 [package]
 name = "newton-testing-utils"
+publish = false
 description = "Testing utils for eigen."
 version.workspace = true
 edition.workspace = true

@@ -1,5 +1,6 @@
 [package]
 name = "info-operator-service"
+publish = false
 description = "Example demonstrating the operatorsinfo crate"
 version.workspace = true
 edition.workspace = true

@@ -1,5 +1,6 @@
 [package]
 name = "chainio-integration-test"
+publish = false
 description = "Integration tests for chainio clients"
 
 version.workspace = true

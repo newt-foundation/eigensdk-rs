@@ -27,7 +27,6 @@ newton-services-avsregistry = { workspace = true, optional = true }
 newton-services-blsaggregation = { workspace = true, optional = true }
 newton-services-operatorsinfo = { workspace = true, optional = true }
 newton-signer = { workspace = true, optional = true }
-newton-testing-utils = { workspace = true, optional = true }
 newton-types = { workspace = true, optional = true }
 newton-utils = { workspace = true, optional = true }
 newton-nodeapi = { workspace = true, optional = true }
@@ -52,7 +51,6 @@ full = [
     "services-blsaggregation",
     "services-operatorsinfo",
     "signer",
-    "testing-utils",
     "nodeapi",
     "metrics-collectors-economic",
     "metrics-collectors-rpc-calls",
@@ -86,9 +84,6 @@ nodeapi = ["dep:newton-nodeapi"]
 
 # Utilities
 utils = ["dep:newton-utils"]
-
-# Testing utilities
-testing-utils = ["dep:newton-testing-utils"]
 
 # Signer-related features
 signer = ["dep:newton-signer"]

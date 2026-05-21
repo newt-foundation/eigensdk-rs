@@ -66,12 +66,6 @@ pub use newton_services_operatorsinfo as services_operatorsinfo;
 #[cfg(feature = "nodeapi")]
 pub use newton_nodeapi as nodeapi;
 
-/* ------------------------------------ Testing Utils Re-export -------------------------------- */
-
-#[doc(inline)]
-#[cfg(feature = "testing-utils")]
-pub use newton_testing_utils as testing_utils;
-
 /* ------------------------------------ Metrics Collectors Re-exports -------------------------- */
 
 #[doc(inline)]
